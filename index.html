@@ -1,0 +1,534 @@
+﻿<!DOCTYPE html>
+<html lang="ja" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Tools — ツールギャラリー</title>
+<style>
+  /* ===== THEME ===== */
+  :root[data-theme="dark"] {
+    --bg: #0d1117;
+    --bg2: #161b22;
+    --bg3: #21262d;
+    --bg4: #30363d;
+    --border: #30363d;
+    --text: #e6edf3;
+    --text2: #8b949e;
+    --text3: #484f58;
+    --card-bg: #161b22;
+    --card-hover: #1c2128;
+    --shadow: rgba(0,0,0,0.4);
+    --badge-bg: #21262d;
+  }
+  :root[data-theme="light"] {
+    --bg: #f6f8fa;
+    --bg2: #ffffff;
+    --bg3: #f1f3f5;
+    --bg4: #e1e4e8;
+    --border: #d0d7de;
+    --text: #1f2328;
+    --text2: #656d76;
+    --text3: #afb8c1;
+    --card-bg: #ffffff;
+    --card-hover: #f6f8fa;
+    --shadow: rgba(0,0,0,0.08);
+    --badge-bg: #f1f3f5;
+  }
+
+  /* ===== BASE ===== */
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Segoe UI', 'Meiryo', sans-serif;
+    line-height: 1.6;
+    transition: background 0.2s, color 0.2s;
+    min-height: 100vh;
+  }
+
+  /* ===== HEADER ===== */
+  header {
+    background: var(--bg2);
+    border-bottom: 1px solid var(--border);
+    padding: 0 32px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    backdrop-filter: blur(12px);
+  }
+  .header-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 60px;
+    gap: 20px;
+  }
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+  }
+  .logo-icon {
+    width: 32px;
+    height: 32px;
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    flex-shrink: 0;
+  }
+  .logo-text {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text);
+  }
+  .logo-text span { color: var(--text2); font-weight: 400; font-size: 0.85rem; margin-left: 4px; }
+
+  /* Search */
+  .search-wrap { flex: 1; max-width: 400px; position: relative; }
+  .search-wrap input {
+    width: 100%;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 7px 14px 7px 36px;
+    font-size: 0.85rem;
+    color: var(--text);
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .search-wrap input:focus { border-color: #6366f1; }
+  .search-wrap input::placeholder { color: var(--text3); }
+  .search-icon {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text3);
+    font-size: 0.85rem;
+    pointer-events: none;
+  }
+
+  /* Theme toggle */
+  .theme-btn {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 7px 12px;
+    cursor: pointer;
+    font-size: 1rem;
+    line-height: 1;
+    color: var(--text2);
+    transition: all 0.2s;
+    flex-shrink: 0;
+  }
+  .theme-btn:hover { background: var(--bg4); color: var(--text); }
+
+  /* Count badge */
+  .tool-count {
+    font-size: 0.75rem;
+    color: var(--text2);
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  /* ===== MAIN ===== */
+  main { max-width: 1200px; margin: 0 auto; padding: 40px 24px; }
+
+  /* Hero */
+  .hero {
+    margin-bottom: 40px;
+    padding-bottom: 32px;
+    border-bottom: 1px solid var(--border);
+  }
+  .hero h1 {
+    font-size: 1.8rem;
+    font-weight: 800;
+    line-height: 1.2;
+    margin-bottom: 8px;
+  }
+  .hero h1 span { color: #6366f1; }
+  .hero p { color: var(--text2); font-size: 0.9rem; max-width: 500px; }
+
+  /* Category section */
+  .category { margin-bottom: 44px; }
+  .category-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 18px;
+  }
+  .category-header h2 {
+    font-size: 0.82rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text2);
+  }
+  .category-line {
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+  .category-count {
+    font-size: 0.72rem;
+    color: var(--text3);
+    background: var(--badge-bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 2px 8px;
+  }
+
+  /* Card grid */
+  .card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 16px;
+  }
+
+  /* Card */
+  .card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    text-decoration: none;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    transition: all 0.18s;
+    position: relative;
+    overflow: hidden;
+  }
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: var(--card-accent, #6366f1);
+    opacity: 0;
+    transition: opacity 0.18s;
+  }
+  .card:hover {
+    background: var(--card-hover);
+    border-color: var(--card-accent, #6366f1);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px var(--shadow);
+  }
+  .card:hover::before { opacity: 1; }
+
+  .card-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+  .card-emoji {
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.4rem;
+    flex-shrink: 0;
+    background: var(--bg3);
+  }
+  .card-arrow {
+    color: var(--text3);
+    font-size: 0.9rem;
+    transition: all 0.18s;
+    flex-shrink: 0;
+    margin-top: 4px;
+  }
+  .card:hover .card-arrow { color: var(--card-accent, #6366f1); transform: translate(2px, -2px); }
+
+  .card-title {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1.35;
+  }
+  .card-desc {
+    font-size: 0.78rem;
+    color: var(--text2);
+    line-height: 1.6;
+    flex: 1;
+  }
+  .card-tags { display: flex; gap: 6px; flex-wrap: wrap; }
+  .tag {
+    font-size: 0.65rem;
+    padding: 2px 8px;
+    border-radius: 12px;
+    background: var(--badge-bg);
+    border: 1px solid var(--border);
+    color: var(--text2);
+  }
+
+  /* hidden by search */
+  .card.hidden { display: none; }
+  .category.all-hidden { display: none; }
+
+  /* No results */
+  .no-results {
+    display: none;
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--text2);
+  }
+  .no-results.show { display: block; }
+  .no-results .nr-icon { font-size: 2.5rem; margin-bottom: 12px; }
+  .no-results p { font-size: 0.88rem; }
+
+  /* Footer */
+  footer {
+    text-align: center;
+    padding: 32px;
+    color: var(--text3);
+    font-size: 0.75rem;
+    border-top: 1px solid var(--border);
+    margin-top: 20px;
+  }
+
+  @media (max-width: 640px) {
+    header { padding: 0 16px; }
+    main { padding: 24px 16px; }
+    .hero h1 { font-size: 1.4rem; }
+    .search-wrap { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <a class="logo" href="index.html">
+      <div class="logo-icon">✦</div>
+      <div class="logo-text">Claude Tools <span>ギャラリー</span></div>
+    </a>
+    <div class="search-wrap">
+      <span class="search-icon">🔍</span>
+      <input type="text" id="search" placeholder="ツールを検索..." oninput="doSearch(this.value)">
+    </div>
+    <span class="tool-count" id="tool-count">8 ツール</span>
+    <button class="theme-btn" onclick="toggleTheme()" id="theme-btn" title="テーマ切替">🌙</button>
+  </div>
+</header>
+
+<main>
+  <div class="hero">
+    <h1>Claude が作った<br><span>ツール</span>ギャラリー</h1>
+    <p>claude.ai で作成したHTMLツールをまとめたコレクション。クリックで即起動。</p>
+  </div>
+
+  <!-- ===== 財務・投資 ===== -->
+  <div class="category" id="cat-finance" data-label="財務・投資">
+    <div class="category-header">
+      <h2>💰 財務・投資</h2>
+      <div class="category-line"></div>
+      <span class="category-count">3</span>
+    </div>
+    <div class="card-grid">
+
+      <a class="card" href="https://tagami0000.github.io/claude-tools/FIREライフサイクル_財務ダッシュボード.html" target="_blank" style="--card-accent:#f59e0b" data-title="FIREライフサイクル 財務ダッシュボード" data-tags="FIRE 退職 シミュレーション 財務 資産">
+        <div class="card-top">
+          <div class="card-emoji">🔥</div>
+          <span class="card-arrow">↗</span>
+        </div>
+        <div class="card-title">FIREライフサイクル 財務ダッシュボード</div>
+        <div class="card-desc">50年退職・100年ゼロ資産設計。資産推移・収入支出フロー・取り崩しバーの3チャートが20個のスライダーと同期するシミュレーター。</div>
+        <div class="card-tags">
+          <span class="tag">FIRE</span><span class="tag">シミュレーション</span><span class="tag">Chart.js</span>
+        </div>
+      </a>
+
+      <a class="card" href="https://tagami0000.github.io/claude-tools/NISA積立シミュレーター.html" target="_blank" style="--card-accent:#10b981" data-title="NISA積立シミュレーター" data-tags="NISA 投資 積立 シミュレーション 資産 利回り">
+        <div class="card-top">
+          <div class="card-emoji">📈</div>
+          <span class="card-arrow">↗</span>
+        </div>
+        <div class="card-title">NISA積立シミュレーター</div>
+        <div class="card-desc">開始資産・利回り・年齢・多段階拠出をスライダーで設定。目標金額からの逆算機能と5年/10年マイルストーン表示付き。</div>
+        <div class="card-tags">
+          <span class="tag">NISA</span><span class="tag">積立投資</span><span class="tag">逆算</span>
+        </div>
+      </a>
+
+      <a class="card" href="https://tagami0000.github.io/claude-tools/主要通貨強度推移チャート_30年.html" target="_blank" style="--card-accent:#3b82f6" data-title="主要通貨強度推移チャート 30年" data-tags="為替 通貨 ドル 円 ユーロ チャート 30年">
+        <div class="card-top">
+          <div class="card-emoji">💱</div>
+          <span class="card-arrow">↗</span>
+        </div>
+        <div class="card-title">主要通貨強度推移チャート（30年）</div>
+        <div class="card-desc">JPY・EUR・GBP・CNY・AUD・CADの対ドル強度を30年間表示。1/3/5/10/20/30年の期間切り替えと通貨個別トグル付き。</div>
+        <div class="card-tags">
+          <span class="tag">為替</span><span class="tag">30年</span><span class="tag">インタラクティブ</span>
+        </div>
+      </a>
+
+    </div>
+  </div>
+
+  <!-- ===== 健康・生活 ===== -->
+  <div class="category" id="cat-health" data-label="健康・生活">
+    <div class="category-header">
+      <h2>🥗 健康・生活</h2>
+      <div class="category-line"></div>
+      <span class="category-count">1</span>
+    </div>
+    <div class="card-grid">
+
+      <a class="card" href="https://tagami0000.github.io/claude-tools/栄養管理プラン_51kg増量計画.html" target="_blank" style="--card-accent:#8b5cf6" data-title="栄養管理プラン 51kg→55kg増量計画" data-tags="栄養 サプリ 筋トレ 増量 献立 食事">
+        <div class="card-top">
+          <div class="card-emoji">💪</div>
+          <span class="card-arrow">↗</span>
+        </div>
+        <div class="card-title">栄養管理プラン（51kg→55kg増量計画）</div>
+        <div class="card-desc">サプリメント全成分・摂取タイムライン・1週間献立（曜日タブ）・買い物リスト・週間コスト概算を含むダークテーマの総合プラン。</div>
+        <div class="card-tags">
+          <span class="tag">栄養</span><span class="tag">サプリ</span><span class="tag">増量</span><span class="tag">献立</span>
+        </div>
+      </a>
+
+    </div>
+  </div>
+
+  <!-- ===== 開発ツール ===== -->
+  <div class="category" id="cat-dev" data-label="開発ツール">
+    <div class="category-header">
+      <h2>🛠️ 開発ツール</h2>
+      <div class="category-line"></div>
+      <span class="category-count">2</span>
+    </div>
+    <div class="card-grid">
+
+      <a class="card" href="https://tagami0000.github.io/claude-tools/設計書必須要件_判定ツール.html" target="_blank" style="--card-accent:#ef4444" data-title="設計書必須要件 判定ツール" data-tags="設計書 ドキュメント 開発 アジャイル ウォーターフォール">
+        <div class="card-top">
+          <div class="card-emoji">📋</div>
+          <span class="card-arrow">↗</span>
+        </div>
+        <div class="card-title">設計書必須要件 判定ツール</div>
+        <div class="card-desc">「プロジェクト規模」「開発手法」「チーム構成」の3軸から基本設計書・詳細設計書の必要度をスコアリングするマトリクス形式ツール。</div>
+        <div class="card-tags">
+          <span class="tag">設計書</span><span class="tag">マトリクス</span><span class="tag">判定</span>
+        </div>
+      </a>
+
+      <a class="card" href="https://tagami0000.github.io/claude-tools/NetlifyDrop_フォルダ管理ガイド.html" target="_blank" style="--card-accent:#00d4b4" data-title="Netlify Drop & フォルダ管理ガイド" data-tags="Netlify デプロイ フォルダ 静的サイト ガイド">
+        <div class="card-top">
+          <div class="card-emoji">🚀</div>
+          <span class="card-arrow">↗</span>
+        </div>
+        <div class="card-title">Netlify Drop &amp; フォルダ管理ガイド</div>
+        <div class="card-desc">Netlify Dropの使い方ガイドとフォルダ管理の2タブ構成。カラーコード化フォルダ構造エクスプローラーとライフサイクルフロー図付き。</div>
+        <div class="card-tags">
+          <span class="tag">Netlify</span><span class="tag">デプロイ</span><span class="tag">ガイド</span>
+        </div>
+      </a>
+
+    </div>
+  </div>
+
+  <!-- ===== PC・ガジェット ===== -->
+  <div class="category" id="cat-pc" data-label="PC・ガジェット">
+    <div class="category-header">
+      <h2>⌨️ PC・ガジェット</h2>
+      <div class="category-line"></div>
+      <span class="category-count">2</span>
+    </div>
+    <div class="card-grid">
+
+      <a class="card" href="https://tagami0000.github.io/claude-tools/Windowsショートカットキー_チートシート.html" target="_blank" style="--card-accent:#f97316" data-title="Windowsショートカットキー チートシート" data-tags="Windows ショートカット キーボード Keychron チートシート">
+        <div class="card-top">
+          <div class="card-emoji">⌨️</div>
+          <span class="card-arrow">↗</span>
+        </div>
+        <div class="card-title">Windowsショートカットキー チートシート</div>
+        <div class="card-desc">使用頻度S〜Cの4ランクで分類したショートカット一覧。Keychron B1 Pro JISのキーボードレイアウトをCSSで再現したダークテーマデザイン。</div>
+        <div class="card-tags">
+          <span class="tag">Windows</span><span class="tag">ショートカット</span><span class="tag">Keychron</span>
+        </div>
+      </a>
+
+      <a class="card" href="https://tagami0000.github.io/claude-tools/ヒートポンプ式ドラム洗濯乾燥機_比較.html" target="_blank" style="--card-accent:#06b6d4" data-title="ヒートポンプ式ドラム洗濯乾燥機 比較" data-tags="洗濯機 乾燥機 比較 シャープ パナソニック 東芝 日立">
+        <div class="card-top">
+          <div class="card-emoji">🫧</div>
+          <span class="card-arrow">↗</span>
+        </div>
+        <div class="card-title">ヒートポンプ式ドラム洗濯乾燥機 比較</div>
+        <div class="card-desc">シャープ・パナソニック・東芝・日立の主要5機種を数値・スコア・グラフで比較。和文エディトリアルデザインの購入ガイド。</div>
+        <div class="card-tags">
+          <span class="tag">家電比較</span><span class="tag">洗濯乾燥機</span><span class="tag">購入ガイド</span>
+        </div>
+      </a>
+
+    </div>
+  </div>
+
+  <!-- No results -->
+  <div class="no-results" id="no-results">
+    <div class="nr-icon">🔍</div>
+    <p>「<span id="no-results-query"></span>」に一致するツールが見つかりませんでした</p>
+  </div>
+
+</main>
+
+<footer>
+  Claude Tools Gallery — claude.ai で生成したHTMLコレクション
+</footer>
+
+<script>
+  // ===== THEME =====
+  const html = document.documentElement;
+  const btn = document.getElementById('theme-btn');
+
+  function toggleTheme() {
+    const isDark = html.getAttribute('data-theme') === 'dark';
+    html.setAttribute('data-theme', isDark ? 'light' : 'dark');
+    btn.textContent = isDark ? '🌙' : '☀️';
+    localStorage.setItem('theme', isDark ? 'light' : 'dark');
+  }
+
+  // Restore saved theme
+  const saved = localStorage.getItem('theme');
+  if (saved) {
+    html.setAttribute('data-theme', saved);
+    btn.textContent = saved === 'dark' ? '☀️' : '🌙';
+  }
+
+  // ===== SEARCH =====
+  const cards = document.querySelectorAll('.card');
+  const categories = document.querySelectorAll('.category');
+  const noResults = document.getElementById('no-results');
+  const countEl = document.getElementById('tool-count');
+
+  function doSearch(q) {
+    const query = q.trim().toLowerCase();
+    let visible = 0;
+
+    cards.forEach(card => {
+      const title = (card.dataset.title || '').toLowerCase();
+      const tags  = (card.dataset.tags  || '').toLowerCase();
+      const desc  = (card.querySelector('.card-desc')?.textContent || '').toLowerCase();
+      const match = !query || title.includes(query) || tags.includes(query) || desc.includes(query);
+      card.classList.toggle('hidden', !match);
+      if (match) visible++;
+    });
+
+    // Hide empty categories
+    categories.forEach(cat => {
+      const anyVisible = [...cat.querySelectorAll('.card')].some(c => !c.classList.contains('hidden'));
+      cat.classList.toggle('all-hidden', !anyVisible);
+    });
+
+    countEl.textContent = query ? `${visible} / 8 ツール` : '8 ツール';
+
+    const noRes = visible === 0 && query;
+    noResults.classList.toggle('show', noRes);
+    document.getElementById('no-results-query').textContent = q;
+  }
+</script>
+</body>
+</html>
