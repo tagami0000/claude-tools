@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>設計書必須要件判定ツール</title>
+<style>
+  :root{
+    --bg:#f8f9fa;--bg2:#fff;--bg3:#f1f3f5;--bg4:#e9ecef;
+    --border:#dee2e6;--text:#212529;--text2:#495057;--text3:#868e96;
+    --blue:#1971c2;--green:#2f9e44;--yellow:#e67700;--red:#c92a2a;--purple:#6741d9;
+    --blue-l:rgba(25,113,194,0.08);--green-l:rgba(47,158,68,0.08);
+    --yellow-l:rgba(230,119,0,0.08);--red-l:rgba(201,42,42,0.08);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--text);font-family:'Segoe UI','Meiryo',sans-serif;line-height:1.6;min-height:100vh}
+  header{background:#fff;border-bottom:2px solid var(--border);padding:28px 40px}
+  header h1{font-size:1.4rem;font-weight:800;color:var(--blue);margin-bottom:4px}
+  header p{font-size:0.85rem;color:var(--text2)}
+
+  main{max-width:1100px;margin:0 auto;padding:32px 24px}
+  h2{font-size:1rem;font-weight:700;color:var(--text);margin-bottom:16px;padding-bottom:8px;border-bottom:2px solid var(--border)}
+
+  /* Axis selectors */
+  .axes-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:28px}
+  .axis-card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;overflow:hidden}
+  .axis-header{background:var(--blue);color:#fff;padding:12px 16px;font-size:0.8rem;font-weight:700;letter-spacing:.04em}
+  .axis-body{padding:12px}
+  .axis-option{display:flex;align-items:flex-start;gap:10px;padding:8px 10px;border-radius:6px;cursor:pointer;transition:background .15s;margin-bottom:4px}
+  .axis-option:last-child{margin-bottom:0}
+  .axis-option:hover{background:var(--bg3)}
+  .axis-option.selected{background:var(--blue-l);outline:1px solid var(--blue)}
+  .axis-option input[type=radio]{margin-top:3px;accent-color:var(--blue);flex-shrink:0}
+  .opt-label{font-size:0.82rem;font-weight:600;color:var(--text);margin-bottom:2px}
+  .opt-desc{font-size:0.72rem;color:var(--text2)}
+
+  /* Result matrix */
+  .result-section{margin-bottom:28px}
+  .result-cards{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px}
+  .result-card{border-radius:12px;padding:20px 24px;border:2px solid}
+  .result-card.req{border-color:var(--red);background:var(--red-l)}
+  .result-card.rec{border-color:var(--yellow);background:var(--yellow-l)}
+  .result-card.opt{border-color:var(--green);background:var(--green-l)}
+  .result-card.skip{border-color:var(--border);background:var(--bg3)}
+  .rc-badge{display:inline-block;font-size:0.7rem;font-weight:700;padding:3px 10px;border-radius:12px;margin-bottom:10px;font-family:sans-serif}
+  .badge-req{background:var(--red);color:#fff}
+  .badge-rec{background:var(--yellow);color:#fff}
+  .badge-opt{background:var(--green);color:#fff}
+  .badge-skip{background:var(--text3);color:#fff}
+  .rc-title{font-size:1rem;font-weight:800;color:var(--text);margin-bottom:6px}
+  .rc-reason{font-size:0.78rem;color:var(--text2);margin-bottom:12px}
+  .rc-checklist{list-style:none}
+  .rc-checklist li{font-size:0.78rem;padding:3px 0;display:flex;align-items:flex-start;gap:6px;color:var(--text2)}
+  .rc-checklist li::before{content:'☑';color:var(--blue);flex-shrink:0}
+  .rc-checklist li.na::before{content:'—';color:var(--text3)}
+
+  /* Matrix table */
+  .matrix-wrap{overflow-x:auto;margin-bottom:28px}
+  .matrix-table{width:100%;border-collapse:collapse;font-size:0.78rem;min-width:700px}
+  .matrix-table th{background:var(--blue);color:#fff;padding:10px 14px;text-align:center;font-size:0.72rem;letter-spacing:.04em}
+  .matrix-table th:first-child{text-align:left;min-width:160px}
+  .matrix-table td{padding:10px 14px;border:1px solid var(--border);text-align:center;vertical-align:middle}
+  .matrix-table tr:nth-child(even) td{background:var(--bg3)}
+  .matrix-table td:first-child{text-align:left;font-weight:600;color:var(--text);background:var(--bg3)!important}
+  .cell-req{color:var(--red);font-weight:700}
+  .cell-rec{color:var(--yellow);font-weight:700}
+  .cell-opt{color:var(--green)}
+  .cell-no{color:var(--text3)}
+  .highlight-row td{background:#fffbe6!important}
+
+  /* Score bar */
+  .score-section{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:28px}
+  .score-box{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:16px}
+  .score-box h3{font-size:0.8rem;font-weight:700;color:var(--text2);margin-bottom:12px;text-transform:uppercase;letter-spacing:.04em}
+  .score-item{margin-bottom:10px}
+  .score-item .si-label{display:flex;justify-content:space-between;font-size:0.78rem;margin-bottom:4px}
+  .score-item .si-label span:last-child{font-weight:700;color:var(--blue)}
+  .score-bar{height:8px;background:var(--bg4);border-radius:4px;overflow:hidden}
+  .score-fill{height:100%;border-radius:4px;transition:width .5s}
+
+  /* Tips */
+  .tips-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px}
+  .tip-card{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:14px}
+  .tip-card h4{font-size:0.8rem;font-weight:700;color:var(--blue);margin-bottom:6px}
+  .tip-card p{font-size:0.75rem;color:var(--text2);margin:0}
+
+  @media(max-width:700px){.axes-grid,.result-cards,.score-section{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header>
+  <h1>📋 設計書 必須要件 判定ツール</h1>
+  <p>「プロジェクト規模」「開発手法」「チーム構成」の3軸から、基本設計書・詳細設計書の必要度を判定します</p>
+</header>
+
+<main>
+
+<!-- AXIS SELECTORS -->
+<div style="margin-bottom:24px">
+  <h2>① 3軸で条件を選択</h2>
+  <div class="axes-grid">
+
+    <!-- Axis 1: Project Scale -->
+    <div class="axis-card">
+      <div class="axis-header">軸1：プロジェクト規模</div>
+      <div class="axis-body">
+        <label class="axis-option selected">
+          <input type="radio" name="scale" value="small" checked onchange="judge()">
+          <div><div class="opt-label">小規模</div><div class="opt-desc">3ヶ月以内・チーム5名以下・機能数10以下</div></div>
+        </label>
+        <label class="axis-option">
+          <input type="radio" name="scale" value="medium" onchange="judge()">
+          <div><div class="opt-label">中規模</div><div class="opt-desc">3〜12ヶ月・チーム6〜20名・機能数10〜50</div></div>
+        </label>
+        <label class="axis-option">
+          <input type="radio" name="scale" value="large" onchange="judge()">
+          <div><div class="opt-label">大規模</div><div class="opt-desc">12ヶ月超・チーム21名以上・機能数50超</div></div>
+        </label>
+        <label class="axis-option">
+          <input type="radio" name="scale" value="critical" onchange="judge()">
+          <div><div class="opt-label">ミッションクリティカル</div><div class="opt-desc">金融・医療・インフラ・官公庁など高信頼性要件</div></div>
+        </label>
+      </div>
+    </div>
+
+    <!-- Axis 2: Development Method -->
+    <div class="axis-card">
+      <div class="axis-header">軸2：開発手法</div>
+      <div class="axis-body">
+        <label class="axis-option selected">
+          <input type="radio" name="method" value="agile" checked onchange="judge()">
+          <div><div class="opt-label">アジャイル / スクラム</div><div class="opt-desc">スプリント短サイクル・継続的フィードバック</div></div>
+        </label>
+        <label class="axis-option">
+          <input type="radio" name="method" value="waterfall" onchange="judge()">
+          <div><div class="opt-label">ウォーターフォール</div><div class="opt-desc">フェーズゲート・段階的承認・仕様凍結</div></div>
+        </label>
+        <label class="axis-option">
+          <input type="radio" name="method" value="hybrid" onchange="judge()">
+          <div><div class="opt-label">ハイブリッド</div><div class="opt-desc">上流WF＋下流アジャイルなど混合型</div></div>
+        </label>
+        <label class="axis-option">
+          <input type="radio" name="method" value="prototype" onchange="judge()">
+          <div><div class="opt-label">プロトタイプ / PoC</div><div class="opt-desc">探索的・仕様未確定・試作優先</div></div>
+        </label>
+      </div>
+    </div>
+
+    <!-- Axis 3: Team -->
+    <div class="axis-card">
+      <div class="axis-header">軸3：チーム構成</div>
+      <div class="axis-body">
+        <label class="axis-option selected">
+          <input type="radio" name="team" value="solo" checked onchange="judge()">
+          <div><div class="opt-label">1人 / 少数精鋭</div><div class="opt-desc">1〜3名・同一拠点・暗黙知共有可能</div></div>
+        </label>
+        <label class="axis-option">
+          <input type="radio" name="team" value="internal" onchange="judge()">
+          <div><div class="opt-label">社内チーム</div><div class="opt-desc">4〜15名・同一組織・直接コミュニケーション可</div></div>
+        </label>
+        <label class="axis-option">
+          <input type="radio" name="team" value="cross" onchange="judge()">
+          <div><div class="opt-label">クロスファンクショナル</div><div class="opt-desc">複数部署・BPO・外部委託混在</div></div>
+        </label>
+        <label class="axis-option">
+          <input type="radio" name="team" value="offshore" onchange="judge()">
+          <div><div class="opt-label">オフショア / リモート分散</div><div class="opt-desc">海外拠点・時差あり・文書伝達が主</div></div>
+        </label>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- RESULT -->
+<div class="result-section">
+  <h2>② 判定結果</h2>
+  <div class="result-cards">
+    <div class="result-card" id="rc-basic">
+      <!-- Populated by JS -->
+    </div>
+    <div class="result-card" id="rc-detail">
+      <!-- Populated by JS -->
+    </div>
+  </div>
+</div>
+
+<!-- SCORE -->
+<div class="score-section">
+  <div class="score-box">
+    <h3>設計書 必要度スコア（基本設計書）</h3>
+    <div id="score-basic-bars"></div>
+  </div>
+  <div class="score-box">
+    <h3>設計書 必要度スコア（詳細設計書）</h3>
+    <div id="score-detail-bars"></div>
+  </div>
+</div>
+
+<!-- MATRIX TABLE -->
+<div style="margin-bottom:28px">
+  <h2>③ 判定マトリクス（全パターン参照）</h2>
+  <div class="matrix-wrap">
+    <table class="matrix-table">
+      <thead>
+        <tr>
+          <th>規模 × 手法 × チーム</th>
+          <th>基本設計書</th>
+          <th>詳細設計書</th>
+          <th>推奨ドキュメント</th>
+          <th>優先度</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>小規模 × アジャイル × 1人</td><td class="cell-no">不要</td><td class="cell-no">不要</td><td>README・ADR</td><td class="cell-opt">低</td></tr>
+        <tr><td>小規模 × アジャイル × 社内</td><td class="cell-opt">任意</td><td class="cell-no">不要</td><td>ユーザーストーリー</td><td class="cell-opt">低〜中</td></tr>
+        <tr><td>小規模 × WF × 1人</td><td class="cell-rec">推奨</td><td class="cell-opt">任意</td><td>基本設計書（簡易版）</td><td class="cell-rec">中</td></tr>
+        <tr><td>小規模 × WF × 社内</td><td class="cell-rec">推奨</td><td class="cell-rec">推奨</td><td>基本+詳細設計書</td><td class="cell-rec">中</td></tr>
+        <tr><td>小規模 × WF × クロス/オフショア</td><td class="cell-req">必須</td><td class="cell-req">必須</td><td>フルセット設計書</td><td class="cell-req">高</td></tr>
+        <tr><td>中規模 × アジャイル × 社内</td><td class="cell-rec">推奨</td><td class="cell-opt">任意</td><td>アーキテクチャ設計書</td><td class="cell-rec">中</td></tr>
+        <tr><td>中規模 × アジャイル × クロス</td><td class="cell-req">必須</td><td class="cell-rec">推奨</td><td>基本設計書＋インターフェース定義</td><td class="cell-req">高</td></tr>
+        <tr><td>中規模 × WF × 社内</td><td class="cell-req">必須</td><td class="cell-req">必須</td><td>フルセット設計書</td><td class="cell-req">高</td></tr>
+        <tr><td>中規模 × WF × オフショア</td><td class="cell-req">必須</td><td class="cell-req">必須</td><td>フルセット＋レビュー体制必須</td><td class="cell-req">最高</td></tr>
+        <tr><td>大規模 × アジャイル × 社内</td><td class="cell-req">必須</td><td class="cell-rec">推奨</td><td>C4モデル＋ADR＋インターフェース仕様</td><td class="cell-req">高</td></tr>
+        <tr><td>大規模 × WF × クロス</td><td class="cell-req">必須</td><td class="cell-req">必須</td><td>フルセット＋フォーマル承認プロセス</td><td class="cell-req">最高</td></tr>
+        <tr><td>ミッションクリティカル × 任意 × 任意</td><td class="cell-req">必須</td><td class="cell-req">必須</td><td>フルセット＋監査対応ドキュメント</td><td class="cell-req">最高 (法令)</td></tr>
+        <tr><td>PoC / プロトタイプ × 任意 × 任意</td><td class="cell-no">不要</td><td class="cell-no">不要</td><td>実験ログ・学習ノート</td><td class="cell-opt">低</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- TIPS -->
+<div>
+  <h2>④ 設計書作成のポイント</h2>
+  <div class="tips-grid">
+    <div class="tip-card">
+      <h4>📄 基本設計書に含めるべき項目</h4>
+      <p>システム概要・機能一覧・外部インターフェース定義・画面遷移図・ER図・非機能要件（性能・セキュリティ）</p>
+    </div>
+    <div class="tip-card">
+      <h4>📝 詳細設計書に含めるべき項目</h4>
+      <p>クラス設計・メソッド仕様・DB物理設計・API仕様書（OpenAPI）・エラーハンドリング定義・単体テスト仕様</p>
+    </div>
+    <div class="tip-card">
+      <h4>⚡ アジャイルでの設計ドキュメント</h4>
+      <p>「ちょうど十分」な設計書を意識。ADR（アーキテクチャ決定記録）とAPIドキュメントの自動生成が実践的。</p>
+    </div>
+    <div class="tip-card">
+      <h4>🔄 設計書の保守</h4>
+      <p>書いたら終わりにしない。コード変更に追随して更新する仕組み（レビュープロセス・自動生成）を設けること。</p>
+    </div>
+    <div class="tip-card">
+      <h4>🤝 オフショア開発の注意点</h4>
+      <p>文化・言語の違いを補うため、図表・サンプルコードを多用。曖昧な表現を排除し、受け入れ基準を明示すること。</p>
+    </div>
+    <div class="tip-card">
+      <h4>⚠️ 設計書過多のリスク</h4>
+      <p>不要な設計書はメンテナンスコストになる。必要なものだけ書き、廃止されたドキュメントは明示的に破棄すること。</p>
+    </div>
+  </div>
+</div>
+
+</main>
+
+<script>
+const RULES = {
+  basic: {
+    scale:  {small:20, medium:50, large:80, critical:100},
+    method: {agile:10, waterfall:70, hybrid:50, prototype:0},
+    team:   {solo:0, internal:20, cross:60, offshore:90}
+  },
+  detail: {
+    scale:  {small:10, medium:40, large:80, critical:100},
+    method: {agile:5,  waterfall:80, hybrid:45, prototype:0},
+    team:   {solo:0, internal:15, cross:55, offshore:90}
+  }
+};
+
+const LEVEL = (s) => s >= 80 ? ['req','必須','badge-req'] : s >= 50 ? ['rec','推奨','badge-rec'] : s >= 25 ? ['opt','任意','badge-opt'] : ['skip','不要','badge-skip'];
+
+function getVal(name) { return document.querySelector(`input[name="${name}"]:checked`)?.value || ''; }
+
+function makeBar(label, val, color) {
+  return `<div class="score-item"><div class="si-label"><span>${label}</span><span>${val}点</span></div><div class="score-bar"><div class="score-fill" style="width:${val}%;background:${color}"></div></div></div>`;
+}
+
+function renderCard(id, title, score, scale, method, team) {
+  const [cls, label, badge] = LEVEL(score);
+  const reasons = {
+    scale: {small:'小規模',medium:'中規模',large:'大規模',critical:'ミッションクリティカル'},
+    method:{agile:'アジャイル',waterfall:'ウォーターフォール',hybrid:'ハイブリッド',prototype:'PoC・プロトタイプ'},
+    team:  {solo:'少人数',internal:'社内チーム',cross:'クロスファンクショナル',offshore:'オフショア分散'}
+  };
+  const checklists = {
+    basic: {
+      req:['システム概要・スコープ定義','機能一覧（ユースケース）','画面遷移図・画面設計','外部インターフェース定義','ER図・データモデル','非機能要件定義'],
+      rec:['主要機能の設計','インターフェース概要','データ概要設計'],
+      opt:['アーキテクチャ概要ノート'],
+      skip:['README.md で十分']
+    },
+    detail: {
+      req:['クラス・モジュール設計','メソッド仕様（入出力・処理）','DB物理設計・DDL','API仕様（OpenAPI等）','エラー定義・例外処理','単体テスト仕様'],
+      rec:['主要ロジックのフローチャート','API概要定義'],
+      opt:['重要箇所のコメント強化'],
+      skip:['コード・テストで代替可']
+    }
+  };
+  const docKey = id === 'rc-basic' ? 'basic' : 'detail';
+  const items = checklists[docKey][cls] || [];
+  const el = document.getElementById(id);
+  el.className = `result-card ${cls}`;
+  el.innerHTML = `
+    <span class="rc-badge ${badge}">${label}</span>
+    <div class="rc-title">${title}</div>
+    <div class="rc-reason">${reasons.scale[scale]} × ${reasons.method[method]} × ${reasons.team[team]}（スコア: ${score}点）</div>
+    <ul class="rc-checklist">${items.map(i=>`<li>${i}</li>`).join('')}</ul>
+  `;
+}
+
+function judge() {
+  const scale = getVal('scale'), method = getVal('method'), team = getVal('team');
+  if (!scale || !method || !team) return;
+
+  // Mark selected options
+  document.querySelectorAll('.axis-option').forEach(el => el.classList.remove('selected'));
+  document.querySelectorAll('input[type=radio]:checked').forEach(r => r.closest('.axis-option')?.classList.add('selected'));
+
+  const sBasic  = Math.min(100, Math.round((RULES.basic.scale[scale]  + RULES.basic.method[method]  + RULES.basic.team[team]) / 3));
+  const sDetail = Math.min(100, Math.round((RULES.detail.scale[scale] + RULES.detail.method[method] + RULES.detail.team[team]) / 3));
+
+  renderCard('rc-basic',  '基本設計書', sBasic,  scale, method, team);
+  renderCard('rc-detail', '詳細設計書', sDetail, scale, method, team);
+
+  const barColor = s => s >= 80 ? '#c92a2a' : s >= 50 ? '#e67700' : s >= 25 ? '#2f9e44' : '#868e96';
+  document.getElementById('score-basic-bars').innerHTML =
+    makeBar('プロジェクト規模', RULES.basic.scale[scale], barColor(RULES.basic.scale[scale])) +
+    makeBar('開発手法', RULES.basic.method[method], barColor(RULES.basic.method[method])) +
+    makeBar('チーム構成', RULES.basic.team[team], barColor(RULES.basic.team[team])) +
+    makeBar('総合スコア', sBasic, barColor(sBasic));
+
+  document.getElementById('score-detail-bars').innerHTML =
+    makeBar('プロジェクト規模', RULES.detail.scale[scale], barColor(RULES.detail.scale[scale])) +
+    makeBar('開発手法', RULES.detail.method[method], barColor(RULES.detail.method[method])) +
+    makeBar('チーム構成', RULES.detail.team[team], barColor(RULES.detail.team[team])) +
+    makeBar('総合スコア', sDetail, barColor(sDetail));
+}
+
+judge();
+</script>
+</body>
+</html>

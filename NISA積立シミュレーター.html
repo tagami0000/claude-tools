@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NISAつみたてシミュレーター</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+  :root{
+    --bg:#080c14;--bg2:#0f172a;--bg3:#1e293b;--bg4:#334155;
+    --border:#334155;--text:#f1f5f9;--text2:#94a3b8;--text3:#64748b;
+    --green:#22c55e;--blue:#60a5fa;--yellow:#fbbf24;--red:#f87171;
+    --purple:#a78bfa;--cyan:#22d3ee;--accent:#6366f1;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--text);font-family:'Segoe UI','Meiryo',sans-serif}
+  header{background:linear-gradient(135deg,#1e1b4b,#0f172a);padding:28px 32px;border-bottom:1px solid var(--border)}
+  header h1{font-size:1.6rem;font-weight:800;margin-bottom:4px}
+  header h1 span{background:linear-gradient(90deg,#6366f1,#22d3ee);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+  header p{color:var(--text2);font-size:0.85rem}
+
+  .layout{display:grid;grid-template-columns:300px 1fr;gap:0;min-height:calc(100vh - 86px)}
+  .sidebar{background:var(--bg2);border-right:1px solid var(--border);padding:24px;overflow-y:auto;max-height:calc(100vh - 86px);position:sticky;top:0}
+  .main{padding:24px;overflow-y:auto}
+
+  .sec-title{font-size:0.7rem;text-transform:uppercase;letter-spacing:.1em;color:var(--text3);margin-bottom:12px;padding-bottom:6px;border-bottom:1px solid var(--border)}
+  .ctrl-block{margin-bottom:22px}
+  .slider-row{margin-bottom:12px}
+  .slider-row label{display:flex;justify-content:space-between;font-size:0.78rem;margin-bottom:5px;color:var(--text2)}
+  .slider-row label b{color:var(--yellow);font-size:0.82rem}
+  input[type=range]{width:100%;-webkit-appearance:none;height:4px;border-radius:2px;background:var(--bg4);cursor:pointer}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:var(--accent);cursor:pointer;border:2px solid var(--bg2)}
+
+  .stage-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+  .stage-badge{font-size:0.72rem;padding:2px 10px;border-radius:12px;font-weight:600}
+  .s1{background:rgba(99,102,241,0.2);color:#a5b4fc}
+  .s2{background:rgba(34,211,238,0.2);color:#67e8f9}
+  .s3{background:rgba(34,197,94,0.2);color:#86efac}
+
+  /* Target reverse calc */
+  .reverse-box{background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:20px}
+  .reverse-box .r-label{font-size:0.78rem;color:var(--text2);margin-bottom:6px}
+  .reverse-box input[type=number]{background:var(--bg4);border:1px solid var(--border);border-radius:6px;color:var(--text);padding:8px 12px;font-size:0.9rem;width:100%;margin-bottom:8px;outline:none}
+  .reverse-box input[type=number]:focus{border-color:var(--accent)}
+  .reverse-result{font-size:0.85rem;color:var(--cyan);font-weight:600;min-height:40px;line-height:1.6}
+
+  /* KPI */
+  .kpi-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px}
+  .kpi{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:14px 16px}
+  .kpi .v{font-size:1.35rem;font-weight:800;margin-bottom:2px}
+  .kpi .l{font-size:0.7rem;color:var(--text2)}
+
+  .chart-card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:18px 20px;margin-bottom:16px}
+  .chart-card h2{font-size:0.82rem;color:var(--text2);margin-bottom:14px;text-transform:uppercase;letter-spacing:.05em}
+  canvas{max-height:260px}
+
+  /* Milestones */
+  .milestone-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;margin-bottom:16px}
+  .ms{background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:12px 14px;text-align:center}
+  .ms .ms-yr{font-size:0.72rem;color:var(--text3);margin-bottom:4px}
+  .ms .ms-val{font-size:1.1rem;font-weight:700;color:var(--cyan)}
+  .ms .ms-gain{font-size:0.72rem;color:var(--green);margin-top:2px}
+
+  @media(max-width:800px){.layout{grid-template-columns:1fr}.sidebar{max-height:none;position:static}.kpi-grid{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+<header>
+  <h1>NISA <span>つみたてシミュレーター</span></h1>
+  <p>開始資産・利回り・年齢・多段階拠出 | 逆算機能 | マイルストーン表示</p>
+</header>
+
+<div class="layout">
+<div class="sidebar">
+
+  <div class="ctrl-block">
+    <div class="sec-title">基本設定</div>
+    <div class="slider-row">
+      <label>現在の年齢 <b id="lv-age">30歳</b></label>
+      <input type="range" id="s-age" min="18" max="60" value="30" oninput="upd()">
+    </div>
+    <div class="slider-row">
+      <label>終了年齢（取り崩し開始） <b id="lv-end">65歳</b></label>
+      <input type="range" id="s-end" min="40" max="80" value="65" oninput="upd()">
+    </div>
+    <div class="slider-row">
+      <label>開始資産（現在の投資可能資産） <b id="lv-init">100万円</b></label>
+      <input type="range" id="s-init" min="0" max="3000" step="50" value="100" oninput="upd()">
+    </div>
+  </div>
+
+  <div class="ctrl-block">
+    <div class="sec-title">運用設定</div>
+    <div class="slider-row">
+      <label>想定年利回り <b id="lv-roi">5%</b></label>
+      <input type="range" id="s-roi" min="0" max="15" step="0.5" value="5" oninput="upd()">
+    </div>
+    <div class="slider-row">
+      <label>NISA年間上限まで拠出 <b id="lv-nisa">つみたて投資枠</b></label>
+      <select id="s-nisa" onchange="upd()" style="width:100%;background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:6px 10px;border-radius:6px;font-size:0.8rem;margin-top:4px">
+        <option value="120">つみたて投資枠 120万円/年</option>
+        <option value="240">成長投資枠 240万円/年</option>
+        <option value="360">両枠フル活用 360万円/年</option>
+        <option value="0">NISA外（自由設定）</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="ctrl-block">
+    <div class="sec-title">第1段階の拠出</div>
+    <div class="stage-header"><span class="stage-badge s1">Stage 1</span><span style="font-size:0.72rem;color:var(--text3)" id="s1-range">現在〜+10年</span></div>
+    <div class="slider-row">
+      <label>月間拠出額 <b id="lv-s1">5万円/月</b></label>
+      <input type="range" id="s-s1" min="0" max="100" step="1" value="5" oninput="upd()">
+    </div>
+    <div class="slider-row">
+      <label>段階1の期間 <b id="lv-d1">10年</b></label>
+      <input type="range" id="s-d1" min="1" max="30" value="10" oninput="upd()">
+    </div>
+  </div>
+
+  <div class="ctrl-block">
+    <div class="sec-title">第2段階の拠出</div>
+    <div class="stage-header"><span class="stage-badge s2">Stage 2</span><span style="font-size:0.72rem;color:var(--text3)" id="s2-range">+10年〜+20年</span></div>
+    <div class="slider-row">
+      <label>月間拠出額 <b id="lv-s2">10万円/月</b></label>
+      <input type="range" id="s-s2" min="0" max="100" step="1" value="10" oninput="upd()">
+    </div>
+    <div class="slider-row">
+      <label>段階2の期間 <b id="lv-d2">10年</b></label>
+      <input type="range" id="s-d2" min="1" max="30" value="10" oninput="upd()">
+    </div>
+  </div>
+
+  <div class="ctrl-block">
+    <div class="sec-title">第3段階の拠出</div>
+    <div class="stage-header"><span class="stage-badge s3">Stage 3</span><span style="font-size:0.72rem;color:var(--text3)" id="s3-range">+20年〜終了</span></div>
+    <div class="slider-row">
+      <label>月間拠出額 <b id="lv-s3">20万円/月</b></label>
+      <input type="range" id="s-s3" min="0" max="100" step="1" value="20" oninput="upd()">
+    </div>
+  </div>
+
+  <div class="ctrl-block">
+    <div class="reverse-box">
+      <div class="r-label">🎯 目標金額から逆算</div>
+      <input type="number" id="target-input" placeholder="例: 10000（万円）" oninput="calcReverse()">
+      <div class="reverse-result" id="reverse-result">目標金額を入力してください</div>
+    </div>
+  </div>
+
+</div><!-- /sidebar -->
+
+<div class="main">
+  <div class="kpi-grid">
+    <div class="kpi"><div class="v" id="kpi-final" style="color:var(--green)">--</div><div class="l">最終資産</div></div>
+    <div class="kpi"><div class="v" id="kpi-gain" style="color:var(--cyan)">--</div><div class="l">運用益</div></div>
+    <div class="kpi"><div class="v" id="kpi-total" style="color:var(--purple)">--</div><div class="l">総拠出額</div></div>
+    <div class="kpi"><div class="v" id="kpi-mul" style="color:var(--yellow)">--</div><div class="l">資産倍率</div></div>
+    <div class="kpi"><div class="v" id="kpi-yr" style="color:var(--blue)">--</div><div class="l">運用年数</div></div>
+    <div class="kpi"><div class="v" id="kpi-monthly" style="color:var(--red)">--</div><div class="l">平均月次拠出</div></div>
+  </div>
+
+  <div class="chart-card">
+    <h2>📈 資産推移グラフ（万円）</h2>
+    <canvas id="chart-main"></canvas>
+  </div>
+
+  <div class="chart-card">
+    <h2>🏆 マイルストーン（5年・10年ごと）</h2>
+    <div class="milestone-grid" id="milestone-grid"></div>
+  </div>
+
+  <div class="chart-card">
+    <h2>📊 拠出 vs 運用益 構成</h2>
+    <canvas id="chart-comp"></canvas>
+  </div>
+</div>
+</div>
+
+<script>
+const gv = id => parseFloat(document.getElementById(id).value);
+
+let chartMain, chartComp;
+
+function simulate() {
+  const age = gv('s-age'), endAge = gv('s-end'), init = gv('s-init');
+  const roi = gv('s-roi') / 100 / 12;
+  const d1 = gv('s-d1'), d2 = gv('s-d2');
+  const s1 = gv('s-s1'), s2 = gv('s-s2'), s3 = gv('s-s3');
+  const years = endAge - age;
+
+  const labels = [], assets = [], contribs = [], gains = [];
+  let asset = init, totalContrib = init, totalGain = 0;
+
+  for (let m = 0; m <= years * 12; m++) {
+    const yr = m / 12;
+    let monthly = yr < d1 ? s1 : (yr < d1 + d2 ? s2 : s3);
+    asset = asset * (1 + roi) + monthly;
+    totalContrib += monthly;
+    if (m % 12 === 0) {
+      totalGain = asset - totalContrib;
+      labels.push(Math.floor(age + yr) + '歳');
+      assets.push(Math.round(asset));
+      contribs.push(Math.round(totalContrib));
+      gains.push(Math.round(Math.max(0, totalGain)));
+    }
+  }
+
+  document.getElementById('lv-age').textContent = age + '歳';
+  document.getElementById('lv-end').textContent = endAge + '歳';
+  document.getElementById('lv-init').textContent = init.toLocaleString() + '万円';
+  document.getElementById('lv-roi').textContent = gv('s-roi') + '%';
+  document.getElementById('lv-s1').textContent = s1 + '万円/月';
+  document.getElementById('lv-s2').textContent = s2 + '万円/月';
+  document.getElementById('lv-s3').textContent = s3 + '万円/月';
+  document.getElementById('lv-d1').textContent = d1 + '年';
+  document.getElementById('lv-d2').textContent = d2 + '年';
+  document.getElementById('s1-range').textContent = age + '歳〜' + (age+d1) + '歳';
+  document.getElementById('s2-range').textContent = (age+d1) + '歳〜' + (age+d1+d2) + '歳';
+  document.getElementById('s3-range').textContent = (age+d1+d2) + '歳〜' + endAge + '歳';
+
+  const nisa = document.getElementById('s-nisa');
+  document.getElementById('lv-nisa').textContent = nisa.options[nisa.selectedIndex].text.split(' ')[0];
+
+  return {labels, assets, contribs, gains, totalContrib: Math.round(totalContrib), totalGain: Math.round(totalGain), years, age, endAge};
+}
+
+function upd() {
+  const d = simulate();
+  const final = d.assets[d.assets.length - 1] || 0;
+  const mul = d.totalContrib > 0 ? (final / d.totalContrib).toFixed(2) : '--';
+  const avgMonthly = d.years > 0 ? Math.round(d.totalContrib / (d.years * 12)) : 0;
+
+  document.getElementById('kpi-final').textContent = final.toLocaleString() + '万円';
+  document.getElementById('kpi-gain').textContent = d.totalGain.toLocaleString() + '万円';
+  document.getElementById('kpi-total').textContent = d.totalContrib.toLocaleString() + '万円';
+  document.getElementById('kpi-mul').textContent = mul + '倍';
+  document.getElementById('kpi-yr').textContent = d.years + '年';
+  document.getElementById('kpi-monthly').textContent = avgMonthly.toLocaleString() + '万円';
+
+  // Milestones
+  const ms = document.getElementById('milestone-grid');
+  ms.innerHTML = '';
+  [5,10,15,20,25,30].forEach(yr => {
+    const idx = Math.min(yr, d.years);
+    if (idx <= d.years && d.assets[idx]) {
+      const v = d.assets[idx];
+      const c = d.contribs[idx] || 0;
+      const g = v - c;
+      ms.innerHTML += `<div class="ms"><div class="ms-yr">${d.age + idx}歳 (${idx}年後)</div><div class="ms-val">${v.toLocaleString()}万円</div><div class="ms-gain">+${Math.round(g).toLocaleString()}万 (運用益)</div></div>`;
+    }
+  });
+
+  // Charts update
+  chartMain.data.labels = d.labels;
+  chartMain.data.datasets[0].data = d.assets;
+  chartMain.data.datasets[1].data = d.contribs;
+  chartMain.update('none');
+
+  chartComp.data.labels = d.labels;
+  chartComp.data.datasets[0].data = d.contribs;
+  chartComp.data.datasets[1].data = d.gains;
+  chartComp.update('none');
+
+  calcReverse();
+}
+
+function calcReverse() {
+  const target = parseFloat(document.getElementById('target-input').value);
+  if (!target || isNaN(target)) { document.getElementById('reverse-result').textContent = '目標金額を入力してください'; return; }
+  const d = simulate();
+  const final = d.assets[d.assets.length - 1] || 0;
+  const ratio = target / Math.max(final, 1);
+  if (final >= target) {
+    const hitYr = d.assets.findIndex(a => a >= target);
+    document.getElementById('reverse-result').textContent = `✅ ${d.age + hitYr}歳（${hitYr}年後）に目標 ${target.toLocaleString()}万円 達成予定！\n最終資産 ${final.toLocaleString()}万円（目標の${(final/target*100).toFixed(0)}%）`;
+  } else {
+    const need = Math.ceil(target / final * 10) / 10;
+    document.getElementById('reverse-result').textContent = `⚠️ 現在の設定では目標の ${(final/target*100).toFixed(0)}% まで到達。\n目標達成には月次拠出を約 ${need}倍 にするか、利回りを上げてください。`;
+  }
+}
+
+const cOpts = {
+  responsive:true, maintainAspectRatio:true,
+  plugins:{legend:{labels:{color:'#94a3b8',font:{size:11}}}},
+  scales:{
+    x:{ticks:{color:'#64748b',maxTicksLimit:12},grid:{color:'#1e293b'}},
+    y:{ticks:{color:'#64748b',callback:v=>v.toLocaleString()+'万'},grid:{color:'#1e293b'}}
+  }
+};
+
+chartMain = new Chart(document.getElementById('chart-main'), {
+  type:'line',
+  data:{labels:[],datasets:[
+    {label:'資産残高',data:[],borderColor:'#22c55e',backgroundColor:'rgba(34,197,94,0.1)',fill:true,tension:0.3,pointRadius:0},
+    {label:'累計拠出',data:[],borderColor:'#6366f1',backgroundColor:'transparent',borderDash:[5,5],tension:0.3,pointRadius:0}
+  ]},
+  options:cOpts
+});
+
+chartComp = new Chart(document.getElementById('chart-comp'), {
+  type:'bar',
+  data:{labels:[],datasets:[
+    {label:'累計拠出額',data:[],backgroundColor:'rgba(99,102,241,0.7)',stack:'a'},
+    {label:'運用益',data:[],backgroundColor:'rgba(34,197,94,0.7)',stack:'a'}
+  ]},
+  options:{...cOpts,scales:{...cOpts.scales}}
+});
+
+upd();
+</script>
+</body>
+</html>

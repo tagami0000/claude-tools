@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Netlify Drop & フォルダ管理ガイド</title>
+<style>
+  :root{
+    --bg:#0f1117;--bg2:#161b27;--bg3:#1e2535;--bg4:#2a3347;
+    --border:#2d3748;--text:#e2e8f0;--text2:#94a3b8;--text3:#64748b;
+    --teal:#00d4b4;--blue:#4299e1;--green:#48bb78;--yellow:#f6c90e;
+    --red:#fc8181;--purple:#9f7aea;--orange:#f6ad55;
+    --netlify:#00ad9f;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--text);font-family:'Segoe UI','Meiryo',sans-serif;line-height:1.7}
+
+  /* Tab nav */
+  .tab-nav{display:flex;background:var(--bg2);border-bottom:1px solid var(--border)}
+  .tab-btn{
+    flex:1;padding:18px 24px;background:none;border:none;color:var(--text2);
+    font-size:0.88rem;font-weight:600;cursor:pointer;border-bottom:3px solid transparent;
+    transition:all .2s;display:flex;align-items:center;justify-content:center;gap:8px;
+  }
+  .tab-btn.active{color:var(--teal);border-bottom-color:var(--teal)}
+  .tab-btn:hover{color:var(--text);background:var(--bg3)}
+  .tab-content{display:none;padding:40px 32px;max-width:1100px;margin:0 auto}
+  .tab-content.active{display:block}
+
+  h1{font-size:1.6rem;font-weight:800;margin-bottom:8px}
+  h2{font-size:1.05rem;font-weight:700;margin-bottom:16px;color:var(--teal);display:flex;align-items:center;gap:8px}
+  h2::before{content:'';display:block;width:3px;height:1em;background:var(--teal);border-radius:2px}
+  h3{font-size:0.9rem;font-weight:700;color:var(--text);margin-bottom:10px}
+  p{font-size:0.87rem;color:var(--text2);margin-bottom:16px}
+
+  .card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:24px;margin-bottom:24px}
+
+  /* Steps */
+  .steps{counter-reset:step}
+  .step{display:flex;gap:16px;margin-bottom:24px;position:relative}
+  .step-num{
+    flex-shrink:0;width:36px;height:36px;border-radius:50%;
+    background:var(--teal);color:#000;font-weight:800;font-size:0.85rem;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .step-body{flex:1}
+  .step-body h3{color:var(--teal);font-size:0.92rem;margin-bottom:6px}
+  .step-body p{margin-bottom:8px;font-size:0.84rem}
+  .code-block{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:12px 16px;font-family:'Consolas',monospace;font-size:0.8rem;color:#a5f3fc;margin-bottom:8px}
+  .tip{background:rgba(0,212,180,0.08);border-left:3px solid var(--teal);padding:10px 14px;border-radius:0 8px 8px 0;font-size:0.8rem;color:var(--text2);margin-top:8px}
+  .warn{background:rgba(246,197,14,0.08);border-left:3px solid var(--yellow);padding:10px 14px;border-radius:0 8px 8px 0;font-size:0.8rem;color:var(--text2);margin-top:8px}
+
+  /* Netlify drop zone illustration */
+  .drop-zone{
+    border:2px dashed var(--netlify);border-radius:16px;padding:40px;
+    text-align:center;background:rgba(0,173,159,0.05);margin-bottom:24px;
+    transition:all .3s;cursor:default;
+  }
+  .drop-zone:hover{background:rgba(0,173,159,0.1);border-color:var(--teal)}
+  .drop-icon{font-size:3rem;margin-bottom:12px;display:block}
+  .drop-zone h3{font-size:1.1rem;color:var(--netlify);margin-bottom:6px}
+  .drop-zone p{font-size:0.82rem;color:var(--text3);margin:0}
+  .netlify-btn{
+    display:inline-block;margin-top:16px;padding:10px 28px;
+    background:var(--netlify);color:#000;border-radius:6px;
+    font-weight:700;font-size:0.85rem;text-decoration:none;
+    transition:all .2s;
+  }
+  .netlify-btn:hover{background:var(--teal);transform:translateY(-1px)}
+
+  /* Lifecycle flow */
+  .flow{display:flex;align-items:center;gap:0;margin-bottom:24px;flex-wrap:wrap}
+  .flow-step{
+    background:var(--bg3);border:1px solid var(--border);border-radius:10px;
+    padding:14px 18px;text-align:center;flex:1;min-width:120px;
+  }
+  .flow-step .f-icon{font-size:1.4rem;margin-bottom:6px}
+  .flow-step .f-label{font-size:0.75rem;font-weight:700;color:var(--teal)}
+  .flow-step .f-desc{font-size:0.68rem;color:var(--text3);margin-top:3px}
+  .flow-arrow{color:var(--text3);font-size:1.2rem;padding:0 6px;flex-shrink:0}
+
+  /* ===== FOLDER GUIDE TAB ===== */
+
+  /* Color-coded explorer */
+  .explorer{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:24px;font-family:'Consolas',monospace;font-size:0.83rem}
+  .explorer-header{font-size:0.7rem;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:14px;font-family:sans-serif}
+  .tree-item{display:flex;align-items:center;gap:8px;padding:3px 0;cursor:default;border-radius:4px;transition:background .15s}
+  .tree-item:hover{background:var(--bg3)}
+  .tree-indent{width:20px;flex-shrink:0}
+  .tree-icon{flex-shrink:0;width:16px;text-align:center;font-size:0.85rem}
+  .tree-name{font-size:0.82rem}
+  .tree-note{font-size:0.68rem;color:var(--text3);margin-left:8px;font-family:sans-serif}
+  .tree-badge{font-size:0.62rem;padding:1px 8px;border-radius:10px;font-family:sans-serif;margin-left:6px;font-weight:600}
+
+  /* Color codes */
+  .c-html{color:#f6c90e}
+  .c-css{color:#4299e1}
+  .c-js{color:#f6ad55}
+  .c-img{color:#9f7aea}
+  .c-font{color:#48bb78}
+  .c-data{color:#fc8181}
+  .c-root{color:#00d4b4}
+  .c-folder{color:#94a3b8}
+
+  .color-legend{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:20px}
+  .cl-item{display:flex;align-items:center;gap:6px;font-size:0.75rem;font-family:sans-serif}
+  .cl-dot{width:10px;height:10px;border-radius:50%}
+
+  /* Folder type cards */
+  .folder-types{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;margin-bottom:24px}
+  .folder-type{background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:14px}
+  .folder-type h4{font-size:0.82rem;font-weight:700;margin-bottom:6px}
+  .folder-type p{font-size:0.75rem;color:var(--text2);margin:0}
+  .folder-type .examples{margin-top:8px;display:flex;flex-wrap:wrap;gap:4px}
+  .eg{font-size:0.68rem;padding:2px 8px;background:var(--bg4);border-radius:4px;font-family:monospace;color:var(--text2)}
+
+  /* Netlify specific structure */
+  .netlify-rules{list-style:none}
+  .netlify-rules li{padding:10px 14px;border-left:3px solid var(--border);margin-bottom:8px;font-size:0.83rem}
+  .netlify-rules li.required{border-left-color:var(--red)}
+  .netlify-rules li.recommended{border-left-color:var(--yellow)}
+  .netlify-rules li.optional{border-left-color:var(--green)}
+  .netlify-rules li .rule-title{font-weight:700;color:var(--text);margin-bottom:2px}
+  .netlify-rules li .rule-desc{font-size:0.75rem;color:var(--text2)}
+
+  @media(max-width:600px){.flow{flex-direction:column}.flow-arrow{transform:rotate(90deg)}}
+</style>
+</head>
+<body>
+
+<div class="tab-nav">
+  <button class="tab-btn active" onclick="switchTab('netlify',this)">
+    <span>🚀</span> Netlify Drop の使い方
+  </button>
+  <button class="tab-btn" onclick="switchTab('folder',this)">
+    <span>📁</span> フォルダの管理方法
+  </button>
+</div>
+
+<!-- ======= TAB 1: NETLIFY DROP ======= -->
+<div class="tab-content active" id="tab-netlify">
+  <div style="margin-bottom:32px">
+    <h1 style="color:var(--netlify)">Netlify Drop</h1>
+    <p style="font-size:0.95rem;color:var(--text2)">ドラッグ＆ドロップでHTMLファイルを即公開。アカウント不要でも使えるシンプルなホスティングサービス。</p>
+  </div>
+
+  <div class="drop-zone">
+    <span class="drop-icon">📂</span>
+    <h3>ここにフォルダをドロップ</h3>
+    <p>index.html を含むフォルダをドラッグ＆ドロップするだけで公開完了</p>
+    <a class="netlify-btn" href="https://app.netlify.com/drop" target="_blank">app.netlify.com/drop を開く →</a>
+  </div>
+
+  <!-- Lifecycle flow -->
+  <div class="card">
+    <h2>デプロイ ライフサイクルフロー</h2>
+    <div class="flow">
+      <div class="flow-step">
+        <div class="f-icon">📁</div>
+        <div class="f-label">フォルダ準備</div>
+        <div class="f-desc">index.htmlを含む<br>フォルダを用意</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">
+        <div class="f-icon">⬆️</div>
+        <div class="f-label">ドロップ</div>
+        <div class="f-desc">ブラウザに<br>D&D</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">
+        <div class="f-icon">⚙️</div>
+        <div class="f-label">ビルド</div>
+        <div class="f-desc">Netlifyが<br>自動処理</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">
+        <div class="f-icon">🌐</div>
+        <div class="f-label">公開</div>
+        <div class="f-desc">URLが<br>発行される</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">
+        <div class="f-icon">🔗</div>
+        <div class="f-label">共有</div>
+        <div class="f-desc">URLを<br>シェア</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Steps -->
+  <div class="card">
+    <h2>ステップバイステップ手順</h2>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <h3>フォルダ構成を確認する</h3>
+          <p>公開するHTMLファイルが入ったフォルダを用意します。必ず <code style="color:var(--yellow)">index.html</code> がルートに存在することを確認してください。</p>
+          <div class="code-block">my-site/<br>├── index.html  ← 必須！<br>├── style.css<br>└── script.js</div>
+          <div class="tip">💡 単一HTMLファイルの場合は、フォルダに入れてから index.html にリネームするか、そのままでも可（ファイル単体ドロップ対応）</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <h3>Netlify Drop ページを開く</h3>
+          <p>ブラウザで <span style="color:var(--teal)">app.netlify.com/drop</span> を開きます。ログイン不要で利用開始できます（ただし24時間でURLが削除されるため、永続化にはアカウント登録が必要）。</p>
+          <div class="warn">⚠️ 非ログイン状態では公開URLは24時間後に削除されます。永続的に使いたい場合は無料アカウントを作成してください。</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-body">
+          <h3>フォルダをドラッグ＆ドロップ</h3>
+          <p>エクスプローラーからフォルダをそのままブラウザの点線エリアにドラッグします。アップロードが始まり、数秒〜数十秒でデプロイが完了します。</p>
+          <div class="tip">💡 大きなファイル（画像・動画）が含まれる場合はアップロードに時間がかかります。不要なファイルは含めないようにしましょう。</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">4</div>
+        <div class="step-body">
+          <h3>公開URLを取得</h3>
+          <p>デプロイが完了すると <code style="color:var(--teal)">https://ランダム文字列.netlify.app</code> 形式のURLが発行されます。このURLをそのまま共有できます。</p>
+          <div class="code-block">例: https://amazing-curie-3f8a91.netlify.app</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">5</div>
+        <div class="step-body">
+          <h3>更新する場合</h3>
+          <p>ファイルを修正して再デプロイするには、同じサイトの管理ページで「Deploys」タブから再度フォルダをドロップするか、URLが変わっても良ければ最初からやり直します。</p>
+          <div class="tip">💡 Netlifyアカウントを持っていると「同じサイトに再デプロイ」機能が使えてURLが変わりません。</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tips -->
+  <div class="card">
+    <h2>よくある問題と解決策</h2>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+      <div style="background:var(--bg3);border-radius:8px;padding:14px">
+        <h3 style="color:var(--red);font-size:0.82rem;margin-bottom:6px">❌ ページが表示されない</h3>
+        <p style="font-size:0.78rem;color:var(--text2);margin:0">フォルダのルートに <code>index.html</code> が存在するか確認。サブフォルダ内に入れてしまっていないかチェック。</p>
+      </div>
+      <div style="background:var(--bg3);border-radius:8px;padding:14px">
+        <h3 style="color:var(--red);font-size:0.82rem;margin-bottom:6px">❌ 画像が表示されない</h3>
+        <p style="font-size:0.78rem;color:var(--text2);margin:0">パスが相対パスになっているか確認。絶対パスや別サーバーのURLは問題ないが、ローカルパスは使用不可。</p>
+      </div>
+      <div style="background:var(--bg3);border-radius:8px;padding:14px">
+        <h3 style="color:var(--red);font-size:0.82rem;margin-bottom:6px">❌ URLが24時間で消えた</h3>
+        <p style="font-size:0.78rem;color:var(--text2);margin:0">無料アカウントでログインしてデプロイすると永続的になります。GitHubアカウントでサインインが最速。</p>
+      </div>
+      <div style="background:var(--bg3);border-radius:8px;padding:14px">
+        <h3 style="color:var(--red);font-size:0.82rem;margin-bottom:6px">❌ 文字化けする</h3>
+        <p style="font-size:0.78mm;color:var(--text2);margin:0">HTMLの &lt;head&gt; に <code>&lt;meta charset="UTF-8"&gt;</code> が入っているか確認。</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ======= TAB 2: FOLDER GUIDE ======= -->
+<div class="tab-content" id="tab-folder">
+  <div style="margin-bottom:32px">
+    <h1>フォルダの管理方法</h1>
+    <p style="font-size:0.95rem;color:var(--text2)">Webプロジェクトのフォルダ構造を色分けで視覚化。Netlify に最適なファイル配置とライフサイクルを解説。</p>
+  </div>
+
+  <!-- Color legend -->
+  <div class="card">
+    <h2>カラーコード凡例</h2>
+    <div class="color-legend">
+      <div class="cl-item"><div class="cl-dot" style="background:#f6c90e"></div><span class="c-html">HTML ファイル</span></div>
+      <div class="cl-item"><div class="cl-dot" style="background:#4299e1"></div><span class="c-css">CSS ファイル</span></div>
+      <div class="cl-item"><div class="cl-dot" style="background:#f6ad55"></div><span class="c-js">JavaScript</span></div>
+      <div class="cl-item"><div class="cl-dot" style="background:#9f7aea"></div><span class="c-img">画像ファイル</span></div>
+      <div class="cl-item"><div class="cl-dot" style="background:#48bb78"></div><span class="c-font">フォント</span></div>
+      <div class="cl-item"><div class="cl-dot" style="background:#fc8181"></div><span class="c-data">データ (JSON等)</span></div>
+      <div class="cl-item"><div class="cl-dot" style="background:#00d4b4"></div><span class="c-root">ルートファイル</span></div>
+    </div>
+
+    <!-- Explorer tree -->
+    <div class="explorer">
+      <div class="explorer-header">📂 プロジェクト フォルダ構造 エクスプローラー</div>
+
+      <div class="tree-item"><div class="tree-icon">📁</div><span class="c-root tree-name">my-project/</span><span class="tree-note">← プロジェクトルート</span><span class="tree-badge" style="background:rgba(0,212,180,0.15);color:var(--teal)">Netlify Drop はここをD&D</span></div>
+
+      <div class="tree-item"><div class="tree-indent"></div><div class="tree-icon">📄</div><span class="c-html tree-name">index.html</span><span class="tree-note">← メインページ（必須）</span></div>
+      <div class="tree-item"><div class="tree-indent"></div><div class="tree-icon">📄</div><span class="c-html tree-name">about.html</span></div>
+      <div class="tree-item"><div class="tree-indent"></div><div class="tree-icon">📄</div><span class="c-html tree-name">contact.html</span></div>
+
+      <div class="tree-item" style="margin-top:4px"><div class="tree-indent"></div><div class="tree-icon">📁</div><span class="c-folder tree-name">css/</span></div>
+      <div class="tree-item"><div class="tree-indent"></div><div class="tree-indent"></div><div class="tree-icon">📄</div><span class="c-css tree-name">style.css</span><span class="tree-note">メインスタイル</span></div>
+      <div class="tree-item"><div class="tree-indent"></div><div class="tree-indent"></div><div class="tree-icon">📄</div><span class="c-css tree-name">reset.css</span></div>
+      <div class="tree-item"><div class="tree-indent"></div><div class="tree-indent"></div><div class="tree-icon">📄</div><span class="c-css tree-name">components.css</span></div>
+
+      <div class="tree-item" style="margin-top:4px"><div class="tree-indent"></div><div class="tree-icon">📁</div><span class="c-folder tree-name">js/</span></div>
+      <div class="tree-item"><div class="tree-indent"></div><div class="tree-indent"></div><div class="tree-icon">📄</div><span class="c-js tree-name">main.js</span><span class="tree-note">メインスクリプト</span></div>
+      <div class="tree-item"><div class="tree-indent"></div><div class="tree-indent"></div><div class="tree-icon">📄</div><span class="c-js tree-name">utils.js</span></div>
+
+      <div class="tree-item" style="margin-top:4px"><div class="tree-indent"></div><div class="tree-icon">📁</div><span class="c-folder tree-name">images/</span></div>
+      <div class="tree-item"><div class="tree-indent"></div><div class="tree-indent"></div><div class="tree-icon">🖼️</div><span class="c-img tree-name">hero.webp</span></div>
+      <div class="tree-item"><div class="tree-indent"></div><div class="tree-indent"></div><div class="tree-icon">🖼️</div><span class="c-img tree-name">logo.svg</span></div>
+      <div class="tree-item"><div class="tree-indent"></div><div class="tree-indent"></div><div class="tree-icon">📁</div><span class="c-folder tree-name">icons/</span></div>
+
+      <div class="tree-item" style="margin-top:4px"><div class="tree-indent"></div><div class="tree-icon">📁</div><span class="c-folder tree-name">fonts/</span></div>
+      <div class="tree-item"><div class="tree-indent"></div><div class="tree-indent"></div><div class="tree-icon">📄</div><span class="c-font tree-name">MyFont.woff2</span></div>
+
+      <div class="tree-item" style="margin-top:4px"><div class="tree-indent"></div><div class="tree-icon">📁</div><span class="c-folder tree-name">data/</span></div>
+      <div class="tree-item"><div class="tree-indent"></div><div class="tree-indent"></div><div class="tree-icon">📄</div><span class="c-data tree-name">products.json</span></div>
+
+      <div class="tree-item" style="margin-top:4px"><div class="tree-indent"></div><div class="tree-icon">📄</div><span class="c-root tree-name">_redirects</span><span class="tree-note">← Netlify専用リダイレクト設定</span></div>
+      <div class="tree-item"><div class="tree-indent"></div><div class="tree-icon">📄</div><span class="c-root tree-name">netlify.toml</span><span class="tree-note">← Netlify設定ファイル（任意）</span></div>
+    </div>
+  </div>
+
+  <!-- Netlify rules -->
+  <div class="card">
+    <h2>Netlify デプロイ ルール</h2>
+    <ul class="netlify-rules">
+      <li class="required">
+        <div class="rule-title">🔴 必須: index.html をルートに配置</div>
+        <div class="rule-desc">フォルダのルート（最上位）に index.html が存在しないとサイトが表示されません。</div>
+      </li>
+      <li class="required">
+        <div class="rule-title">🔴 必須: 相対パスでファイルを参照</div>
+        <div class="rule-desc">&lt;link href="css/style.css"&gt; のように相対パスで参照。絶対パス（/Users/...）は動作しません。</div>
+      </li>
+      <li class="recommended">
+        <div class="rule-title">🟡 推奨: _redirects ファイルで404対応</div>
+        <div class="rule-desc">SPA（シングルページアプリ）の場合、<code>/* /index.html 200</code> を記述したファイルを置くとルーティングが正常に動作します。</div>
+      </li>
+      <li class="recommended">
+        <div class="rule-title">🟡 推奨: 画像はWebP形式に変換</div>
+        <div class="rule-desc">アップロード容量とページ表示速度のため、PNG/JPGよりWebP形式が推奨されます。</div>
+      </li>
+      <li class="optional">
+        <div class="rule-title">🟢 任意: netlify.toml でビルド設定</div>
+        <div class="rule-desc">カスタムヘッダー、環境変数、リダイレクトルールを一元管理できます。Drop 利用時は不要です。</div>
+      </li>
+    </ul>
+  </div>
+
+  <!-- Folder types -->
+  <div class="card">
+    <h2>フォルダ種別ガイド</h2>
+    <div class="folder-types">
+      <div class="folder-type">
+        <h4 class="c-html">HTML フォルダ</h4>
+        <p>ページごとにHTMLを分ける場合のフォルダ。SEO・構造化に有効。</p>
+        <div class="examples"><span class="eg">pages/</span><span class="eg">views/</span></div>
+      </div>
+      <div class="folder-type">
+        <h4 class="c-css">CSS フォルダ</h4>
+        <p>スタイルシートを役割別に分類。リセット・コンポーネント・ページ別など。</p>
+        <div class="examples"><span class="eg">css/</span><span class="eg">styles/</span><span class="eg">scss/</span></div>
+      </div>
+      <div class="folder-type">
+        <h4 class="c-js">JS フォルダ</h4>
+        <p>スクリプトファイルの格納場所。ライブラリとカスタムコードを分けると管理しやすい。</p>
+        <div class="examples"><span class="eg">js/</span><span class="eg">scripts/</span><span class="eg">lib/</span></div>
+      </div>
+      <div class="folder-type">
+        <h4 class="c-img">画像フォルダ</h4>
+        <p>画像ファイルをまとめる。サイズ別・用途別にサブフォルダで管理すると吉。</p>
+        <div class="examples"><span class="eg">images/</span><span class="eg">img/</span><span class="eg">assets/</span></div>
+      </div>
+      <div class="folder-type">
+        <h4 class="c-data">データフォルダ</h4>
+        <p>JSON・CSV など動的データの格納場所。fetch() で読み込む場合に活用。</p>
+        <div class="examples"><span class="eg">data/</span><span class="eg">json/</span><span class="eg">api/</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function switchTab(id, btn) {
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + id).classList.add('active');
+  btn.classList.add('active');
+}
+</script>
+</body>
+</html>

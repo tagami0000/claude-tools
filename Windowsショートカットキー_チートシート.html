@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Windowsショートカットキー チートシート</title>
+<style>
+  :root {
+    --bg: #0d1117;
+    --bg2: #161b22;
+    --bg3: #21262d;
+    --border: #30363d;
+    --text: #e6edf3;
+    --text2: #8b949e;
+    --s-color: #ff7b72;
+    --a-color: #ffa657;
+    --b-color: #79c0ff;
+    --c-color: #56d364;
+    --key-bg: #1c2128;
+    --key-border: #444c56;
+    --key-text: #cdd9e5;
+    --key-active: #58a6ff;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', 'Meiryo', sans-serif; line-height: 1.6; }
+
+  /* Sticky Nav */
+  nav {
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(13,17,23,0.95); backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--border);
+    padding: 10px 24px; display: flex; gap: 12px; align-items: center;
+  }
+  nav h1 { font-size: 0.95rem; font-weight: 600; color: var(--text2); margin-right: 8px; white-space: nowrap; }
+  nav a {
+    text-decoration: none; font-size: 0.8rem; padding: 4px 12px;
+    border-radius: 20px; border: 1px solid var(--border); color: var(--text2);
+    transition: all 0.2s;
+  }
+  nav a:hover, nav a.active { color: var(--text); border-color: var(--key-active); background: rgba(88,166,255,0.1); }
+  .rank-badge { display: inline-block; font-size: 0.75rem; font-weight: 700; width: 22px; height: 22px; line-height: 22px; text-align: center; border-radius: 4px; margin-right: 4px; }
+  .s .rank-badge { background: var(--s-color); color: #000; }
+  .a .rank-badge { background: var(--a-color); color: #000; }
+  .b .rank-badge { background: var(--b-color); color: #000; }
+  .c .rank-badge { background: var(--c-color); color: #000; }
+
+  /* Keyboard Layout */
+  .keyboard-section { padding: 24px; background: var(--bg2); border-bottom: 1px solid var(--border); }
+  .keyboard-section h2 { font-size: 0.85rem; color: var(--text2); margin-bottom: 16px; letter-spacing: 0.05em; text-transform: uppercase; }
+  .keyboard { display: flex; flex-direction: column; gap: 5px; max-width: 900px; }
+  .key-row { display: flex; gap: 4px; align-items: flex-end; }
+  .key {
+    display: inline-flex; flex-direction: column; align-items: center; justify-content: center;
+    min-width: 36px; height: 36px; padding: 2px 4px;
+    background: var(--key-bg); border: 1px solid var(--key-border);
+    border-bottom: 3px solid #555; border-radius: 5px;
+    font-size: 0.6rem; color: var(--key-text); cursor: default;
+    transition: all 0.15s; position: relative;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.4);
+  }
+  .key:hover { background: #2d333b; border-color: var(--key-active); transform: translateY(-1px); }
+  .key .main { font-size: 0.65rem; font-weight: 600; }
+  .key .sub { font-size: 0.5rem; color: var(--text2); }
+  .key.wide-15 { min-width: 54px; }
+  .key.wide-2 { min-width: 76px; }
+  .key.wide-25 { min-width: 95px; }
+  .key.space-bar { min-width: 280px; }
+  .key.rank-s { border-color: var(--s-color); box-shadow: 0 0 6px rgba(255,123,114,0.3), 0 2px 4px rgba(0,0,0,0.4); }
+  .key.rank-a { border-color: var(--a-color); box-shadow: 0 0 6px rgba(255,166,87,0.3), 0 2px 4px rgba(0,0,0,0.4); }
+  .key.rank-b { border-color: var(--b-color); box-shadow: 0 0 6px rgba(121,192,255,0.3), 0 2px 4px rgba(0,0,0,0.4); }
+  .key.rank-c { border-color: var(--c-color); box-shadow: 0 0 6px rgba(86,211,100,0.3), 0 2px 4px rgba(0,0,0,0.4); }
+  .key-legend { display: flex; gap: 16px; margin-top: 12px; font-size: 0.75rem; }
+  .legend-item { display: flex; align-items: center; gap: 6px; }
+  .legend-dot { width: 10px; height: 10px; border-radius: 2px; }
+
+  /* Main Content */
+  main { max-width: 1100px; margin: 0 auto; padding: 32px 24px; }
+  .rank-section { margin-bottom: 48px; }
+  .rank-header {
+    display: flex; align-items: center; gap: 12px;
+    padding: 16px 20px; border-radius: 10px 10px 0 0;
+    border: 1px solid var(--border); border-bottom: none;
+    margin-bottom: 0;
+  }
+  .rank-header h2 { font-size: 1.1rem; }
+  .rank-header .desc { font-size: 0.8rem; color: var(--text2); }
+  .s .rank-header { background: rgba(255,123,114,0.08); }
+  .a .rank-header { background: rgba(255,166,87,0.08); }
+  .b .rank-header { background: rgba(121,192,255,0.08); }
+  .c .rank-header { background: rgba(86,211,100,0.08); }
+
+  .shortcut-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 0;
+    border: 1px solid var(--border); border-radius: 0 0 10px 10px; overflow: hidden;
+  }
+  .shortcut-card {
+    padding: 14px 16px; border-right: 1px solid var(--border); border-bottom: 1px solid var(--border);
+    transition: background 0.15s; cursor: default;
+  }
+  .shortcut-card:hover { background: var(--bg3); }
+  .shortcut-card:last-child, .shortcut-card:nth-child(2n) { border-right: none; }
+  .shortcut-keys { display: flex; gap: 4px; align-items: center; margin-bottom: 6px; flex-wrap: wrap; }
+  .kc {
+    display: inline-block; font-family: 'Consolas', monospace; font-size: 0.78rem;
+    padding: 2px 8px; border-radius: 4px;
+    background: var(--bg3); border: 1px solid var(--key-border);
+    border-bottom: 2px solid #555; color: var(--key-text);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+  }
+  .plus { color: var(--text2); font-size: 0.7rem; }
+  .shortcut-desc { font-size: 0.82rem; color: var(--text); }
+  .shortcut-note { font-size: 0.72rem; color: var(--text2); margin-top: 3px; }
+  .category-label { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text2); margin-bottom: 4px; }
+
+  /* Section anchors */
+  .section-anchor { scroll-margin-top: 60px; }
+
+  footer { text-align: center; padding: 32px; color: var(--text2); font-size: 0.75rem; border-top: 1px solid var(--border); margin-top: 32px; }
+</style>
+</head>
+<body>
+
+<nav>
+  <h1>⌨️ Shortcut Keys</h1>
+  <a href="#rank-s" class="s"><span class="rank-badge" style="background:var(--s-color);color:#000">S</span> 必須</a>
+  <a href="#rank-a" class="a"><span class="rank-badge" style="background:var(--a-color);color:#000">A</span> 高頻度</a>
+  <a href="#rank-b" class="b"><span class="rank-badge" style="background:var(--b-color);color:#000">B</span> 中頻度</a>
+  <a href="#rank-c" class="c"><span class="rank-badge" style="background:var(--c-color);color:#000">C</span> 低頻度</a>
+  <a href="#keyboard">キーボード</a>
+</nav>
+
+<div class="keyboard-section" id="keyboard">
+  <h2>Keychron B1 Pro JIS — Layer 3 レイアウト</h2>
+  <div class="keyboard">
+    <!-- Row 1: Fn row -->
+    <div class="key-row">
+      <div class="key rank-c"><span class="main">Esc</span></div>
+      <div class="key"><span class="main">F1</span></div>
+      <div class="key"><span class="main">F2</span></div>
+      <div class="key"><span class="main">F3</span></div>
+      <div class="key"><span class="main">F4</span></div>
+      <div class="key"><span class="main">F5</span></div>
+      <div class="key"><span class="main">F6</span></div>
+      <div class="key"><span class="main">F7</span></div>
+      <div class="key rank-b"><span class="main">F8</span></div>
+      <div class="key rank-b"><span class="main">F9</span></div>
+      <div class="key rank-a"><span class="main">F10</span></div>
+      <div class="key rank-a"><span class="main">F11</span></div>
+      <div class="key rank-b"><span class="main">F12</span></div>
+      <div class="key wide-15"><span class="main">Del</span></div>
+    </div>
+    <!-- Row 2: Number row -->
+    <div class="key-row">
+      <div class="key"><span class="main">半/全</span></div>
+      <div class="key"><span class="main">1</span><span class="sub">!</span></div>
+      <div class="key"><span class="main">2</span><span class="sub">"</span></div>
+      <div class="key"><span class="main">3</span><span class="sub">#</span></div>
+      <div class="key"><span class="main">4</span><span class="sub">$</span></div>
+      <div class="key"><span class="main">5</span><span class="sub">%</span></div>
+      <div class="key"><span class="main">6</span><span class="sub">&</span></div>
+      <div class="key"><span class="main">7</span><span class="sub">'</span></div>
+      <div class="key"><span class="main">8</span><span class="sub">(</span></div>
+      <div class="key"><span class="main">9</span><span class="sub">)</span></div>
+      <div class="key"><span class="main">0</span></div>
+      <div class="key"><span class="main">-</span><span class="sub">=</span></div>
+      <div class="key"><span class="main">^</span><span class="sub">~</span></div>
+      <div class="key"><span class="main">¥</span><span class="sub">|</span></div>
+      <div class="key wide-15 rank-s"><span class="main">BS</span></div>
+    </div>
+    <!-- Row 3: QWERTY -->
+    <div class="key-row">
+      <div class="key wide-15 rank-b"><span class="main">Tab</span></div>
+      <div class="key rank-s"><span class="main">Q</span></div>
+      <div class="key rank-b"><span class="main">W</span></div>
+      <div class="key rank-s"><span class="main">E</span></div>
+      <div class="key rank-a"><span class="main">R</span></div>
+      <div class="key rank-s"><span class="main">T</span></div>
+      <div class="key rank-a"><span class="main">Y</span></div>
+      <div class="key rank-a"><span class="main">U</span></div>
+      <div class="key rank-b"><span class="main">I</span></div>
+      <div class="key rank-b"><span class="main">O</span></div>
+      <div class="key rank-s"><span class="main">P</span></div>
+      <div class="key"><span class="main">@</span><span class="sub">`</span></div>
+      <div class="key"><span class="main">[</span><span class="sub">{</span></div>
+      <div class="key wide-2 rank-b"><span class="main">Enter</span></div>
+    </div>
+    <!-- Row 4: ASDF -->
+    <div class="key-row">
+      <div class="key wide-2"><span class="main">CapsLk</span></div>
+      <div class="key rank-s"><span class="main">A</span></div>
+      <div class="key rank-s"><span class="main">S</span></div>
+      <div class="key rank-s"><span class="main">D</span></div>
+      <div class="key rank-s"><span class="main">F</span></div>
+      <div class="key rank-a"><span class="main">G</span></div>
+      <div class="key rank-s"><span class="main">H</span></div>
+      <div class="key rank-b"><span class="main">J</span></div>
+      <div class="key rank-b"><span class="main">K</span></div>
+      <div class="key rank-b"><span class="main">L</span></div>
+      <div class="key"><span class="main">;</span><span class="sub">+</span></div>
+      <div class="key"><span class="main">:</span><span class="sub">*</span></div>
+      <div class="key"><span class="main">]</span><span class="sub">}</span></div>
+    </div>
+    <!-- Row 5: ZXCV -->
+    <div class="key-row">
+      <div class="key wide-25 rank-s"><span class="main">Shift</span></div>
+      <div class="key rank-s"><span class="main">Z</span></div>
+      <div class="key rank-s"><span class="main">X</span></div>
+      <div class="key rank-s"><span class="main">C</span></div>
+      <div class="key rank-s"><span class="main">V</span></div>
+      <div class="key rank-s"><span class="main">B</span></div>
+      <div class="key rank-a"><span class="main">N</span></div>
+      <div class="key rank-a"><span class="main">M</span></div>
+      <div class="key"><span class="main">,</span><span class="sub">&lt;</span></div>
+      <div class="key"><span class="main">.</span><span class="sub">&gt;</span></div>
+      <div class="key"><span class="main">/</span><span class="sub">?</span></div>
+      <div class="key"><span class="main">\</span><span class="sub">_</span></div>
+      <div class="key wide-2 rank-s"><span class="main">Shift</span></div>
+    </div>
+    <!-- Row 6: Bottom -->
+    <div class="key-row">
+      <div class="key rank-s"><span class="main">Ctrl</span></div>
+      <div class="key"><span class="main">Win</span></div>
+      <div class="key rank-s"><span class="main">Alt</span></div>
+      <div class="key"><span class="main">無変換</span></div>
+      <div class="key space-bar rank-s"><span class="main">Space</span></div>
+      <div class="key"><span class="main">変換</span></div>
+      <div class="key"><span class="main">ひら</span></div>
+      <div class="key rank-s"><span class="main">Alt</span></div>
+      <div class="key"><span class="main">▲</span></div>
+      <div class="key rank-s"><span class="main">◀▼▶</span></div>
+      <div class="key rank-s"><span class="main">Ctrl</span></div>
+    </div>
+  </div>
+  <div class="key-legend">
+    <div class="legend-item"><div class="legend-dot" style="background:var(--s-color)"></div><span>S ランク</span></div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--a-color)"></div><span>A ランク</span></div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--b-color)"></div><span>B ランク</span></div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--c-color)"></div><span>C ランク</span></div>
+  </div>
+</div>
+
+<main>
+
+<!-- S RANK -->
+<div class="rank-section s section-anchor" id="rank-s">
+  <div class="rank-header">
+    <span class="rank-badge" style="font-size:1.2rem;width:32px;height:32px;line-height:32px;background:var(--s-color);color:#000">S</span>
+    <h2>S ランク — 毎日必ず使う最重要ショートカット</h2>
+    <span class="desc">使用頻度: 非常に高い / 習得優先度: 最高</span>
+  </div>
+  <div class="shortcut-grid">
+    <div class="shortcut-card">
+      <div class="category-label">コピー&ペースト</div>
+      <div class="shortcut-keys"><span class="kc">Ctrl</span><span class="plus">+</span><span class="kc">C</span></div>
+      <div class="shortcut-desc">コピー</div>
+    </div>
+    <div class="shortcut-card">
+      <div class="category-label">コピー&ペースト</div>
+      <div class="shortcut-keys"><span class="kc">Ctrl</span><span class="plus">+</span><span class="kc">V</span></div>
+      <div class="shortcut-desc">貼り付け</div>
+    </div>
+    <div class="shortcut-card">
+      <div class="category-label">コピー&ペースト</div>
+      <div class="shortcut-keys"><span class="kc">Ctrl</span><span class="plus">+</span><span class="kc">X</span></div>
+      <div class="shortcut-desc">切り取り</div>
+    </div>
+    <div class="shortcut-card">
+      <div class="category-label">元に戻す</div>
+      <div class="shortcut-keys"><span class="kc">Ctrl</span><span class="plus">+</span><span class="kc">Z</span></div>
+      <div class="shortcut-desc">元に戻す (Undo)</div>
+    </div>
+    <div class="shortcut-card">
+      <div class="category-label">元に戻す</div>
+      <div class="shortcut-keys"><span class="kc">Ctrl</span><span class="plus">+</span><span class="kc">Y</span></div>
+      <div class="shortcut-desc">やり直す (Redo)</div>
+      <div class="shortcut-note">Ctrl+Shift+Z でも可</div>
+    </div>
+    <div class="shortcut-card">
+      <div class="category-label">選択</div>
+      <div class="shortcut-keys"><span class="kc">Ctrl</span><span class="plus">+</span><span class="kc">A</span></div>
+      <div class="shortcut-desc">すべて選択</div>
+    </div>
+    <div class="shortcut-card">
+      <div class="category-label">保存</div>
+      <div class="shortcut-keys"><span class="kc">Ctrl</span><span class="plus">+</span><span class="kc">S</span></div>
+      <div class="shortcut-desc">上書き保存</div>
+    </div>
+    <div class="shortcut-card">
+      <div class="category-label">保存</div>
+      <div class="shortcut-keys"><span class="kc">Ctrl</span><span class="plus">+</span><span class="kc">Shift</span><span class="plus">+</span><span class="kc">S</span></div>
+      <div class="shortcut-desc">名前を付けて保存</div>
+    </div>
+    <div class="shortcut-card">
+      <div class="category-label">ウィンドウ操作</div>
+      <div class="shortcut-keys"><span class="kc">Alt</span><span class="plus">+</span><span class="kc">Tab</span></div>
+      <div class="shortcut-desc">ウィンドウ切替</div>
+    </div>
+    <div class="shortcut-card">
+      <div class="category-label">ウィンドウ操作</div>
+      <div class="shortcut-keys"><span class="kc">Alt</span><span class="plus">+</span><span class="kc">F4</span></div>
+      <div class="shortcut-desc">ウィンドウを閉じる</div>
+    </div>
+    <div class="shortcut-card">
+      <div class="category-label">検索</div>
+      <div class="shortcut-keys"><span class="kc">Ctrl</span><span class="plus">+</span><span class="kc">F</span></div>
+      <div class="shortcut-desc">ページ内検索</div>
+    </div>
+    <div class="shortcut-card">
+      <div class="category-label">デスクトップ</div>
+      <div class="shortcut-keys"><span class="kc">Win</span><span class="plus">+</span><span class="kc">D</span></div>
+      <div class="shortcut-desc">デスクトップ表示/非表示</div>
+    </div>
+    <div class="shortcut-card">
+      <div class="category-label">スクリーンショット</div>
+      <div class="shortcut-keys"><span class="kc">Win</span><span class="plus">+</span><span class="kc">Shift</span><span class="plus">+</span><span class="kc">S</span></div>
+      <div class="shortcut-desc">スクリーンショット (範囲選択)</div>
+      <div class="shortcut-note">クリップボードに保存</div>
+    </div>
+    <div class="shortcut-card">
+      <div class="category-label">タスクマネージャー</div>
+      <div class="shortcut-keys"><span class="kc">Ctrl</span><span class="plus">+</span><span class="kc">Shift</span><span class="plus">+</span><span class="kc">Esc</span></div>
+      <div class="shortcut-desc">タスクマネージャー起動</div>
+    </div>
+    <div class="shortcut-card">
+      <div class="category-label">ブラウザ</div>
+      <div class="shortcut-keys"><span class="kc">Ctrl</span><span class="plus">+</span><span class="kc">T</span></div>
+      <div class="shortcut-desc">新規タブを開く</div>
+    </div>
+    <div class="shortcut-card">
+      <div class="category-label">ブラウザ</div>
+      <div class="shortcut-keys"><span class="kc">Ctrl</span><span class="plus">+</span><span class="kc">W</span></div>
+      <div class="shortcut-desc">タブを閉じる</div>
+    </div>
+  </div>
+</div>
+
+<!-- A RANK -->
+<div class="rank-section a section-anchor" id="rank-a">
+  <div class="rank-header">
+    <span class="rank-badge" style="font-size:1.2rem;width:32px;height:32px;line-height:32px;background:var(--a-color);color:#000">A</span>
+    <h2>A ランク — 高頻度で使う重要ショートカット</h2>
+    <span class="desc">使用頻度: 高い / 習得優先度: 高</span>
+  </div>
+  <div class="shortcut-grid">
+    <div class="shortcut-card">
+      <div class="category-label">ウィンドウ</div>
+      <div class="shortcut-keys"><span class="kc">Win</span><span class="plus">+</span><span class="kc">←/→</span></div>
+      <div class="shortcut-desc">ウィンドウを左右にスナップ</div>
+    </div>
+    <div class="shortcut-card">
+      <div class="category-label">ウィンドウ</div>
+      <div class="shortcut-keys"><span class="kc">Win</span><span class="plus">+</span><span class="kc">↑</span></div>
+      <div class="shortcut-desc">ウィンドウを最大化</div>
+    </div>
+    <div class="shortcut-card">
+      <div class="category-label">ウィンドウ</div>
+      <div class="shortcut-keys"><span class="kc">Win</span><span class="plus">+</span><span class="kc">↓</span></div>
+      <div class="shortcut-desc">ウィンドウを縮小/最小化</div>
+    </div>
+    <div class="shortcut-card">
+      <div class="category-label">ブラウザ</div>
+      <div class="shortcut-keys"><span class="kc">Ctrl</span><span class="plus">+</span><span class="kc">Shift</span><span class="plus">+</span><span class="kc">T</span></div>
+      <div class="shortcut-desc">閉じたタブを復元</div>
+    </div>
+    <div class="shortcut-card">
+      <div class="category-label">ブラウザ</div>
+      <div class="shortcut-keys"><span class="kc">Ctrl</span><span class="plus">+</span><span class="kc">L</span></div>
+      <div class="shortcut-desc">アドレスバーにフォーカス</div>
+    </div>
+    <div class="shortcut-card">
+      <div class="category-label">ブラウザ</div>
+      <div class="shortcut-keys"><span class="kc">Ctrl</span><span class="plus">+</span><span class="kc">Tab</span></div>
+      <div class="shortcut-desc">次のタブに移動</div>
+    </div>
+    <div class="shortcut-card">
+      <div class="category-label">テキスト編集</div>
+      <div class="shortcut-keys"><span class="kc">Ctrl</span><span class="plus">+</span><span class="kc">H</span></div>
+      <div class="shortcut-desc">置換ダイアログ</div>
+    </div>
+    <div class="shortcut-card">
+      <div class="category-label">テキスト編集</div>
+      <div class="shortcut-keys"><span class="kc">Ctrl</span><span class="plus">+</span><span class="kc">←/→</span></div>
+      <div class="shortcut-desc">単語単位でカーソル移動</div>
+    </div>
+    <div class="shortcut-card">
+      <div class="category-label">テキスト編集</div>
+      <div class="shortcut-keys"><span class="kc">Home</span> / <span class="kc">End</span></div>
+      <div class="shortcut-desc">行頭/行末にカーソル移動</div>
+    </div>
+    <div class="shortcut-card">
+      <div class="category-label">ファイル操作</div>
+      <div class="shortcut-keys"><span class="kc">Ctrl</span><span class="plus">+</span><span class="kc">N</span></div>
+      <div class="shortcut-desc">新規ファイル/ウィンドウ</div>
+    </div>
+    <div class="shortcut-card">
+      <div class="category-label">ファイル操作</div>
+      <div class="shortcut-keys"><span class="kc">Ctrl</span><span class="plus">+</span><span class="kc">O</span></div>
+      <div class="shortcut-desc">ファイルを開く</div>
+    </div>
+    <div class="shortcut-card">
+      <div class="category-label">印刷</div>
+      <div class="shortcut-keys"><span class="kc">Ctrl</span><span class="plus">+</span><span class="kc">P</span></div>
+      <div class="shortcut-desc">印刷ダイアログ</div>
+    </div>
+  </div>
+</div>
+
+<!-- B RANK -->
+<div class="rank-section b section-anchor" id="rank-b">
+  <div class="rank-header">
+    <span class="rank-badge" style="font-size:1.2rem;width:32px;height:32px;line-height:32px;background:var(--b-color);color:#000">B</span>
+    <h2>B ランク — 中頻度で使う便利ショートカット</h2>
+    <span class="desc">使用頻度: 中程度 / 習得優先度: 中</span>
+  </div>
+  <div class="shortcut-grid">
+    <div class="shortcut-card">
+      <div class="category-label">仮想デスクトップ</div>
+      <div class="shortcut-keys"><span class="kc">Win</span><span class="plus">+</span><span class="kc">Ctrl</span><span class="plus">+</span><span class="kc">D</span></div>
+      <div class="shortcut-desc">新しい仮想デスクトップを作成</div>
+    </div>
+    <div class="shortcut-card">
+      <div class="category-label">仮想デスクトップ</div>
+      <div class="shortcut-keys"><span class="kc">Win</span><span class="plus">+</span><span class="kc">Ctrl</span><span class="plus">+</span><span class="kc">←/→</span></div>
+      <div class="shortcut-desc">仮想デスクトップ切替</div>
+    </div>
+    <div class="shortcut-card">
+      <div class="category-label">エクスプローラー</div>
+      <div class="shortcut-keys"><span class="kc">Win</span><span class="plus">+</span><span class="kc">E</span></div>
+      <div class="shortcut-desc">エクスプローラーを開く</div>
+    </div>
+    <div class="shortcut-card">
+      <div class="category-label">設定</div>
+      <div class="shortcut-keys"><span class="kc">Win</span><span class="plus">+</span><span class="kc">I</span></div>
+      <div class="shortcut-desc">設定アプリを開く</div>
+    </div>
+    <div class="shortcut-card">
+      <div class="category-label">クリップボード</div>
+      <div class="shortcut-keys"><span class="kc">Win</span><span class="plus">+</span><span class="kc">V</span></div>
+      <div class="shortcut-desc">クリップボード履歴</div>
+    </div>
+    <div class="shortcut-card">
+      <div class="category-label">絵文字</div>
+      <div class="shortcut-keys"><span class="kc">Win</span><span class="plus">+</span><span class="kc">.</span></div>
+      <div class="shortcut-desc">絵文字ピッカー</div>
+    </div>
+    <div class="shortcut-card">
+      <div class="category-label">ロック</div>
+      <div class="shortcut-keys"><span class="kc">Win</span><span class="plus">+</span><span class="kc">L</span></div>
+      <div class="shortcut-desc">画面ロック</div>
+    </div>
+    <div class="shortcut-card">
+      <div class="category-label">書式</div>
+      <div class="shortcut-keys"><span class="kc">Ctrl</span><span class="plus">+</span><span class="kc">B</span></div>
+      <div class="shortcut-desc">太字</div>
+    </div>
+    <div class="shortcut-card">
+      <div class="category-label">書式</div>
+      <div class="shortcut-keys"><span class="kc">Ctrl</span><span class="plus">+</span><span class="kc">I</span></div>
+      <div class="shortcut-desc">イタリック</div>
+    </div>
+    <div class="shortcut-card">
+      <div class="category-label">書式</div>
+      <div class="shortcut-keys"><span class="kc">Ctrl</span><span class="plus">+</span><span class="kc">U</span></div>
+      <div class="shortcut-desc">下線</div>
+    </div>
+  </div>
+</div>
+
+<!-- C RANK -->
+<div class="rank-section c section-anchor" id="rank-c">
+  <div class="rank-header">
+    <span class="rank-badge" style="font-size:1.2rem;width:32px;height:32px;line-height:32px;background:var(--c-color);color:#000">C</span>
+    <h2>C ランク — 知っておくと便利な低頻度ショートカット</h2>
+    <span class="desc">使用頻度: 低い / 習得優先度: 低</span>
+  </div>
+  <div class="shortcut-grid">
+    <div class="shortcut-card">
+      <div class="category-label">システム</div>
+      <div class="shortcut-keys"><span class="kc">Win</span><span class="plus">+</span><span class="kc">R</span></div>
+      <div class="shortcut-desc">ファイル名を指定して実行</div>
+    </div>
+    <div class="shortcut-card">
+      <div class="category-label">システム</div>
+      <div class="shortcut-keys"><span class="kc">Win</span><span class="plus">+</span><span class="kc">X</span></div>
+      <div class="shortcut-desc">クイックリンクメニュー</div>
+    </div>
+    <div class="shortcut-card">
+      <div class="category-label">システム</div>
+      <div class="shortcut-keys"><span class="kc">Win</span><span class="plus">+</span><span class="kc">Pause</span></div>
+      <div class="shortcut-desc">システムプロパティ</div>
+    </div>
+    <div class="shortcut-card">
+      <div class="category-label">アクセシビリティ</div>
+      <div class="shortcut-keys"><span class="kc">Win</span><span class="plus">+</span><span class="kc">+</span></div>
+      <div class="shortcut-desc">拡大鏡を開く</div>
+    </div>
+    <div class="shortcut-card">
+      <div class="category-label">アクセシビリティ</div>
+      <div class="shortcut-keys"><span class="kc">Win</span><span class="plus">+</span><span class="kc">U</span></div>
+      <div class="shortcut-desc">アクセシビリティ設定</div>
+    </div>
+    <div class="shortcut-card">
+      <div class="category-label">ファイル</div>
+      <div class="shortcut-keys"><span class="kc">Shift</span><span class="plus">+</span><span class="kc">Del</span></div>
+      <div class="shortcut-desc">完全削除（ゴミ箱スキップ）</div>
+      <div class="shortcut-note">注意: 復元不可</div>
+    </div>
+    <div class="shortcut-card">
+      <div class="category-label">スクリーンショット</div>
+      <div class="shortcut-keys"><span class="kc">PrtSc</span></div>
+      <div class="shortcut-desc">全画面スクリーンショット</div>
+      <div class="shortcut-note">クリップボードに保存</div>
+    </div>
+    <div class="shortcut-card">
+      <div class="category-label">スクリーンショット</div>
+      <div class="shortcut-keys"><span class="kc">Alt</span><span class="plus">+</span><span class="kc">PrtSc</span></div>
+      <div class="shortcut-desc">アクティブウィンドウのSS</div>
+    </div>
+  </div>
+</div>
+
+</main>
+
+<footer>
+  Keychron B1 Pro JIS / Layer 3 対応 | Windowsショートカットキー チートシート | ランク: S（必須）A（高頻度）B（中頻度）C（低頻度）
+</footer>
+
+<script>
+  // Sticky nav active state
+  const sections = document.querySelectorAll('.section-anchor');
+  const navLinks = document.querySelectorAll('nav a');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        navLinks.forEach(l => l.classList.remove('active'));
+        const link = document.querySelector(`nav a[href="#${e.target.id}"]`);
+        if (link) link.classList.add('active');
+      }
+    });
+  }, { rootMargin: '-50% 0px -50% 0px' });
+  sections.forEach(s => observer.observe(s));
+</script>
+</body>
+</html>

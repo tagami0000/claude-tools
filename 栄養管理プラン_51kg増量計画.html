@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>栄養管理プラン v3 — 51kg→55kg増量計画</title>
+<style>
+  :root {
+    --bg: #0a0e17; --bg2: #111827; --bg3: #1f2937; --bg4: #374151;
+    --border: #374151; --text: #f3f4f6; --text2: #9ca3af; --text3: #6b7280;
+    --accent: #6366f1; --accent2: #8b5cf6; --green: #10b981; --yellow: #f59e0b;
+    --red: #ef4444; --blue: #3b82f6; --orange: #f97316;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: 'Segoe UI','Meiryo',sans-serif; line-height: 1.7; }
+
+  header {
+    background: linear-gradient(135deg, #1e1b4b 0%, #0f172a 100%);
+    border-bottom: 1px solid var(--border); padding: 40px 32px;
+  }
+  header h1 { font-size: 1.8rem; font-weight: 800; margin-bottom: 8px; }
+  header h1 span { color: var(--accent2); }
+  header p { color: var(--text2); font-size: 0.9rem; }
+  .header-stats { display: flex; gap: 24px; margin-top: 20px; flex-wrap: wrap; }
+  .stat-box { background: rgba(99,102,241,0.15); border: 1px solid rgba(99,102,241,0.3); border-radius: 10px; padding: 14px 20px; min-width: 130px; }
+  .stat-box .val { font-size: 1.5rem; font-weight: 700; color: var(--accent2); }
+  .stat-box .label { font-size: 0.75rem; color: var(--text2); }
+
+  nav { background: var(--bg2); border-bottom: 1px solid var(--border); display: flex; gap: 0; overflow-x: auto; }
+  nav button {
+    padding: 14px 20px; background: none; border: none; color: var(--text2);
+    font-size: 0.85rem; cursor: pointer; white-space: nowrap; border-bottom: 2px solid transparent;
+    transition: all 0.2s;
+  }
+  nav button.active { color: var(--accent2); border-bottom-color: var(--accent2); }
+  nav button:hover { color: var(--text); }
+
+  main { max-width: 1100px; margin: 0 auto; padding: 32px 20px; }
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+
+  h2 { font-size: 1.15rem; font-weight: 700; margin-bottom: 20px; color: var(--text); display: flex; align-items: center; gap: 8px; }
+  h2::before { content: ''; display: block; width: 4px; height: 1.15em; background: var(--accent2); border-radius: 2px; }
+  h3 { font-size: 0.95rem; font-weight: 600; color: var(--accent2); margin-bottom: 12px; }
+
+  .card { background: var(--bg2); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-bottom: 20px; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+
+  /* Supplement table */
+  .supp-table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+  .supp-table th { background: var(--bg3); padding: 10px 14px; text-align: left; font-size: 0.75rem; color: var(--text2); text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid var(--border); }
+  .supp-table td { padding: 10px 14px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  .supp-table tr:last-child td { border-bottom: none; }
+  .supp-table tr:hover td { background: var(--bg3); }
+  .badge { display: inline-block; font-size: 0.7rem; padding: 2px 8px; border-radius: 12px; font-weight: 600; }
+  .badge-protein { background: rgba(59,130,246,0.2); color: #93c5fd; }
+  .badge-vitamin { background: rgba(16,185,129,0.2); color: #6ee7b7; }
+  .badge-mineral { background: rgba(245,158,11,0.2); color: #fcd34d; }
+  .badge-amino { background: rgba(239,68,68,0.2); color: #fca5a5; }
+  .badge-fat { background: rgba(249,115,22,0.2); color: #fdba74; }
+
+  /* Timeline */
+  .timeline { position: relative; padding-left: 30px; }
+  .timeline::before { content: ''; position: absolute; left: 10px; top: 0; bottom: 0; width: 2px; background: var(--border); }
+  .tl-item { position: relative; margin-bottom: 20px; }
+  .tl-dot { position: absolute; left: -26px; top: 4px; width: 14px; height: 14px; border-radius: 50%; border: 2px solid var(--accent2); background: var(--bg2); }
+  .tl-time { font-size: 0.75rem; color: var(--accent2); font-weight: 700; margin-bottom: 4px; }
+  .tl-title { font-size: 0.9rem; font-weight: 600; margin-bottom: 4px; }
+  .tl-detail { font-size: 0.8rem; color: var(--text2); }
+  .tl-supps { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 6px; }
+  .tl-supp-tag { font-size: 0.72rem; padding: 2px 10px; border-radius: 12px; background: var(--bg3); border: 1px solid var(--border); color: var(--text2); }
+
+  /* Meal plan */
+  .day-tabs { display: flex; gap: 4px; margin-bottom: 20px; flex-wrap: wrap; }
+  .day-tab { padding: 6px 14px; border-radius: 20px; border: 1px solid var(--border); background: none; color: var(--text2); font-size: 0.8rem; cursor: pointer; transition: all 0.2s; }
+  .day-tab.active { background: var(--accent2); border-color: var(--accent2); color: #fff; }
+  .day-content { display: none; }
+  .day-content.active { display: block; }
+  .meal-card { background: var(--bg3); border-radius: 10px; padding: 14px 16px; margin-bottom: 12px; }
+  .meal-card h4 { font-size: 0.8rem; color: var(--accent2); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.05em; }
+  .meal-items { list-style: none; }
+  .meal-items li { font-size: 0.85rem; padding: 3px 0; color: var(--text); display: flex; justify-content: space-between; }
+  .meal-items li span { color: var(--text2); font-size: 0.78rem; }
+  .meal-total { margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border); display: flex; gap: 16px; font-size: 0.78rem; }
+  .macro { color: var(--text2); }
+  .macro b { color: var(--text); }
+
+  /* Shopping list */
+  .shop-category { margin-bottom: 24px; }
+  .shop-items { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 8px; }
+  .shop-item { background: var(--bg3); border: 1px solid var(--border); border-radius: 8px; padding: 10px 14px; font-size: 0.83rem; display: flex; justify-content: space-between; align-items: center; }
+  .shop-item .price { color: var(--yellow); font-size: 0.78rem; font-weight: 600; }
+
+  /* Cost summary */
+  .cost-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 0.85rem; }
+  .cost-row:last-child { border-bottom: none; font-weight: 700; font-size: 0.95rem; }
+  .cost-row .amount { color: var(--yellow); font-weight: 600; }
+
+  @media (max-width: 600px) { .grid2, .grid3 { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>栄養管理プラン <span>v3</span></h1>
+  <p>51kg → 55kg 増量計画 — サプリメント・献立・買い物リスト</p>
+  <div class="header-stats">
+    <div class="stat-box"><div class="val">51 kg</div><div class="label">現在体重</div></div>
+    <div class="stat-box"><div class="val">55 kg</div><div class="label">目標体重</div></div>
+    <div class="stat-box"><div class="val">+4 kg</div><div class="label">増量目標</div></div>
+    <div class="stat-box"><div class="val">2,700</div><div class="label">目標カロリー (kcal/日)</div></div>
+    <div class="stat-box"><div class="val">150g</div><div class="label">目標タンパク質 (g/日)</div></div>
+  </div>
+</header>
+
+<nav>
+  <button class="active" onclick="switchTab('supps', this)">💊 サプリメント全成分</button>
+  <button onclick="switchTab('timeline', this)">⏰ 摂取タイムライン</button>
+  <button onclick="switchTab('meal', this)">🍽️ 1週間献立</button>
+  <button onclick="switchTab('shopping', this)">🛒 買い物リスト</button>
+  <button onclick="switchTab('cost', this)">💰 週間コスト</button>
+</nav>
+
+<main>
+
+<!-- SUPPS TAB -->
+<div class="tab-content active" id="tab-supps">
+  <div class="card">
+    <h2>サプリメント全成分詳細</h2>
+    <table class="supp-table">
+      <thead>
+        <tr>
+          <th>サプリメント名</th><th>分類</th><th>有効成分</th><th>1回量</th><th>摂取回数</th><th>目的・効果</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><b>プロテイン (WPC)</b></td>
+          <td><span class="badge badge-protein">タンパク質</span></td>
+          <td>ホエイプロテイン concentrate 80%</td>
+          <td>30g (タンパク質 約24g)</td>
+          <td>1〜2回/日</td>
+          <td>筋タンパク質合成促進、体重増加サポート</td>
+        </tr>
+        <tr>
+          <td><b>クレアチン (モノハイドレート)</b></td>
+          <td><span class="badge badge-amino">アミノ酸系</span></td>
+          <td>クレアチンモノハイドレート 100%</td>
+          <td>5g</td>
+          <td>1回/日</td>
+          <td>ATP再合成促進、筋力・パワー向上、体重増加</td>
+        </tr>
+        <tr>
+          <td><b>EAA (必須アミノ酸)</b></td>
+          <td><span class="badge badge-amino">アミノ酸系</span></td>
+          <td>L-ロイシン、L-イソロイシン、L-バリン 他6種</td>
+          <td>10g</td>
+          <td>1〜2回/日</td>
+          <td>筋タンパク質合成、BCAA比率 2:1:1</td>
+        </tr>
+        <tr>
+          <td><b>マルトデキストリン</b></td>
+          <td><span class="badge badge-protein">炭水化物</span></td>
+          <td>マルトデキストリン (DE=15〜20)</td>
+          <td>50g</td>
+          <td>1〜2回/日</td>
+          <td>カロリー補給、GI値高め、運動後回復</td>
+        </tr>
+        <tr>
+          <td><b>ビタミンD3</b></td>
+          <td><span class="badge badge-vitamin">ビタミン</span></td>
+          <td>コレカルシフェロール 2,000IU</td>
+          <td>2,000IU (1粒)</td>
+          <td>1回/日</td>
+          <td>カルシウム吸収、免疫機能、テストステロン維持</td>
+        </tr>
+        <tr>
+          <td><b>亜鉛</b></td>
+          <td><span class="badge badge-mineral">ミネラル</span></td>
+          <td>亜鉛 (グルコン酸亜鉛) 25mg</td>
+          <td>25mg (1粒)</td>
+          <td>1回/日</td>
+          <td>テストステロン合成、タンパク質代謝、免疫</td>
+        </tr>
+        <tr>
+          <td><b>マグネシウム</b></td>
+          <td><span class="badge badge-mineral">ミネラル</span></td>
+          <td>マグネシウム (グリシン酸Mg) 200mg</td>
+          <td>200mg (2粒)</td>
+          <td>1回/日 (就寝前)</td>
+          <td>筋肉弛緩、睡眠質改善、タンパク質合成補助</td>
+        </tr>
+        <tr>
+          <td><b>オメガ3 (フィッシュオイル)</b></td>
+          <td><span class="badge badge-fat">脂質系</span></td>
+          <td>EPA 360mg + DHA 240mg / 1粒</td>
+          <td>2粒 (EPA720mg+DHA480mg)</td>
+          <td>1〜2回/日</td>
+          <td>炎症抑制、心血管保護、筋タンパク質合成促進</td>
+        </tr>
+        <tr>
+          <td><b>マルチビタミン</b></td>
+          <td><span class="badge badge-vitamin">ビタミン</span></td>
+          <td>B1,B2,B6,B12,C,E,葉酸 他</td>
+          <td>1粒</td>
+          <td>1回/日</td>
+          <td>代謝サポート、微量栄養素補給</td>
+        </tr>
+        <tr>
+          <td><b>グルタミン</b></td>
+          <td><span class="badge badge-amino">アミノ酸系</span></td>
+          <td>L-グルタミン 100%</td>
+          <td>5g</td>
+          <td>1〜2回/日</td>
+          <td>腸管保護、免疫機能、回復促進</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- TIMELINE TAB -->
+<div class="tab-content" id="tab-timeline">
+  <div class="card">
+    <h2>1日の摂取タイムライン</h2>
+    <div class="timeline">
+      <div class="tl-item">
+        <div class="tl-dot"></div>
+        <div class="tl-time">06:30 — 起床直後</div>
+        <div class="tl-title">朝の栄養補給</div>
+        <div class="tl-detail">空腹状態を早期に解消。コルチゾール対策</div>
+        <div class="tl-supps">
+          <span class="tl-supp-tag">マルチビタミン ×1粒</span>
+          <span class="tl-supp-tag">ビタミンD3 2,000IU</span>
+          <span class="tl-supp-tag">オメガ3 ×2粒</span>
+          <span class="tl-supp-tag">亜鉛 25mg</span>
+        </div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-dot"></div>
+        <div class="tl-time">07:00 — 朝食</div>
+        <div class="tl-title">高カロリー朝食 + クレアチン</div>
+        <div class="tl-detail">目標: 700〜800kcal / タンパク質 35g以上</div>
+        <div class="tl-supps">
+          <span class="tl-supp-tag">クレアチン 5g (水に溶かして)</span>
+          <span class="tl-supp-tag">マルトデキストリン 50g (必要に応じて)</span>
+        </div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-dot"></div>
+        <div class="tl-time">10:00 — 午前間食</div>
+        <div class="tl-title">中間栄養補給</div>
+        <div class="tl-detail">食事間隔3時間以内を維持。タンパク質持続供給</div>
+        <div class="tl-supps">
+          <span class="tl-supp-tag">プロテイン 30g (牛乳 or 水)</span>
+          <span class="tl-supp-tag">グルタミン 5g</span>
+        </div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-dot"></div>
+        <div class="tl-time">12:30 — 昼食</div>
+        <div class="tl-title">メイン昼食</div>
+        <div class="tl-detail">目標: 700〜800kcal / バランス型</div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-dot"></div>
+        <div class="tl-time">15:00 — 午後間食 / プレワークアウト</div>
+        <div class="tl-title">トレーニング前補給</div>
+        <div class="tl-detail">運動1〜2時間前。エネルギー充填</div>
+        <div class="tl-supps">
+          <span class="tl-supp-tag">EAA 10g</span>
+          <span class="tl-supp-tag">マルトデキストリン 50g</span>
+        </div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-dot"></div>
+        <div class="tl-time">17:00 — トレーニング中</div>
+        <div class="tl-title">ワークアウト中</div>
+        <div class="tl-detail">水分補給重視。BCAA/EAAでカタボリック抑制</div>
+        <div class="tl-supps">
+          <span class="tl-supp-tag">EAA 10g (水に溶かしてシッピング)</span>
+        </div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-dot"></div>
+        <div class="tl-time">18:30 — トレーニング後 (30分以内)</div>
+        <div class="tl-title">ポストワークアウト — 最重要タイミング</div>
+        <div class="tl-detail">アナボリックウィンドウ。素早い糖質+タンパク質補給</div>
+        <div class="tl-supps">
+          <span class="tl-supp-tag">プロテイン 30g</span>
+          <span class="tl-supp-tag">マルトデキストリン 50g</span>
+          <span class="tl-supp-tag">グルタミン 5g</span>
+        </div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-dot"></div>
+        <div class="tl-time">19:30 — 夕食</div>
+        <div class="tl-title">メイン夕食</div>
+        <div class="tl-detail">目標: 700kcal / 高タンパク質</div>
+        <div class="tl-supps">
+          <span class="tl-supp-tag">オメガ3 ×2粒</span>
+        </div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-dot"></div>
+        <div class="tl-time">22:00 — 就寝前</div>
+        <div class="tl-title">睡眠中の同化促進</div>
+        <div class="tl-detail">成長ホルモン分泌ピークに合わせて準備</div>
+        <div class="tl-supps">
+          <span class="tl-supp-tag">マグネシウム 200mg</span>
+          <span class="tl-supp-tag">プロテイン 30g (カゼイン推奨 or ホエイ)</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MEAL TAB -->
+<div class="tab-content" id="tab-meal">
+  <div class="card">
+    <h2>1週間献立</h2>
+    <div class="day-tabs">
+      <button class="day-tab active" onclick="switchDay('mon', this)">月</button>
+      <button class="day-tab" onclick="switchDay('tue', this)">火</button>
+      <button class="day-tab" onclick="switchDay('wed', this)">水</button>
+      <button class="day-tab" onclick="switchDay('thu', this)">木</button>
+      <button class="day-tab" onclick="switchDay('fri', this)">金</button>
+      <button class="day-tab" onclick="switchDay('sat', this)">土</button>
+      <button class="day-tab" onclick="switchDay('sun', this)">日</button>
+    </div>
+
+    <div class="day-content active" id="day-mon">
+      <div class="meal-card"><h4>🌅 朝食</h4><ul class="meal-items"><li>白米 <span>200g / 336kcal</span></li><li>卵 3個 (スクランブル) <span>215kcal / P18g</span></li><li>鶏胸肉ソテー <span>100g / P23g</span></li><li>バナナ <span>1本 / 86kcal</span></li><li>牛乳 <span>200ml / 134kcal</span></li></ul><div class="meal-total"><span class="macro">カロリー <b>770 kcal</b></span><span class="macro">P <b>55g</b></span><span class="macro">C <b>110g</b></span><span class="macro">F <b>18g</b></span></div></div>
+      <div class="meal-card"><h4>☀️ 昼食</h4><ul class="meal-items"><li>鶏胸肉丼 (大盛り) <span>350g / P45g</span></li><li>豆腐みそ汁 <span>P8g</span></li><li>ゆで卵 1個 <span>P6g</span></li></ul><div class="meal-total"><span class="macro">カロリー <b>750 kcal</b></span><span class="macro">P <b>59g</b></span><span class="macro">C <b>95g</b></span><span class="macro">F <b>12g</b></span></div></div>
+      <div class="meal-card"><h4>🌙 夕食</h4><ul class="meal-items"><li>鮭の塩焼き <span>150g / P35g</span></li><li>白米 <span>200g / 336kcal</span></li><li>ほうれん草のおひたし <span>100g</span></li><li>納豆 <span>1パック / P8g</span></li></ul><div class="meal-total"><span class="macro">カロリー <b>720 kcal</b></span><span class="macro">P <b>48g</b></span><span class="macro">C <b>95g</b></span><span class="macro">F <b>14g</b></span></div></div>
+      <div class="meal-card"><h4>🍫 間食 (計)</h4><ul class="meal-items"><li>プロテイン ×2 <span>P48g / 240kcal</span></li><li>バナナ <span>1本 / 86kcal</span></li><li>おにぎり <span>2個 / 360kcal</span></li></ul><div class="meal-total"><span class="macro">1日合計カロリー <b>約2,926 kcal</b></span><span class="macro">総タンパク質 <b>約160g</b></span></div></div>
+    </div>
+
+    <div class="day-content" id="day-tue">
+      <div class="meal-card"><h4>🌅 朝食</h4><ul class="meal-items"><li>オートミール <span>100g / 389kcal</span></li><li>ギリシャヨーグルト <span>200g / P20g</span></li><li>ゆで卵 2個 <span>P12g</span></li><li>ブルーベリー <span>50g / 29kcal</span></li><li>はちみつ <span>大さじ1 / 64kcal</span></li></ul><div class="meal-total"><span class="macro">カロリー <b>750 kcal</b></span><span class="macro">P <b>48g</b></span><span class="macro">C <b>105g</b></span><span class="macro">F <b>16g</b></span></div></div>
+      <div class="meal-card"><h4>☀️ 昼食</h4><ul class="meal-items"><li>豚こまスタミナ炒め丼 <span>P38g</span></li><li>わかめスープ <span>P5g</span></li><li>温泉卵 <span>P6g</span></li></ul><div class="meal-total"><span class="macro">カロリー <b>780 kcal</b></span><span class="macro">P <b>49g</b></span><span class="macro">C <b>100g</b></span><span class="macro">F <b>18g</b></span></div></div>
+      <div class="meal-card"><h4>🌙 夕食</h4><ul class="meal-items"><li>牛赤身ステーキ <span>150g / P36g</span></li><li>玄米 <span>180g / 302kcal</span></li><li>ブロッコリー蒸し <span>150g</span></li><li>アボカド <span>1/2個 / 160kcal</span></li></ul><div class="meal-total"><span class="macro">カロリー <b>760 kcal</b></span><span class="macro">P <b>42g</b></span><span class="macro">C <b>88g</b></span><span class="macro">F <b>22g</b></span></div></div>
+      <div class="meal-card"><h4>🍫 間食</h4><ul class="meal-items"><li>プロテイン ×2 + カゼイン ×1 <span>P60g</span></li><li>ミックスナッツ <span>30g / 190kcal</span></li></ul><div class="meal-total"><span class="macro">1日合計カロリー <b>約2,900 kcal</b></span><span class="macro">総タンパク質 <b>約155g</b></span></div></div>
+    </div>
+
+    <div class="day-content" id="day-wed">
+      <div class="meal-card"><h4>🌅 朝食 (高カロリー日)</h4><ul class="meal-items"><li>パンケーキ 4枚 <span>560kcal</span></li><li>卵 3個 (目玉焼き) <span>P18g</span></li><li>ベーコン 4枚 <span>P10g</span></li><li>牛乳 <span>200ml</span></li></ul><div class="meal-total"><span class="macro">カロリー <b>820 kcal</b></span><span class="macro">P <b>44g</b></span></div></div>
+      <div class="meal-card"><h4>☀️ 昼食</h4><ul class="meal-items"><li>ツナマヨパスタ <span>P32g</span></li><li>コーンスープ <span>P5g</span></li><li>ゆで卵 2個 <span>P12g</span></li></ul><div class="meal-total"><span class="macro">カロリー <b>720 kcal</b></span><span class="macro">P <b>49g</b></span></div></div>
+      <div class="meal-card"><h4>🌙 夕食</h4><ul class="meal-items"><li>鶏もも照り焼き <span>200g / P40g</span></li><li>白米 <span>200g</span></li><li>豆腐サラダ <span>P10g</span></li></ul><div class="meal-total"><span class="macro">カロリー <b>740 kcal</b></span><span class="macro">P <b>55g</b></span></div></div>
+      <div class="meal-card"><h4>🍫 間食</h4><ul class="meal-items"><li>プロテイン ×2 <span>P48g</span></li><li>おにぎり 2個 <span>360kcal</span></li></ul><div class="meal-total"><span class="macro">1日合計カロリー <b>約2,950 kcal</b></span><span class="macro">総タンパク質 <b>約156g</b></span></div></div>
+    </div>
+
+    <div class="day-content" id="day-thu">
+      <div class="meal-card"><h4>🌅 朝食</h4><ul class="meal-items"><li>白米 200g + 納豆 2パック <span>P16g</span></li><li>卵焼き 3個分 <span>P18g</span></li><li>鶏胸ハム <span>80g / P18g</span></li><li>バナナ 1本 <span>86kcal</span></li></ul><div class="meal-total"><span class="macro">カロリー <b>740 kcal</b></span><span class="macro">P <b>52g</b></span></div></div>
+      <div class="meal-card"><h4>☀️ 昼食</h4><ul class="meal-items"><li>サバ缶丼 (大盛り) <span>P38g / オメガ3豊富</span></li><li>大根みそ汁 <span>P5g</span></li></ul><div class="meal-total"><span class="macro">カロリー <b>760 kcal</b></span><span class="macro">P <b>43g</b></span></div></div>
+      <div class="meal-card"><h4>🌙 夕食</h4><ul class="meal-items"><li>豆腐ハンバーグ <span>P30g</span></li><li>白米 <span>200g</span></li><li>ほうれん草 <span>100g</span></li><li>みそ汁 <span>P5g</span></li></ul><div class="meal-total"><span class="macro">カロリー <b>700 kcal</b></span><span class="macro">P <b>40g</b></span></div></div>
+      <div class="meal-card"><h4>🍫 間食</h4><ul class="meal-items"><li>プロテイン ×2 <span>P48g</span></li><li>バナナ 2本 <span>172kcal</span></li></ul><div class="meal-total"><span class="macro">1日合計カロリー <b>約2,850 kcal</b></span><span class="macro">総タンパク質 <b>約148g</b></span></div></div>
+    </div>
+
+    <div class="day-content" id="day-fri">
+      <div class="meal-card"><h4>🌅 朝食</h4><ul class="meal-items"><li>オートミール粥 + はちみつ <span>400kcal</span></li><li>卵 3個 (ゆで) <span>P18g</span></li><li>チーズ 2枚 <span>P8g</span></li><li>オレンジジュース <span>200ml / 86kcal</span></li></ul><div class="meal-total"><span class="macro">カロリー <b>720 kcal</b></span><span class="macro">P <b>40g</b></span></div></div>
+      <div class="meal-card"><h4>☀️ 昼食</h4><ul class="meal-items"><li>鶏胸肉カレー (大盛り) <span>P42g</span></li><li>サラダ (豆入り) <span>P10g</span></li></ul><div class="meal-total"><span class="macro">カロリー <b>800 kcal</b></span><span class="macro">P <b>52g</b></span></div></div>
+      <div class="meal-card"><h4>🌙 夕食</h4><ul class="meal-items"><li>マグロ刺身 <span>150g / P36g</span></li><li>白米 <span>200g</span></li><li>わかめサラダ <span>P3g</span></li><li>冷奴 <span>P8g</span></li></ul><div class="meal-total"><span class="macro">カロリー <b>700 kcal</b></span><span class="macro">P <b>47g</b></span></div></div>
+      <div class="meal-card"><h4>🍫 間食</h4><ul class="meal-items"><li>プロテイン ×2 <span>P48g</span></li><li>バナナ + ナッツ <span>270kcal</span></li></ul><div class="meal-total"><span class="macro">1日合計カロリー <b>約2,890 kcal</b></span><span class="macro">総タンパク質 <b>約147g</b></span></div></div>
+    </div>
+
+    <div class="day-content" id="day-sat">
+      <div class="meal-card"><h4>🌅 朝食 (週末リフィード)</h4><ul class="meal-items"><li>フレンチトースト 3枚 <span>540kcal</span></li><li>スクランブルエッグ 3個 <span>P18g</span></li><li>ベーコン <span>P8g</span></li><li>牛乳 <span>P7g</span></li></ul><div class="meal-total"><span class="macro">カロリー <b>850 kcal</b></span><span class="macro">P <b>45g</b></span></div></div>
+      <div class="meal-card"><h4>☀️ 昼食</h4><ul class="meal-items"><li>焼肉定食 (牛カルビ150g) <span>P35g</span></li><li>ライス大盛り <span>250g</span></li><li>冷奴 <span>P8g</span></li></ul><div class="meal-total"><span class="macro">カロリー <b>900 kcal</b></span><span class="macro">P <b>48g</b></span></div></div>
+      <div class="meal-card"><h4>🌙 夕食</h4><ul class="meal-items"><li>鶏胸肉グリル <span>200g / P46g</span></li><li>パスタ <span>150g (乾燥重量)</span></li><li>トマトソース <span>P5g</span></li></ul><div class="meal-total"><span class="macro">カロリー <b>780 kcal</b></span><span class="macro">P <b>55g</b></span></div></div>
+      <div class="meal-card"><h4>🍫 間食</h4><ul class="meal-items"><li>プロテイン ×1 <span>P24g</span></li><li>アイスクリーム (チートミール) <span>300kcal</span></li></ul><div class="meal-total"><span class="macro">1日合計カロリー <b>約3,130 kcal</b> (リフィードデー)</span><span class="macro">総タンパク質 <b>約152g</b></span></div></div>
+    </div>
+
+    <div class="day-content" id="day-sun">
+      <div class="meal-card"><h4>🌅 朝食 (回復日)</h4><ul class="meal-items"><li>白米 + 鮭 + みそ汁 (和食定食) <span>P30g</span></li><li>卵 2個 <span>P12g</span></li><li>納豆 1パック <span>P8g</span></li></ul><div class="meal-total"><span class="macro">カロリー <b>650 kcal</b></span><span class="macro">P <b>50g</b></span></div></div>
+      <div class="meal-card"><h4>☀️ 昼食</h4><ul class="meal-items"><li>親子丼 (大盛り) <span>P40g</span></li><li>豆腐みそ汁 <span>P8g</span></li></ul><div class="meal-total"><span class="macro">カロリー <b>720 kcal</b></span><span class="macro">P <b>48g</b></span></div></div>
+      <div class="meal-card"><h4>🌙 夕食</h4><ul class="meal-items"><li>しゃぶしゃぶ (豚/鶏) <span>P50g</span></li><li>白米 <span>200g</span></li><li>野菜たっぷり <span>葉野菜300g</span></li></ul><div class="meal-total"><span class="macro">カロリー <b>750 kcal</b></span><span class="macro">P <b>55g</b></span></div></div>
+      <div class="meal-card"><h4>🍫 間食</h4><ul class="meal-items"><li>プロテイン ×2 <span>P48g</span></li><li>おにぎり 1個 <span>180kcal</span></li></ul><div class="meal-total"><span class="macro">1日合計カロリー <b>約2,750 kcal</b> (回復デー)</span><span class="macro">総タンパク質 <b>約153g</b></span></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- SHOPPING TAB -->
+<div class="tab-content" id="tab-shopping">
+  <div class="card">
+    <h2>週間買い物リスト</h2>
+    <div class="shop-category">
+      <h3>🥩 タンパク質食材</h3>
+      <div class="shop-items">
+        <div class="shop-item">鶏胸肉 <span class="price">1.5kg / ¥600</span></div>
+        <div class="shop-item">卵 <span class="price">20個 / ¥400</span></div>
+        <div class="shop-item">豚こま肉 <span class="price">500g / ¥350</span></div>
+        <div class="shop-item">牛赤身 <span class="price">400g / ¥900</span></div>
+        <div class="shop-item">鮭 <span class="price">3切れ / ¥450</span></div>
+        <div class="shop-item">マグロ (刺身) <span class="price">1パック / ¥500</span></div>
+        <div class="shop-item">納豆 <span class="price">9パック / ¥270</span></div>
+        <div class="shop-item">木綿豆腐 <span class="price">4丁 / ¥320</span></div>
+        <div class="shop-item">ギリシャヨーグルト <span class="price">400g×2 / ¥700</span></div>
+        <div class="shop-item">サバ缶 <span class="price">4缶 / ¥600</span></div>
+      </div>
+    </div>
+    <div class="shop-category">
+      <h3>🌾 炭水化物</h3>
+      <div class="shop-items">
+        <div class="shop-item">白米 <span class="price">5kg / ¥1,800</span></div>
+        <div class="shop-item">オートミール <span class="price">800g / ¥400</span></div>
+        <div class="shop-item">パスタ <span class="price">500g / ¥200</span></div>
+        <div class="shop-item">食パン <span class="price">1斤 / ¥200</span></div>
+        <div class="shop-item">バナナ <span class="price">1房(7本) / ¥200</span></div>
+        <div class="shop-item">おにぎり用海苔 <span class="price">¥300</span></div>
+      </div>
+    </div>
+    <div class="shop-category">
+      <h3>🥦 野菜・その他</h3>
+      <div class="shop-items">
+        <div class="shop-item">ほうれん草 <span class="price">2袋 / ¥240</span></div>
+        <div class="shop-item">ブロッコリー <span class="price">2個 / ¥300</span></div>
+        <div class="shop-item">トマト <span class="price">4個 / ¥300</span></div>
+        <div class="shop-item">アボカド <span class="price">3個 / ¥450</span></div>
+        <div class="shop-item">牛乳 <span class="price">1L×3 / ¥600</span></div>
+        <div class="shop-item">チーズ (スライス) <span class="price">¥250</span></div>
+      </div>
+    </div>
+    <div class="shop-category">
+      <h3>💊 サプリメント (月次)</h3>
+      <div class="shop-items">
+        <div class="shop-item">WPCプロテイン 3kg <span class="price">¥5,000</span></div>
+        <div class="shop-item">クレアチン 500g <span class="price">¥2,000</span></div>
+        <div class="shop-item">EAA 500g <span class="price">¥3,500</span></div>
+        <div class="shop-item">マルトデキストリン 1kg <span class="price">¥1,500</span></div>
+        <div class="shop-item">ビタミンD3 90粒 <span class="price">¥800</span></div>
+        <div class="shop-item">亜鉛 60粒 <span class="price">¥1,200</span></div>
+        <div class="shop-item">マグネシウム 120粒 <span class="price">¥1,500</span></div>
+        <div class="shop-item">オメガ3 180粒 <span class="price">¥2,500</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- COST TAB -->
+<div class="tab-content" id="tab-cost">
+  <div class="card">
+    <h2>週間コスト概算</h2>
+    <div class="cost-row"><span>🥩 タンパク質食材</span><span class="amount">¥5,090</span></div>
+    <div class="cost-row"><span>🌾 炭水化物・主食</span><span class="amount">¥3,100</span></div>
+    <div class="cost-row"><span>🥦 野菜・乳製品</span><span class="amount">¥2,140</span></div>
+    <div class="cost-row"><span>💊 サプリメント (週割り)</span><span class="amount">¥4,250</span></div>
+    <div class="cost-row"><span>その他 (調味料・雑費)</span><span class="amount">¥1,000</span></div>
+    <div class="cost-row"><span>週間合計</span><span class="amount">¥15,580</span></div>
+    <div class="cost-row"><span>月間合計 (×4週)</span><span class="amount">¥62,320</span></div>
+    <p style="margin-top:16px;font-size:0.8rem;color:var(--text2)">※ サプリメントは月次購入の週割り換算。食材は週次購入想定。価格は目安。</p>
+  </div>
+</div>
+
+</main>
+
+<script>
+function switchTab(id, btn) {
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + id).classList.add('active');
+  btn.classList.add('active');
+}
+function switchDay(id, btn) {
+  document.querySelectorAll('.day-content').forEach(d => d.classList.remove('active'));
+  document.querySelectorAll('.day-tab').forEach(b => b.classList.remove('active'));
+  document.getElementById('day-' + id).classList.add('active');
+  btn.classList.add('active');
+}
+</script>
+</body>
+</html>

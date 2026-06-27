@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FIREライフサイクル財務ダッシュボード</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+  :root {
+    --bg:#0b0f1a;--bg2:#111827;--bg3:#1f2937;--bg4:#374151;
+    --border:#374151;--text:#f9fafb;--text2:#9ca3af;--text3:#6b7280;
+    --green:#10b981;--blue:#3b82f6;--yellow:#f59e0b;--red:#ef4444;
+    --purple:#8b5cf6;--teal:#14b8a6;--orange:#f97316;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--text);font-family:'Segoe UI','Meiryo',sans-serif;min-height:100vh}
+  header{background:linear-gradient(135deg,#1a1040 0%,#0b0f1a 100%);padding:28px 32px;border-bottom:1px solid var(--border)}
+  header h1{font-size:1.5rem;font-weight:800;margin-bottom:4px}
+  header h1 span{color:var(--yellow)}
+  header p{color:var(--text2);font-size:0.85rem}
+  .layout{display:grid;grid-template-columns:280px 1fr;min-height:calc(100vh - 80px)}
+
+  /* Controls panel */
+  .controls{background:var(--bg2);border-right:1px solid var(--border);padding:20px;overflow-y:auto;max-height:calc(100vh - 80px);position:sticky;top:0}
+  .ctrl-section{margin-bottom:24px}
+  .ctrl-section h3{font-size:0.75rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--text3);margin-bottom:12px;padding-bottom:6px;border-bottom:1px solid var(--border)}
+  .slider-group{margin-bottom:14px}
+  .slider-label{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;font-size:0.78rem}
+  .slider-label span:first-child{color:var(--text2)}
+  .slider-val{color:var(--yellow);font-weight:700;font-size:0.82rem;min-width:60px;text-align:right}
+  input[type=range]{width:100%;-webkit-appearance:none;height:4px;border-radius:2px;background:var(--bg4);outline:none;cursor:pointer}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;border-radius:50%;background:var(--yellow);cursor:pointer}
+
+  /* Charts area */
+  .charts-area{padding:20px;overflow-y:auto}
+  .kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}
+  .kpi{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:14px 16px}
+  .kpi .val{font-size:1.4rem;font-weight:800;margin-bottom:2px}
+  .kpi .label{font-size:0.72rem;color:var(--text2)}
+  .chart-card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:16px 20px;margin-bottom:16px}
+  .chart-card h2{font-size:0.85rem;font-weight:600;color:var(--text2);margin-bottom:14px;text-transform:uppercase;letter-spacing:0.05em}
+  canvas{max-height:220px}
+
+  @media(max-width:900px){.layout{grid-template-columns:1fr}.controls{max-height:none;position:static}.kpi-row{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+<header>
+  <h1>FIRE <span>ライフサイクル</span> 財務ダッシュボード</h1>
+  <p>50年退職・100年ゼロ資産設計 — 3チャート同期シミュレーション</p>
+</header>
+
+<div class="layout">
+<div class="controls">
+
+  <div class="ctrl-section">
+    <h3>基本設定</h3>
+    <div class="slider-group">
+      <div class="slider-label"><span>現在の年齢</span><span class="slider-val" id="v-age">30</span></div>
+      <input type="range" id="s-age" min="20" max="50" value="30" oninput="sync('age',this.value,'歳')">
+    </div>
+    <div class="slider-group">
+      <div class="slider-label"><span>退職年齢</span><span class="slider-val" id="v-retire">50</span></div>
+      <input type="range" id="s-retire" min="40" max="70" value="50" oninput="sync('retire',this.value,'歳')">
+    </div>
+    <div class="slider-group">
+      <div class="slider-label"><span>寿命設定</span><span class="slider-val" id="v-life">100</span></div>
+      <input type="range" id="s-life" min="80" max="110" value="100" oninput="sync('life',this.value,'歳')">
+    </div>
+  </div>
+
+  <div class="ctrl-section">
+    <h3>収入・支出（現役）</h3>
+    <div class="slider-group">
+      <div class="slider-label"><span>現在の年収</span><span class="slider-val" id="v-income">600</span></div>
+      <input type="range" id="s-income" min="200" max="2000" step="50" value="600" oninput="sync('income',this.value,'万円')">
+    </div>
+    <div class="slider-group">
+      <div class="slider-label"><span>年収増加率</span><span class="slider-val" id="v-incgrow">2</span></div>
+      <input type="range" id="s-incgrow" min="0" max="10" step="0.5" value="2" oninput="sync('incgrow',this.value,'%/年')">
+    </div>
+    <div class="slider-group">
+      <div class="slider-label"><span>現役時の生活費</span><span class="slider-val" id="v-expense">300</span></div>
+      <input type="range" id="s-expense" min="100" max="1000" step="50" value="300" oninput="sync('expense',this.value,'万円/年')">
+    </div>
+  </div>
+
+  <div class="ctrl-section">
+    <h3>退職後</h3>
+    <div class="slider-group">
+      <div class="slider-label"><span>退職後生活費</span><span class="slider-val" id="v-retexp">240</span></div>
+      <input type="range" id="s-retexp" min="100" max="800" step="20" value="240" oninput="sync('retexp',this.value,'万円/年')">
+    </div>
+    <div class="slider-group">
+      <div class="slider-label"><span>年金受給額</span><span class="slider-val" id="v-pension">80</span></div>
+      <input type="range" id="s-pension" min="0" max="300" step="10" value="80" oninput="sync('pension',this.value,'万円/年')">
+    </div>
+    <div class="slider-group">
+      <div class="slider-label"><span>年金開始年齢</span><span class="slider-val" id="v-penage">65</span></div>
+      <input type="range" id="s-penage" min="60" max="75" value="65" oninput="sync('penage',this.value,'歳')">
+    </div>
+  </div>
+
+  <div class="ctrl-section">
+    <h3>資産運用</h3>
+    <div class="slider-group">
+      <div class="slider-label"><span>現在の資産</span><span class="slider-val" id="v-asset">500</span></div>
+      <input type="range" id="s-asset" min="0" max="5000" step="100" value="500" oninput="sync('asset',this.value,'万円')">
+    </div>
+    <div class="slider-group">
+      <div class="slider-label"><span>現役期 運用利回り</span><span class="slider-val" id="v-roi1">5</span></div>
+      <input type="range" id="s-roi1" min="0" max="15" step="0.5" value="5" oninput="sync('roi1',this.value,'%')">
+    </div>
+    <div class="slider-group">
+      <div class="slider-label"><span>退職後 運用利回り</span><span class="slider-val" id="v-roi2">3</span></div>
+      <input type="range" id="s-roi2" min="0" max="10" step="0.5" value="3" oninput="sync('roi2',this.value,'%')">
+    </div>
+    <div class="slider-group">
+      <div class="slider-label"><span>インフレ率</span><span class="slider-val" id="v-inf">2</span></div>
+      <input type="range" id="s-inf" min="0" max="5" step="0.5" value="2" oninput="sync('inf',this.value,'%')">
+    </div>
+  </div>
+
+  <div class="ctrl-section">
+    <h3>副収入</h3>
+    <div class="slider-group">
+      <div class="slider-label"><span>副収入（現役）</span><span class="slider-val" id="v-side1">0</span></div>
+      <input type="range" id="s-side1" min="0" max="500" step="10" value="0" oninput="sync('side1',this.value,'万円/年')">
+    </div>
+    <div class="slider-group">
+      <div class="slider-label"><span>副収入（退職後）</span><span class="slider-val" id="v-side2">50</span></div>
+      <input type="range" id="s-side2" min="0" max="300" step="10" value="50" oninput="sync('side2',this.value,'万円/年')">
+    </div>
+  </div>
+
+  <div class="ctrl-section">
+    <h3>リスク・その他</h3>
+    <div class="slider-group">
+      <div class="slider-label"><span>緊急出費リザーブ</span><span class="slider-val" id="v-reserve">200</span></div>
+      <input type="range" id="s-reserve" min="0" max="1000" step="50" value="200" oninput="sync('reserve',this.value,'万円')">
+    </div>
+    <div class="slider-group">
+      <div class="slider-label"><span>税・社保負担率</span><span class="slider-val" id="v-tax">30</span></div>
+      <input type="range" id="s-tax" min="10" max="50" step="1" value="30" oninput="sync('tax',this.value,'%')">
+    </div>
+  </div>
+
+</div><!-- /controls -->
+
+<div class="charts-area">
+  <div class="kpi-row">
+    <div class="kpi"><div class="val" id="kpi-peak" style="color:var(--green)">--</div><div class="label">ピーク資産</div></div>
+    <div class="kpi"><div class="val" id="kpi-fi" style="color:var(--blue)">--</div><div class="label">FIRE達成年齢</div></div>
+    <div class="kpi"><div class="val" id="kpi-zero" style="color:var(--yellow)">--</div><div class="label">資産ゼロ予測年齢</div></div>
+    <div class="kpi"><div class="val" id="kpi-save" style="color:var(--purple)">--</div><div class="label">現役期 平均貯蓄率</div></div>
+  </div>
+
+  <div class="chart-card">
+    <h2>📈 資産推移（万円）</h2>
+    <canvas id="chart-asset"></canvas>
+  </div>
+  <div class="chart-card">
+    <h2>💹 収入・支出フロー（万円/年）</h2>
+    <canvas id="chart-flow"></canvas>
+  </div>
+  <div class="chart-card">
+    <h2>📊 貯蓄・取り崩しバー（万円/年）</h2>
+    <canvas id="chart-bar"></canvas>
+  </div>
+</div>
+</div><!-- /layout -->
+
+<script>
+const params = {
+  age:30,retire:50,life:100,income:600,incgrow:2,expense:300,
+  retexp:240,pension:80,penage:65,asset:500,roi1:5,roi2:3,
+  inf:2,side1:0,side2:50,reserve:200,tax:30
+};
+
+function sync(key, val, unit) {
+  params[key] = parseFloat(val);
+  document.getElementById('v-'+key).textContent = val + unit;
+  update();
+}
+
+function simulate() {
+  const {age,retire,life,income,incgrow,expense,retexp,pension,penage,
+         asset,roi1,roi2,inf,side1,side2,reserve,tax} = params;
+  const years = [], assets = [], incomes = [], expenses = [], netflows = [];
+  let a = asset;
+  let peakAsset = a;
+  let fiAge = null;
+  let zeroAge = null;
+  const fireTarget = retexp * 25; // 4% rule
+  let totalSave = 0, workYears = 0;
+
+  for (let yr = age; yr <= life; yr++) {
+    years.push(yr);
+    const isRetired = yr >= retire;
+    const inflation = Math.pow(1 + inf/100, yr - age);
+    let inc, exp, roi;
+
+    if (!isRetired) {
+      const rawInc = income * Math.pow(1 + incgrow/100, yr - age);
+      inc = rawInc * (1 - tax/100) + side1;
+      exp = expense * inflation;
+      roi = roi1/100;
+      const save = inc - exp;
+      totalSave += save;
+      workYears++;
+    } else {
+      const pen = yr >= penage ? pension : 0;
+      inc = side2 + pen;
+      exp = retexp * inflation;
+      roi = roi2/100;
+    }
+
+    const prevA = a;
+    a = a * (1 + roi) + (inc - exp);
+    if (a > peakAsset) peakAsset = a;
+    if (!fiAge && a >= fireTarget) fiAge = yr;
+    if (!zeroAge && prevA > 0 && a <= 0) { zeroAge = yr; a = 0; }
+
+    assets.push(Math.round(a));
+    incomes.push(Math.round(inc));
+    expenses.push(Math.round(exp));
+    netflows.push(Math.round(inc - exp));
+  }
+  return {years, assets, incomes, expenses, netflows, peakAsset, fiAge, zeroAge, totalSave, workYears, fireTarget};
+}
+
+const colors = { green:'#10b981', blue:'#3b82f6', yellow:'#f59e0b', red:'#ef4444', purple:'#8b5cf6', teal:'#14b8a6' };
+const chartOpts = (title) => ({
+  responsive:true, maintainAspectRatio:true,
+  plugins:{legend:{labels:{color:'#9ca3af',font:{size:11}}},tooltip:{callbacks:{label:ctx=>` ${ctx.dataset.label}: ${ctx.parsed.y.toLocaleString()}万円`}}},
+  scales:{
+    x:{ticks:{color:'#6b7280',maxTicksLimit:15},grid:{color:'#374151'}},
+    y:{ticks:{color:'#6b7280',callback:v=>v.toLocaleString()},grid:{color:'#374151'}}
+  }
+});
+
+let charts = {};
+function initCharts() {
+  charts.asset = new Chart(document.getElementById('chart-asset').getContext('2d'), {
+    type:'line', data:{labels:[],datasets:[{label:'資産残高',data:[],borderColor:colors.green,backgroundColor:'rgba(16,185,129,0.1)',fill:true,tension:0.3,pointRadius:0}]},
+    options:{...chartOpts(),plugins:{...chartOpts().plugins,annotation:{}}}
+  });
+  charts.flow = new Chart(document.getElementById('chart-flow').getContext('2d'), {
+    type:'line', data:{labels:[],datasets:[
+      {label:'収入',data:[],borderColor:colors.blue,backgroundColor:'rgba(59,130,246,0.1)',fill:false,tension:0.3,pointRadius:0},
+      {label:'支出',data:[],borderColor:colors.red,backgroundColor:'rgba(239,68,68,0.1)',fill:false,tension:0.3,pointRadius:0}
+    ]},
+    options:chartOpts()
+  });
+  charts.bar = new Chart(document.getElementById('chart-bar').getContext('2d'), {
+    type:'bar', data:{labels:[],datasets:[{label:'純フロー（収入−支出）',data:[],backgroundColor:[]}]},
+    options:{...chartOpts(),scales:{...chartOpts().scales,y:{...chartOpts().scales.y}}}
+  });
+}
+
+function update() {
+  const d = simulate();
+  const {years,assets,incomes,expenses,netflows,peakAsset,fiAge,zeroAge,totalSave,workYears} = d;
+
+  document.getElementById('kpi-peak').textContent = Math.round(peakAsset).toLocaleString() + '万円';
+  document.getElementById('kpi-fi').textContent = fiAge ? fiAge + '歳' : '未達成';
+  document.getElementById('kpi-zero').textContent = zeroAge ? zeroAge + '歳' : '100歳以降';
+  const avgSave = workYears > 0 ? Math.round(totalSave / workYears) : 0;
+  document.getElementById('kpi-save').textContent = avgSave.toLocaleString() + '万円/年';
+
+  charts.asset.data.labels = years;
+  charts.asset.data.datasets[0].data = assets;
+  charts.asset.update('none');
+
+  charts.flow.data.labels = years;
+  charts.flow.data.datasets[0].data = incomes;
+  charts.flow.data.datasets[1].data = expenses;
+  charts.flow.update('none');
+
+  charts.bar.data.labels = years;
+  charts.bar.data.datasets[0].data = netflows;
+  charts.bar.data.datasets[0].backgroundColor = netflows.map(v => v >= 0 ? 'rgba(16,185,129,0.7)' : 'rgba(239,68,68,0.7)');
+  charts.bar.update('none');
+}
+
+initCharts();
+update();
+</script>
+</body>
+</html>

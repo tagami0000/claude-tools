@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>主要通貨 対ドル強度推移チャート（30年）</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+  :root{
+    --bg:#060a10;--bg2:#0d1421;--bg3:#131d2e;--bg4:#1a2740;
+    --border:#1e2f47;--text:#e8eef8;--text2:#8ba3c4;--text3:#4a6080;
+    --jpy:#f87171;--eur:#60a5fa;--gbp:#34d399;--cny:#fbbf24;--aud:#a78bfa;--cad:#fb923c;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--text);font-family:'Segoe UI','Meiryo',sans-serif;min-height:100vh}
+
+  header{
+    background:linear-gradient(180deg,#0d1421 0%,#060a10 100%);
+    border-bottom:1px solid var(--border);padding:28px 32px;
+  }
+  .header-top{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap}
+  header h1{font-size:1.4rem;font-weight:800;line-height:1.2;margin-bottom:4px}
+  header h1 span{color:#60a5fa}
+  header p{font-size:0.8rem;color:var(--text2)}
+
+  /* Period buttons */
+  .period-btns{display:flex;gap:6px;flex-wrap:wrap}
+  .period-btn{
+    padding:7px 16px;border:1px solid var(--border);border-radius:20px;
+    background:none;color:var(--text2);font-size:0.78rem;font-weight:600;cursor:pointer;
+    transition:all .2s;
+  }
+  .period-btn.active{background:#1e3a5f;border-color:#60a5fa;color:#60a5fa}
+  .period-btn:hover{border-color:var(--text2);color:var(--text)}
+
+  main{padding:24px 32px;max-width:1400px;margin:0 auto}
+
+  /* Currency toggles */
+  .currency-row{display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap;align-items:center}
+  .currency-row span{font-size:0.72rem;color:var(--text3);margin-right:4px;text-transform:uppercase;letter-spacing:.06em}
+  .ccy-toggle{
+    display:flex;align-items:center;gap:7px;padding:6px 14px;
+    border:1.5px solid;border-radius:20px;cursor:pointer;font-size:0.78rem;font-weight:700;
+    transition:all .2s;user-select:none;
+  }
+  .ccy-toggle .dot{width:8px;height:8px;border-radius:50%}
+  .ccy-toggle.off{opacity:.35;filter:grayscale(.5)}
+
+  /* Chart */
+  .chart-container{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:20px 24px;margin-bottom:20px;position:relative}
+  canvas{width:100%!important}
+
+  /* Stats grid */
+  .stats-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:12px;margin-bottom:20px}
+  .stat-card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:14px;border-top:3px solid}
+  .stat-card .cc-name{font-size:0.7rem;font-weight:700;margin-bottom:4px;opacity:.8}
+  .stat-card .cc-val{font-size:1.15rem;font-weight:800;margin-bottom:2px}
+  .stat-card .cc-change{font-size:0.72rem;font-family:monospace}
+  .up{color:#34d399}.down{color:#f87171}.neu{color:var(--text2)}
+
+  /* Info bar */
+  .info-bar{background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:14px 20px;display:flex;gap:24px;flex-wrap:wrap;font-size:0.78rem;color:var(--text2);margin-bottom:20px}
+  .info-bar b{color:var(--text)}
+
+  /* Annotations / key events */
+  .events-section{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:20px}
+  .events-section h2{font-size:0.8rem;text-transform:uppercase;letter-spacing:.06em;color:var(--text2);margin-bottom:14px}
+  .events-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px}
+  .event-item{background:var(--bg3);border-radius:8px;padding:10px 12px;display:flex;gap:10px}
+  .event-year{font-size:0.72rem;font-weight:800;color:#60a5fa;width:36px;flex-shrink:0}
+  .event-desc{font-size:0.75rem;color:var(--text2);line-height:1.5}
+
+  @media(max-width:800px){.stats-grid{grid-template-columns:repeat(3,1fr)}.header-top{flex-direction:column}}
+</style>
+</head>
+<body>
+<header>
+  <div class="header-top">
+    <div>
+      <h1>主要6通貨 <span>対ドル強度</span> 推移チャート</h1>
+      <p>JPY・EUR・GBP・CNY・AUD・CAD の対USD相対強度（1994年 = 100基準）</p>
+    </div>
+    <div class="period-btns">
+      <button class="period-btn" onclick="setPeriod(1)" id="pb-1">1年</button>
+      <button class="period-btn" onclick="setPeriod(3)" id="pb-3">3年</button>
+      <button class="period-btn" onclick="setPeriod(5)" id="pb-5">5年</button>
+      <button class="period-btn" onclick="setPeriod(10)" id="pb-10">10年</button>
+      <button class="period-btn" onclick="setPeriod(20)" id="pb-20">20年</button>
+      <button class="period-btn active" onclick="setPeriod(30)" id="pb-30">30年</button>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="currency-row">
+    <span>通貨切替:</span>
+    <div class="ccy-toggle" id="t-jpy" style="border-color:var(--jpy);color:var(--jpy)" onclick="toggleCcy('JPY')">
+      <div class="dot" style="background:var(--jpy)"></div>JPY 日本円
+    </div>
+    <div class="ccy-toggle" id="t-eur" style="border-color:var(--eur);color:var(--eur)" onclick="toggleCcy('EUR')">
+      <div class="dot" style="background:var(--eur)"></div>EUR ユーロ
+    </div>
+    <div class="ccy-toggle" id="t-gbp" style="border-color:var(--gbp);color:var(--gbp)" onclick="toggleCcy('GBP')">
+      <div class="dot" style="background:var(--gbp)"></div>GBP 英ポンド
+    </div>
+    <div class="ccy-toggle" id="t-cny" style="border-color:var(--cny);color:var(--cny)" onclick="toggleCcy('CNY')">
+      <div class="dot" style="background:var(--cny)"></div>CNY 人民元
+    </div>
+    <div class="ccy-toggle" id="t-aud" style="border-color:var(--aud);color:var(--aud)" onclick="toggleCcy('AUD')">
+      <div class="dot" style="background:var(--aud)"></div>AUD 豪ドル
+    </div>
+    <div class="ccy-toggle" id="t-cad" style="border-color:var(--cad);color:var(--cad)" onclick="toggleCcy('CAD')">
+      <div class="dot" style="background:var(--cad)"></div>CAD カナダドル
+    </div>
+  </div>
+
+  <div class="chart-container">
+    <canvas id="main-chart"></canvas>
+  </div>
+
+  <div class="stats-grid" id="stats-grid"></div>
+
+  <div class="info-bar">
+    <div><b>基準:</b> 1994年1月 = 100（指数化）</div>
+    <div><b>データ:</b> 年次終値ベース / 対USD相対強度</div>
+    <div><b>期間:</b> 1994年〜2024年（30年）</div>
+    <div><b>注意:</b> 教育・参考用データ。投資判断には使用しないこと。</div>
+  </div>
+
+  <div class="events-section">
+    <h2>📌 主要マクロイベント（通貨強度への影響）</h2>
+    <div class="events-list">
+      <div class="event-item"><div class="event-year">1997</div><div class="event-desc">アジア通貨危機 — AUD・JPY急落トリガー</div></div>
+      <div class="event-item"><div class="event-year">1999</div><div class="event-desc">ユーロ導入 — EUR誕生、初期は対USD下落</div></div>
+      <div class="event-item"><div class="event-year">2001</div><div class="event-desc">9.11テロ・ドットコムバブル崩壊 — ドル安誘発</div></div>
+      <div class="event-item"><div class="event-year">2005</div><div class="event-desc">中国 人民元切り上げ (2.1%) — CNY対ドル強化開始</div></div>
+      <div class="event-item"><div class="event-year">2008</div><div class="event-desc">リーマンショック — AUD・GBP急落 / 円高加速</div></div>
+      <div class="event-item"><div class="event-year">2011</div><div class="event-desc">東日本大震災 — 一時 75円台 (JPY最高値水準)</div></div>
+      <div class="event-item"><div class="event-year">2013</div><div class="event-desc">アベノミクス・QQE開始 — JPY急速下落</div></div>
+      <div class="event-item"><div class="event-year">2016</div><div class="event-desc">Brexit 国民投票 — GBP急落 (-10%超)</div></div>
+      <div class="event-item"><div class="event-year">2020</div><div class="event-desc">COVID-19 — 全通貨対ドルで一時急落後回復</div></div>
+      <div class="event-item"><div class="event-year">2022</div><div class="event-desc">FRB 急速利上げ — JPY 151円台、32年ぶり安値</div></div>
+      <div class="event-item"><div class="event-year">2023</div><div class="event-desc">日銀 YCC修正 — JPYやや回復局面</div></div>
+      <div class="event-item"><div class="event-year">2024</div><div class="event-desc">日銀利上げ再開 — JPY 一時 141円台まで円高</div></div>
+    </div>
+  </div>
+</main>
+
+<script>
+// Annual FX rate data (USDJPY, EURUSD inverted to strength index, etc.)
+// All values normalized to 1994 = 100 (higher = stronger vs USD)
+const YEARS = [1994,1995,1996,1997,1998,1999,2000,2001,2002,2003,2004,2005,2006,2007,2008,2009,2010,2011,2012,2013,2014,2015,2016,2017,2018,2019,2020,2021,2022,2023,2024];
+
+const RAW = {
+  // JPY strength (100/USDJPY * base) — weaker yen = lower index
+  JPY: [100,115,100,83,87,90,86,86,92,91,92,88,85,91,92,99,97,107,92,82,79,75,76,81,78,81,84,77,63,68,72],
+  // EUR (EURUSD * base) — stronger euro = higher
+  EUR: [100,100,95,95,95,100,88,87,91,108,118,118,119,135,130,128,119,113,108,116,108,93,95,107,103,103,110,107,96,101,104],
+  // GBP (GBPUSD * base)
+  GBP: [100,104,107,108,107,106,107,100,101,105,110,110,113,124,103,104,109,108,108,112,107,93,85,90,91,89,93,88,79,83,87],
+  // CNY — pegged then gradually strengthened
+  CNY: [100,99,86,85,85,85,85,85,85,85,85,86,88,90,91,92,94,96,97,97,96,95,93,95,94,95,95,93,94,92,90],
+  // AUD
+  AUD: [100,104,105,88,81,90,84,76,82,94,103,106,110,118,96,106,113,113,102,95,92,79,76,83,82,79,79,79,67,70,73],
+  // CAD
+  CAD: [100,98,98,93,90,91,89,87,90,97,103,112,114,119,108,108,112,110,106,106,103,97,93,100,102,104,104,103,97,101,103],
+};
+
+const CURRENCIES = ['JPY','EUR','GBP','CNY','AUD','CAD'];
+const COLORS = {JPY:'#f87171',EUR:'#60a5fa',GBP:'#34d399',CNY:'#fbbf24',AUD:'#a78bfa',CAD:'#fb923c'};
+const NAMES = {JPY:'日本円',EUR:'ユーロ',GBP:'英ポンド',CNY:'人民元',AUD:'豪ドル',CAD:'カナダドル'};
+
+let activePeriod = 30;
+let activeCCY = {JPY:true,EUR:true,GBP:true,CNY:true,AUD:true,CAD:true};
+
+function getSlice(period) {
+  const n = Math.min(period, YEARS.length);
+  return {
+    labels: YEARS.slice(-n).map(String),
+    data: Object.fromEntries(CURRENCIES.map(c => [c, RAW[c].slice(-n)]))
+  };
+}
+
+function buildDatasets(data) {
+  return CURRENCIES.map(c => ({
+    label: c + ' ' + NAMES[c],
+    data: activeCCY[c] ? data[c] : [],
+    borderColor: COLORS[c],
+    backgroundColor: COLORS[c] + '18',
+    fill: false,
+    tension: 0.35,
+    pointRadius: activePeriod <= 5 ? 4 : 2,
+    pointHoverRadius: 6,
+    borderWidth: 2,
+    hidden: !activeCCY[c],
+  }));
+}
+
+const ctx = document.getElementById('main-chart').getContext('2d');
+let chart = new Chart(ctx, {
+  type: 'line',
+  data: { labels: [], datasets: [] },
+  options: {
+    responsive: true,
+    interaction: { mode: 'index', intersect: false },
+    plugins: {
+      legend: { labels: { color: '#8ba3c4', font: { size: 11 }, boxWidth: 14, padding: 16 } },
+      tooltip: {
+        backgroundColor: '#0d1421',
+        borderColor: '#1e2f47',
+        borderWidth: 1,
+        titleColor: '#e8eef8',
+        bodyColor: '#8ba3c4',
+        callbacks: {
+          label: ctx => ` ${ctx.dataset.label}: ${ctx.parsed.y.toFixed(1)} (1994年=100)`,
+          afterLabel: ctx => {
+            const ccy = ctx.dataset.label.split(' ')[0];
+            const v = ctx.parsed.y;
+            return v > 100 ? ` ▲ 1994年比 +${(v-100).toFixed(1)}%` : ` ▼ 1994年比 ${(v-100).toFixed(1)}%`;
+          }
+        }
+      }
+    },
+    scales: {
+      x: { ticks: { color: '#4a6080', maxTicksLimit: 15 }, grid: { color: '#0d1421' } },
+      y: {
+        ticks: { color: '#4a6080', callback: v => v.toFixed(0) },
+        grid: { color: '#131d2e' },
+        title: { display: true, text: '対ドル強度指数（1994年=100）', color: '#4a6080', font: { size: 11 } }
+      }
+    }
+  }
+});
+
+function renderStats(period) {
+  const { data, labels } = getSlice(period);
+  const grid = document.getElementById('stats-grid');
+  grid.innerHTML = CURRENCIES.map(c => {
+    const vals = data[c];
+    const cur = vals[vals.length - 1];
+    const prev = vals[0];
+    const chg = ((cur - prev) / prev * 100).toFixed(1);
+    const cls = chg > 0 ? 'up' : chg < 0 ? 'down' : 'neu';
+    const arrow = chg > 0 ? '▲' : chg < 0 ? '▼' : '—';
+    return `<div class="stat-card" style="border-top-color:${COLORS[c]}">
+      <div class="cc-name" style="color:${COLORS[c]}">${c} ${NAMES[c]}</div>
+      <div class="cc-val" style="color:${COLORS[c]}">${cur.toFixed(1)}</div>
+      <div class="cc-change ${cls}">${arrow} ${Math.abs(chg)}% (${period}年)</div>
+    </div>`;
+  }).join('');
+}
+
+function update() {
+  const { labels, data } = getSlice(activePeriod);
+  chart.data.labels = labels;
+  chart.data.datasets = buildDatasets(data);
+  chart.update();
+  renderStats(activePeriod);
+}
+
+function setPeriod(p) {
+  activePeriod = p;
+  document.querySelectorAll('.period-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('pb-' + p).classList.add('active');
+  update();
+}
+
+function toggleCcy(ccy) {
+  activeCCY[ccy] = !activeCCY[ccy];
+  const el = document.getElementById('t-' + ccy.toLowerCase());
+  el.classList.toggle('off', !activeCCY[ccy]);
+  update();
+}
+
+update();
+</script>
+</body>
+</html>
