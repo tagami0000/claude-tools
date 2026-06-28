@@ -1,0 +1,1732 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>4・5・6月の給料で決まるアレ | 完全図解（藍×抹茶版）</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho+B1:wght@400;500;700;800&family=Noto+Sans+JP:wght@300;400;500;700;900&family=Bodoni+Moda:ital,wght@0,400;0,700;0,900;1,700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    /* Japanese indigo (藍) × matcha (抹茶) palette */
+    --paper: #EEF3EE;
+    --paper-warm: #E2EBE3;
+    --ink: #0F1A2A;
+    --ink-soft: #1F2D42;
+    --ink-mute: #5C6F7E;
+    --indigo: #1B3A5C;        /* 藍 - primary accent */
+    --indigo-deep: #0E2440;
+    --indigo-bright: #2C5C8C;
+    --matcha: #5C7D5A;        /* 抹茶 - secondary accent */
+    --matcha-deep: #3F5A3F;
+    --teal: #2F7E81;          /* tertiary cyan/teal */
+    --sage: #8FA785;          /* lighter green */
+    --cream: #F6FAF6;
+    --line: rgba(15, 26, 42, 0.15);
+    --line-strong: rgba(15, 26, 42, 0.4);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: "Noto Sans JP", -apple-system, BlinkMacSystemFont, sans-serif;
+    font-weight: 400;
+    line-height: 1.7;
+    overflow-x: hidden;
+    background-image:
+      radial-gradient(at 10% 10%, rgba(92, 125, 90, 0.10) 0, transparent 50%),
+      radial-gradient(at 90% 60%, rgba(27, 58, 92, 0.08) 0, transparent 45%);
+    background-attachment: fixed;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 1;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3'/><feColorMatrix values='0 0 0 0 0.06 0 0 0 0 0.10 0 0 0 0 0.16 0 0 0 0.04 0'/></filter><rect width='200' height='200' filter='url(%23n)'/></svg>");
+    opacity: 0.55;
+    mix-blend-mode: multiply;
+  }
+
+  .wrap { position: relative; z-index: 2; }
+
+  .container {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 0 20px;
+  }
+
+  .hero {
+    padding: 72px 20px 60px;
+    border-bottom: 1px solid var(--line);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero__kicker {
+    font-family: "Bodoni Moda", serif;
+    font-style: italic;
+    font-weight: 400;
+    font-size: 13px;
+    letter-spacing: 0.15em;
+    color: var(--indigo);
+    text-transform: uppercase;
+    margin-bottom: 18px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .hero__kicker::before, .hero__kicker::after {
+    content: '';
+    flex: 0 0 30px;
+    height: 1px;
+    background: var(--indigo);
+  }
+  .hero__kicker::after { flex: 1; }
+
+  .hero__title {
+    font-family: "Shippori Mincho B1", serif;
+    font-weight: 800;
+    font-size: clamp(42px, 9vw, 78px);
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+    color: var(--ink);
+    margin-bottom: 20px;
+  }
+  .hero__title em {
+    font-family: "Bodoni Moda", serif;
+    font-style: italic;
+    font-weight: 900;
+    color: var(--indigo);
+    font-size: 1.15em;
+  }
+
+  .hero__subtitle {
+    font-size: 16px;
+    color: var(--ink-mute);
+    max-width: 520px;
+    line-height: 1.8;
+    margin-bottom: 32px;
+  }
+
+  .hero__meta {
+    display: flex;
+    gap: 24px;
+    flex-wrap: wrap;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 11px;
+    color: var(--ink-mute);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding-top: 18px;
+    border-top: 1px dashed var(--line-strong);
+  }
+  .hero__meta span { display: flex; align-items: center; gap: 6px; }
+  .hero__meta span::before {
+    content: '';
+    width: 6px; height: 6px;
+    background: var(--matcha);
+    border-radius: 50%;
+  }
+
+  section { padding: 72px 0; border-bottom: 1px solid var(--line); }
+
+  .section__num {
+    font-family: "Bodoni Moda", serif;
+    font-size: 13px;
+    font-style: italic;
+    color: var(--indigo);
+    letter-spacing: 0.2em;
+    margin-bottom: 8px;
+  }
+
+  .section__title {
+    font-family: "Shippori Mincho B1", serif;
+    font-weight: 700;
+    font-size: clamp(28px, 5.5vw, 40px);
+    line-height: 1.2;
+    margin-bottom: 16px;
+    letter-spacing: -0.01em;
+  }
+
+  .section__lead {
+    color: var(--ink-mute);
+    font-size: 15px;
+    margin-bottom: 40px;
+    max-width: 620px;
+  }
+
+  .insight {
+    background: var(--ink);
+    color: var(--paper);
+    padding: 48px 32px;
+    position: relative;
+  }
+  .insight::before {
+    content: '重要';
+    position: absolute;
+    top: -12px;
+    left: 24px;
+    background: var(--indigo);
+    color: var(--paper);
+    padding: 4px 14px;
+    font-size: 11px;
+    letter-spacing: 0.3em;
+    font-weight: 700;
+  }
+
+  .insight__cross {
+    display: flex;
+    align-items: baseline;
+    gap: 16px;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+  }
+  .insight__wrong {
+    font-family: "Shippori Mincho B1", serif;
+    font-size: 28px;
+    font-weight: 700;
+    text-decoration: line-through;
+    text-decoration-color: var(--indigo-bright);
+    text-decoration-thickness: 3px;
+    color: rgba(238, 243, 238, 0.5);
+  }
+  .insight__right {
+    font-family: "Shippori Mincho B1", serif;
+    font-size: 36px;
+    font-weight: 800;
+    color: var(--paper);
+  }
+  .insight__right em { color: var(--sage); font-style: normal; }
+  .insight__arrow { color: var(--matcha); font-size: 24px; transform: translateY(-4px); }
+  .insight__desc {
+    color: rgba(238, 243, 238, 0.78);
+    line-height: 1.8;
+    font-size: 14px;
+  }
+
+  .timeline { position: relative; padding: 20px 0; }
+
+  .timeline__track {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    gap: 2px;
+    margin-bottom: 12px;
+  }
+
+  .timeline__month {
+    aspect-ratio: 1 / 1.6;
+    background: var(--paper-warm);
+    border: 1px solid var(--line);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 10px;
+    color: var(--ink-mute);
+    position: relative;
+    transition: all 0.3s ease;
+  }
+  .timeline__month.collect {
+    background: var(--indigo);
+    color: var(--paper);
+    border-color: var(--indigo-deep);
+    font-weight: 700;
+  }
+  .timeline__month.collect::after {
+    content: '';
+    position: absolute;
+    bottom: -6px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0; height: 0;
+    border-left: 6px solid transparent;
+    border-right: 6px solid transparent;
+    border-top: 6px solid var(--indigo);
+  }
+  .timeline__month.apply {
+    background: var(--matcha);
+    color: var(--paper);
+    border-color: var(--matcha-deep);
+    font-weight: 700;
+  }
+  .timeline__month.submit {
+    background: var(--ink);
+    color: var(--paper);
+    border-color: var(--ink);
+  }
+
+  .timeline__month-num {
+    font-size: 18px;
+    font-weight: 700;
+    font-family: "Bodoni Moda", serif;
+  }
+
+  .timeline__labels {
+    display: flex;
+    justify-content: space-between;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 10px;
+    color: var(--ink-mute);
+    padding: 0 4px;
+    letter-spacing: 0.1em;
+  }
+
+  .timeline__legend {
+    display: flex;
+    gap: 16px;
+    margin-top: 20px;
+    flex-wrap: wrap;
+    font-size: 11px;
+    color: var(--ink-mute);
+  }
+  .legend-dot {
+    display: inline-block;
+    width: 10px; height: 10px;
+    margin-right: 6px;
+    vertical-align: middle;
+  }
+  .legend-dot.collect { background: var(--indigo); }
+  .legend-dot.submit { background: var(--ink); }
+  .legend-dot.apply { background: var(--matcha); }
+
+  .timeline__flow {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr auto 1fr;
+    gap: 12px;
+    align-items: center;
+    margin-top: 40px;
+    padding: 24px 16px;
+    background: var(--cream);
+    border: 1px solid var(--line);
+  }
+
+  .timeline__flow-step { text-align: center; }
+  .timeline__flow-step strong {
+    display: block;
+    font-family: "Shippori Mincho B1", serif;
+    font-weight: 700;
+    font-size: 15px;
+    color: var(--ink);
+    margin-bottom: 4px;
+  }
+  .timeline__flow-step small {
+    font-size: 11px;
+    color: var(--ink-mute);
+    font-family: "JetBrains Mono", monospace;
+  }
+  .timeline__flow-arrow {
+    color: var(--indigo);
+    font-size: 24px;
+    font-weight: 300;
+  }
+
+  @media (max-width: 600px) {
+    .timeline__flow { grid-template-columns: 1fr; gap: 8px; }
+    .timeline__flow-arrow { transform: rotate(90deg); }
+  }
+
+  .timeline__impact {
+    margin-top: 32px;
+    padding: 20px 24px;
+    border-left: 3px solid var(--matcha);
+    background: rgba(92, 125, 90, 0.08);
+  }
+  .timeline__impact strong {
+    font-family: "Shippori Mincho B1", serif;
+    font-size: 18px;
+    color: var(--matcha-deep);
+    display: block;
+    margin-bottom: 8px;
+  }
+  .timeline__impact p {
+    font-size: 14px;
+    color: var(--ink-soft);
+    line-height: 1.7;
+  }
+
+  .flow-diagram { display: grid; gap: 20px; margin-top: 20px; }
+
+  .flow-card {
+    background: var(--cream);
+    border: 1px solid var(--line);
+    padding: 24px 20px;
+    position: relative;
+  }
+  .flow-card__step {
+    position: absolute;
+    top: 16px;
+    right: 20px;
+    font-family: "Bodoni Moda", serif;
+    font-style: italic;
+    font-size: 28px;
+    font-weight: 900;
+    color: var(--indigo);
+    opacity: 0.85;
+  }
+  .flow-card__label {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 10px;
+    color: var(--indigo);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+  .flow-card__title {
+    font-family: "Shippori Mincho B1", serif;
+    font-weight: 700;
+    font-size: 22px;
+    margin-bottom: 12px;
+    line-height: 1.3;
+  }
+  .flow-card__formula {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 13px;
+    color: var(--ink-soft);
+    background: var(--paper);
+    padding: 12px 14px;
+    border: 1px dashed var(--line-strong);
+    margin: 12px 0;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+  .flow-card__formula em { color: var(--matcha-deep); font-style: normal; font-weight: 700; }
+  .flow-card__note {
+    font-size: 12px;
+    color: var(--ink-mute);
+    line-height: 1.6;
+  }
+
+  .flow-connector {
+    height: 32px;
+    position: relative;
+    display: flex;
+    justify-content: center;
+  }
+  .flow-connector::before {
+    content: '';
+    width: 2px; height: 100%;
+    background: var(--ink);
+  }
+  .flow-connector::after {
+    content: '▼';
+    position: absolute;
+    bottom: -4px;
+    color: var(--ink);
+    font-size: 12px;
+  }
+
+  .verdictbox {
+    background: linear-gradient(135deg, var(--indigo-deep) 0%, var(--ink) 100%);
+    color: var(--paper);
+    padding: 40px 32px;
+    position: relative;
+    overflow: hidden;
+  }
+  .verdictbox::before {
+    content: '調査';
+    position: absolute;
+    top: 24px;
+    right: 24px;
+    writing-mode: vertical-rl;
+    font-family: "Shippori Mincho B1", serif;
+    font-weight: 700;
+    font-size: 120px;
+    color: rgba(238, 243, 238, 0.04);
+    line-height: 1;
+  }
+  .verdictbox__verdict {
+    display: inline-block;
+    background: var(--matcha);
+    padding: 6px 16px;
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    margin-bottom: 20px;
+    font-weight: 700;
+  }
+  .verdictbox__answer {
+    font-family: "Shippori Mincho B1", serif;
+    font-size: 42px;
+    font-weight: 800;
+    line-height: 1.2;
+    margin-bottom: 8px;
+  }
+  .verdictbox__answer em { font-style: normal; color: var(--sage); }
+  .verdictbox__sub {
+    font-size: 13px;
+    color: rgba(238, 243, 238, 0.6);
+    margin-bottom: 28px;
+    font-family: "JetBrains Mono", monospace;
+    letter-spacing: 0.1em;
+  }
+
+  .verdictbox__evidence { display: grid; gap: 12px; margin-top: 24px; }
+
+  .evidence-item {
+    display: grid;
+    grid-template-columns: 32px 1fr;
+    gap: 14px;
+    padding: 14px 0;
+    border-top: 1px solid rgba(238, 243, 238, 0.15);
+  }
+  .evidence-item__num {
+    font-family: "Bodoni Moda", serif;
+    font-style: italic;
+    font-size: 22px;
+    font-weight: 900;
+    color: var(--sage);
+    line-height: 1;
+  }
+  .evidence-item__body strong {
+    display: block;
+    font-size: 14px;
+    font-weight: 700;
+    margin-bottom: 4px;
+    color: var(--paper);
+  }
+  .evidence-item__body span {
+    font-size: 12px;
+    color: rgba(238, 243, 238, 0.7);
+    line-height: 1.6;
+  }
+
+  .verdictbox__branch {
+    margin-top: 32px;
+    padding: 20px;
+    background: rgba(238, 243, 238, 0.06);
+    border: 1px solid rgba(238, 243, 238, 0.15);
+  }
+  .verdictbox__branch h4 {
+    font-size: 12px;
+    color: var(--sage);
+    letter-spacing: 0.2em;
+    margin-bottom: 12px;
+    font-weight: 700;
+  }
+
+  .branch-compare { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+  .branch-box {
+    padding: 14px;
+    background: rgba(15, 26, 42, 0.4);
+  }
+  .branch-box.likely { border: 2px solid var(--matcha); }
+  .branch-box__name {
+    font-family: "Shippori Mincho B1", serif;
+    font-size: 15px;
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+  .branch-box__rate {
+    font-family: "Bodoni Moda", serif;
+    font-size: 32px;
+    font-weight: 900;
+    color: var(--sage);
+    line-height: 1;
+  }
+  .branch-box__rate small {
+    font-size: 12px;
+    color: rgba(238, 243, 238, 0.6);
+    font-family: "JetBrains Mono", monospace;
+    display: block;
+    margin-top: 4px;
+  }
+  .branch-box__tag {
+    display: inline-block;
+    margin-top: 8px;
+    padding: 2px 8px;
+    font-size: 10px;
+    background: var(--matcha);
+    color: var(--paper);
+    font-weight: 700;
+    letter-spacing: 0.1em;
+  }
+
+  .calculator {
+    background: var(--paper-warm);
+    border: 2px solid var(--ink);
+    padding: 32px 24px;
+    margin-top: 24px;
+  }
+
+  .calc__label {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    color: var(--indigo);
+    margin-bottom: 10px;
+    text-transform: uppercase;
+  }
+  .calc__input-group { margin-bottom: 28px; }
+  .calc__input {
+    width: 100%;
+    padding: 16px 18px;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 28px;
+    font-weight: 700;
+    border: 1px solid var(--ink);
+    background: var(--cream);
+    color: var(--ink);
+    text-align: right;
+    -moz-appearance: textfield;
+  }
+  .calc__input::-webkit-outer-spin-button,
+  .calc__input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+  .calc__input:focus {
+    outline: none;
+    border-color: var(--indigo);
+    background: #fff;
+  }
+
+  .calc__toggle-group {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+  }
+  .calc__toggle {
+    flex: 1;
+    min-width: 100px;
+    padding: 10px 12px;
+    background: var(--cream);
+    border: 1px solid var(--line-strong);
+    color: var(--ink-mute);
+    font-family: "Noto Sans JP", sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .calc__toggle.active {
+    background: var(--ink);
+    color: var(--paper);
+    border-color: var(--ink);
+  }
+
+  .calc__result {
+    padding: 24px 20px;
+    background: var(--ink);
+    color: var(--paper);
+    margin-top: 8px;
+  }
+
+  .calc__grade-display {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid rgba(238, 243, 238, 0.2);
+  }
+  .calc__grade-label {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 11px;
+    color: rgba(238, 243, 238, 0.6);
+    letter-spacing: 0.15em;
+  }
+  .calc__grade-value {
+    font-family: "Bodoni Moda", serif;
+    font-weight: 900;
+    font-size: 48px;
+    color: var(--sage);
+    line-height: 1;
+  }
+  .calc__grade-value small {
+    font-size: 13px;
+    color: rgba(238, 243, 238, 0.6);
+    font-family: "JetBrains Mono", monospace;
+    display: block;
+    margin-top: 6px;
+    font-weight: 400;
+  }
+
+  .calc__breakdown {
+    display: grid;
+    gap: 10px;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 13px;
+  }
+  .calc__row {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    padding: 6px 0;
+  }
+  .calc__row-label { color: rgba(238, 243, 238, 0.75); font-size: 12px; }
+  .calc__row-value { font-weight: 700; color: var(--paper); }
+
+  .calc__row.total {
+    border-top: 1px dashed rgba(238, 243, 238, 0.3);
+    padding-top: 14px;
+    margin-top: 6px;
+  }
+  .calc__row.total .calc__row-label {
+    font-size: 14px;
+    color: var(--sage);
+    font-family: "Shippori Mincho B1", serif;
+    font-weight: 700;
+  }
+  .calc__row.total .calc__row-value {
+    font-size: 22px;
+    color: var(--sage);
+    font-family: "Bodoni Moda", serif;
+  }
+
+  .calc__visual-bar {
+    display: flex;
+    height: 36px;
+    margin: 18px 0 10px;
+    border: 1px solid rgba(238, 243, 238, 0.3);
+  }
+  .calc__visual-seg {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    color: var(--paper);
+    font-weight: 700;
+    font-family: "JetBrains Mono", monospace;
+    transition: flex 0.5s ease;
+    overflow: hidden;
+    white-space: nowrap;
+  }
+  .calc__visual-seg.health { background: var(--indigo-bright); }
+  .calc__visual-seg.child { background: var(--sage); color: var(--ink); }
+  .calc__visual-seg.pension { background: var(--matcha); }
+  .calc__visual-seg.care { background: var(--teal); }
+
+  .calc__yearly {
+    margin-top: 20px;
+    padding-top: 16px;
+    border-top: 1px dashed rgba(238, 243, 238, 0.3);
+    font-size: 12px;
+    color: rgba(238, 243, 238, 0.6);
+    text-align: center;
+    font-family: "JetBrains Mono", monospace;
+  }
+  .calc__yearly strong {
+    color: var(--sage);
+    font-size: 20px;
+    font-family: "Bodoni Moda", serif;
+    display: block;
+    margin-top: 4px;
+  }
+
+  .grade-table-wrap {
+    margin-top: 24px;
+    border: 1px solid var(--line-strong);
+    background: var(--cream);
+    max-height: 500px;
+    overflow-y: auto;
+    position: relative;
+  }
+  .grade-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 12px;
+  }
+  .grade-table thead {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+  }
+  .grade-table th {
+    background: var(--ink);
+    color: var(--paper);
+    padding: 10px 8px;
+    text-align: right;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    font-weight: 700;
+  }
+  .grade-table th:first-child { text-align: center; }
+
+  .grade-table td {
+    padding: 8px;
+    text-align: right;
+    border-bottom: 1px solid var(--line);
+    color: var(--ink-soft);
+  }
+  .grade-table td:first-child {
+    text-align: center;
+    color: var(--indigo);
+    font-weight: 700;
+    background: var(--paper);
+  }
+
+  .grade-table tr:hover td { background: rgba(92, 125, 90, 0.10); }
+  .grade-table tr.current td {
+    background: rgba(27, 58, 92, 0.10) !important;
+    font-weight: 700;
+  }
+  .grade-table tr.current td:first-child {
+    background: var(--indigo) !important;
+    color: var(--paper);
+  }
+
+  .grade-table .total-col {
+    color: var(--matcha-deep) !important;
+    font-weight: 700;
+  }
+
+  .checklist { margin-top: 24px; display: grid; gap: 16px; }
+
+  .check-item {
+    display: grid;
+    grid-template-columns: 40px 1fr;
+    gap: 16px;
+    align-items: start;
+    padding: 16px 20px;
+    background: var(--cream);
+    border-left: 3px solid var(--indigo);
+  }
+  .check-item__num {
+    font-family: "Bodoni Moda", serif;
+    font-style: italic;
+    font-weight: 900;
+    font-size: 32px;
+    color: var(--indigo);
+    line-height: 1;
+  }
+  .check-item__body strong {
+    display: block;
+    font-family: "Shippori Mincho B1", serif;
+    font-size: 16px;
+    margin-bottom: 4px;
+    font-weight: 700;
+  }
+  .check-item__body span {
+    font-size: 13px;
+    color: var(--ink-mute);
+    line-height: 1.7;
+  }
+
+  .footer {
+    padding: 48px 20px 60px;
+    border-top: 2px solid var(--ink);
+    text-align: center;
+    background: var(--ink);
+    color: var(--paper);
+  }
+  .footer__mark {
+    font-family: "Bodoni Moda", serif;
+    font-style: italic;
+    font-size: 14px;
+    color: var(--sage);
+    margin-bottom: 8px;
+  }
+  .footer__sources {
+    margin-top: 20px;
+    font-size: 11px;
+    color: rgba(238, 243, 238, 0.5);
+    font-family: "JetBrains Mono", monospace;
+    letter-spacing: 0.08em;
+    line-height: 1.8;
+  }
+  .footer__sources a {
+    color: var(--sage);
+    text-decoration: none;
+    border-bottom: 1px dotted var(--sage);
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .hero__kicker { animation: fadeUp 0.6s ease 0.1s both; }
+  .hero__title { animation: fadeUp 0.8s ease 0.2s both; }
+  .hero__subtitle { animation: fadeUp 0.8s ease 0.4s both; }
+  .hero__meta { animation: fadeUp 0.8s ease 0.5s both; }
+
+  @media (max-width: 480px) {
+    .hero { padding: 48px 20px 40px; }
+    section { padding: 56px 0; }
+    .insight, .verdictbox { padding: 32px 20px; }
+    .insight__right { font-size: 28px; }
+    .verdictbox__answer { font-size: 32px; }
+    .calc__grade-value { font-size: 40px; }
+    .grade-table th, .grade-table td { padding: 6px 4px; font-size: 10px; }
+    .branch-compare { grid-template-columns: 1fr; }
+  }
+
+  .marker { position: relative; display: inline-block; }
+  .marker::after {
+    content: '';
+    position: absolute;
+    left: -2px; right: -2px;
+    bottom: 2px; height: 8px;
+    background: var(--sage);
+    z-index: -1;
+    opacity: 0.6;
+  }
+
+  .ornament {
+    text-align: center;
+    padding: 20px 0;
+    font-size: 14px;
+    color: var(--ink-mute);
+    letter-spacing: 2em;
+  }
+
+  .warn-box {
+    margin-top: 24px;
+    padding: 16px 20px;
+    background: var(--cream);
+    border: 1px dashed var(--line-strong);
+  }
+  .warn-box__label {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 10px;
+    color: var(--indigo);
+    letter-spacing: 0.2em;
+    margin-bottom: 8px;
+  }
+  .warn-box p {
+    font-size: 13px;
+    line-height: 1.7;
+    color: var(--ink-soft);
+  }
+
+  /* quick presets */
+  .calc__presets { display: flex; gap: 8px; flex-wrap: wrap; margin: -14px 0 24px; }
+  .calc__preset {
+    padding: 7px 14px;
+    background: var(--cream);
+    border: 1px solid var(--line-strong);
+    color: var(--ink-mute);
+    font-family: "JetBrains Mono", monospace;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .calc__preset:hover { border-color: var(--indigo); color: var(--indigo); }
+
+  /* border analysis (calculator) */
+  .calc__border { display: grid; gap: 10px; }
+  .calc__border:not(:empty) {
+    margin-top: 18px;
+    padding-top: 18px;
+    border-top: 1px dashed rgba(238, 243, 238, 0.3);
+  }
+  .border-row {
+    display: grid;
+    grid-template-columns: 18px 1fr;
+    gap: 12px;
+    align-items: start;
+    font-size: 12.5px;
+    line-height: 1.65;
+  }
+  .border-row__icon { font-weight: 900; font-size: 16px; line-height: 1.3; }
+  .border-row.down .border-row__icon { color: var(--sage); }
+  .border-row.up .border-row__icon { color: #E8A0A0; }
+  .border-row__text { color: rgba(238, 243, 238, 0.82); }
+  .border-row__text b { color: var(--paper); font-weight: 700; }
+  .border-row.down .border-row__text b.amt { color: var(--sage); }
+  .border-row.up .border-row__text b.amt { color: #E8A0A0; }
+
+  /* update guide (§08) */
+  .update-card {
+    background: var(--cream);
+    border: 1px solid var(--line-strong);
+    padding: 28px 24px;
+    margin-top: 8px;
+  }
+  .update-card__opt {
+    display: grid;
+    grid-template-columns: 36px 1fr;
+    gap: 14px;
+    padding: 16px 0;
+    border-top: 1px solid var(--line);
+  }
+  .update-card__opt:first-of-type { border-top: none; padding-top: 0; }
+  .update-card__optnum {
+    font-family: "Bodoni Moda", serif;
+    font-style: italic;
+    font-weight: 900;
+    font-size: 26px;
+    color: var(--indigo);
+    line-height: 1;
+  }
+  .update-card__opt strong {
+    display: block;
+    font-family: "Shippori Mincho B1", serif;
+    font-weight: 700;
+    font-size: 16px;
+    margin-bottom: 6px;
+  }
+  .update-card__opt span { font-size: 13px; color: var(--ink-mute); line-height: 1.75; }
+  .update-card code {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 11.5px;
+    background: var(--paper);
+    padding: 2px 6px;
+    border: 1px solid var(--line);
+    color: var(--indigo-deep);
+    white-space: nowrap;
+  }
+  .update-codeblock {
+    margin-top: 20px;
+    padding: 18px 16px;
+    background: var(--ink);
+    color: var(--paper);
+    font-family: "JetBrains Mono", monospace;
+    font-size: 11.5px;
+    line-height: 1.85;
+    overflow-x: auto;
+    white-space: pre;
+  }
+  .update-codeblock .cc { color: rgba(238, 243, 238, 0.42); }
+  .update-codeblock .cv { color: #9DC3E6; }
+
+  /* scroll reveal */
+  .reveal { opacity: 0; transform: translateY(24px); transition: opacity 0.7s ease, transform 0.7s ease; }
+  .reveal.in { opacity: 1; transform: none; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="hero">
+    <div class="container">
+      <div class="hero__kicker">Visual Guide / <span class="js-fy">令和8年度</span>版 / 藍×抹茶</div>
+      <h1 class="hero__title">
+        たった<em>3</em>ヶ月で<br>
+        1年の手取りが<br>
+        決まる、仕組み。
+      </h1>
+      <p class="hero__subtitle">
+        4月・5月・6月の給料で「税金」じゃなくて「社会保険料」が決まる。
+        その仕組みを、全部、図で解く。
+      </p>
+      <div class="hero__meta">
+        <span>協会けんぽ</span>
+        <span>都道府県支部別</span>
+        <span class="js-fy">令和8年度</span>
+      </div>
+    </div>
+  </header>
+
+  <section>
+    <div class="container">
+      <div class="section__num">§ 01 — CORE TRUTH</div>
+      <h2 class="section__title">まず、誤解を正す。</h2>
+      <p class="section__lead">
+        「4〜6月で税金が決まる」は正確じゃない。決まるのは<span class="marker">社会保険料</span>です。
+      </p>
+
+      <div class="insight">
+        <div class="insight__cross">
+          <div class="insight__wrong">税金</div>
+          <div class="insight__arrow">→</div>
+          <div class="insight__right">じつは<em>社会保険料</em></div>
+        </div>
+        <p class="insight__desc">
+          正確には <strong style="color:var(--sage)">健康保険料</strong>・<strong style="color:var(--sage)">厚生年金保険料</strong>・<strong style="color:var(--sage)">子ども子育て支援金</strong>（40歳以上はプラスで介護保険料）が、4〜6月の給料で決まる。所得税や住民税は別の仕組みで動いてます。
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="container">
+      <div class="section__num">§ 02 — TIMELINE</div>
+      <h2 class="section__title">1年間の流れを、見る。</h2>
+      <p class="section__lead">
+        3ヶ月の観測期間 → 届出 → 適用。ここを押さえれば全部わかる。
+      </p>
+
+      <div class="timeline">
+        <div class="timeline__track" id="timelineTrack"></div>
+        <div class="timeline__labels">
+          <span>1月</span><span>4月</span><span>7月</span><span>10月</span><span>12月</span>
+        </div>
+        <div class="timeline__legend">
+          <span><i class="legend-dot collect"></i>観測期間（4・5・6月）</span>
+          <span><i class="legend-dot submit"></i>届出（7月）</span>
+          <span><i class="legend-dot apply"></i>新料率の適用（9月〜）</span>
+        </div>
+      </div>
+
+      <div class="timeline__flow">
+        <div class="timeline__flow-step">
+          <strong>4・5・6月</strong>
+          <small>OBSERVE</small>
+        </div>
+        <div class="timeline__flow-arrow">→</div>
+        <div class="timeline__flow-step">
+          <strong>7月1〜10日</strong>
+          <small>SUBMIT</small>
+        </div>
+        <div class="timeline__flow-arrow">→</div>
+        <div class="timeline__flow-step">
+          <strong>9月〜翌8月</strong>
+          <small>APPLIED</small>
+        </div>
+      </div>
+
+      <div class="timeline__impact">
+        <strong>たった3ヶ月が、12ヶ月を縛る。</strong>
+        <p>
+          4〜6月の給料が多いとその後1年間の社会保険料が高くなる。
+          残業代・通勤手当・各種手当も全部平均額に含まれます。ただしボーナスは対象外。
+        </p>
+      </div>
+
+      <div class="warn-box">
+        <div class="warn-box__label">⚠ ATTENTION</div>
+        <p>
+          判定は「<strong>支払われた月</strong>」基準。末締め翌月25日払いなど<strong>翌月払い</strong>の会社では、
+          実質 <strong style="color:var(--indigo);">3・4・5月の残業</strong> が効いてきます。給与明細の締め日を要確認。
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="container">
+      <div class="section__num">§ 03 — THE MECHANISM</div>
+      <h2 class="section__title">計算の"流れ"、3ステップ。</h2>
+      <p class="section__lead">
+        給料の平均 → 等級（区切り） → 料率をかける。これだけ。
+      </p>
+
+      <div class="flow-diagram">
+        <div class="flow-card">
+          <div class="flow-card__step">01</div>
+          <div class="flow-card__label">STEP ONE</div>
+          <div class="flow-card__title">3ヶ月の平均を出す</div>
+          <div class="flow-card__formula">
+            <em>報酬月額</em> = (4月 + 5月 + 6月) ÷ 3
+          </div>
+          <div class="flow-card__note">
+            総支給額（基本給＋残業代＋通勤手当＋各種手当）が対象。手取りじゃないので注意。
+          </div>
+        </div>
+
+        <div class="flow-connector"></div>
+
+        <div class="flow-card">
+          <div class="flow-card__step">02</div>
+          <div class="flow-card__label">STEP TWO</div>
+          <div class="flow-card__title">等級に当てはめる</div>
+          <div class="flow-card__formula">
+            <em>395,000〜425,000円</em> → 標準報酬 <em>410,000円</em>
+          </div>
+          <div class="flow-card__note">
+            1等級（58,000円）〜50等級（1,390,000円）まで、ざっくり区切って管理しているイメージ。
+          </div>
+        </div>
+
+        <div class="flow-connector"></div>
+
+        <div class="flow-card">
+          <div class="flow-card__step">03</div>
+          <div class="flow-card__label">STEP THREE</div>
+          <div class="flow-card__title">料率をかける（折半）</div>
+          <div class="flow-card__formula">
+            標準報酬 × <em>料率</em> ÷ 2 = 天引き額
+          </div>
+          <div class="flow-card__note">
+            会社と従業員で<strong>半分ずつ</strong>負担。ここが重要。健保・厚年・子育支援金でそれぞれ計算して合算。
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="container">
+      <div class="section__num">§ 04 — WHICH ONE</div>
+      <h2 class="section__title">あなたは、どっち。</h2>
+      <p class="section__lead">
+        計算の前に、自分が「協会けんぽ」か「健保組合」かを確かめる。ここで料率が変わる。
+      </p>
+
+      <div class="verdictbox">
+        <div class="verdictbox__verdict">2タイプ</div>
+        <div class="verdictbox__answer">
+          協会けんぽ<br>or <em>健保組合</em>
+        </div>
+        <div class="verdictbox__sub">// どちらに入っているかで料率も保険証も変わる</div>
+
+        <div class="verdictbox__evidence">
+          <div class="evidence-item">
+            <div class="evidence-item__num">01</div>
+            <div class="evidence-item__body">
+              <strong>保険証・資格情報の「保険者名称」を見る</strong>
+              <span>「全国健康保険協会」なら協会けんぽ。「○○健康保険組合」と書いてあれば健保組合。ここが一番速い。</span>
+            </div>
+          </div>
+          <div class="evidence-item">
+            <div class="evidence-item__num">02</div>
+            <div class="evidence-item__body">
+              <strong>会社の規模・業界で当たりをつける</strong>
+              <span>大企業や業界団体は健保組合が多い。中小企業は協会けんぽが基本。迷ったら協会けんぽ寄り。</span>
+            </div>
+          </div>
+          <div class="evidence-item">
+            <div class="evidence-item__num">03</div>
+            <div class="evidence-item__body">
+              <strong>付加給付の有無</strong>
+              <span>高額療養費の上乗せなど「独自の給付」があれば健保組合の可能性大。何もなければ協会けんぽの特徴。</span>
+            </div>
+          </div>
+          <div class="evidence-item">
+            <div class="evidence-item__num">04</div>
+            <div class="evidence-item__body">
+              <strong>マイナポータルで確認</strong>
+              <span>「資格情報」に保険者名称と支部が表示される。手元に保険証が無くても確定できる。</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="verdictbox__branch">
+          <h4>// 協会けんぽは「支部」で料率が変わる</h4>
+          <div class="branch-compare">
+            <div class="branch-box">
+              <div class="branch-box__name">静岡支部</div>
+              <div class="branch-box__rate"><span class="js-rate" data-branch="shizuoka">9.61</span><small>% 健保料率</small></div>
+            </div>
+            <div class="branch-box">
+              <div class="branch-box__name">東京支部</div>
+              <div class="branch-box__rate"><span class="js-rate" data-branch="tokyo">9.85</span><small>% 健保料率</small></div>
+            </div>
+          </div>
+          <p style="font-size:12px;color:rgba(238,243,238,0.65);margin-top:14px;line-height:1.7;">
+            協会けんぽは会社の所在地の<strong style="color:var(--sage)">都道府県支部</strong>に加入。同じ給料でも支部で健保料率が変わる。下の計算機で支部を切り替えて比べられる。
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="container">
+      <div class="section__num">§ 05 — CALCULATOR</div>
+      <h2 class="section__title">自分の金額を、出す。</h2>
+      <p class="section__lead">
+        4〜6月の月給（総支給額の3ヶ月平均）を入れると、等級と毎月の天引き額が出ます。
+      </p>
+
+      <div class="calculator">
+        <div class="calc__input-group">
+          <div class="calc__label">4〜6月 平均月給（総支給、円）</div>
+          <input type="number" class="calc__input" id="wageInput" value="400000" min="0" step="1000" inputmode="numeric" />
+        </div>
+
+        <div class="calc__presets" id="wagePresets">
+          <button class="calc__preset" data-w="250000">25万</button>
+          <button class="calc__preset" data-w="300000">30万</button>
+          <button class="calc__preset" data-w="350000">35万</button>
+          <button class="calc__preset" data-w="400000">40万</button>
+          <button class="calc__preset" data-w="500000">50万</button>
+          <button class="calc__preset" data-w="600000">60万</button>
+        </div>
+
+        <div class="calc__toggle-group" id="branchToggle">
+          <button class="calc__toggle active" data-branch="shizuoka">静岡支部 9.61%</button>
+          <button class="calc__toggle" data-branch="tokyo">東京支部 9.85%</button>
+        </div>
+
+        <div class="calc__toggle-group" id="ageToggle">
+          <button class="calc__toggle active" data-age="under40">40歳未満</button>
+          <button class="calc__toggle" data-age="over40">40〜64歳（介護あり）</button>
+        </div>
+
+        <div class="calc__result" id="result">
+          <div class="calc__grade-display">
+            <div>
+              <div class="calc__grade-label">等級 / GRADE</div>
+              <div class="calc__grade-value" id="gradeNum">
+                —<small id="stdWage">標準報酬月額 — 円</small>
+              </div>
+            </div>
+          </div>
+
+          <div class="calc__visual-bar" id="visualBar"></div>
+          <div style="font-size:10px;color:rgba(238,243,238,0.5);margin-bottom:16px;font-family:'JetBrains Mono',monospace;">構成比</div>
+
+          <div class="calc__breakdown">
+            <div class="calc__row">
+              <span class="calc__row-label">健康保険料</span>
+              <span class="calc__row-value" id="rHealth">—</span>
+            </div>
+            <div class="calc__row" id="careRow" style="display:none;">
+              <span class="calc__row-label">介護保険料</span>
+              <span class="calc__row-value" id="rCare">—</span>
+            </div>
+            <div class="calc__row">
+              <span class="calc__row-label">子ども・子育て支援金</span>
+              <span class="calc__row-value" id="rChild">—</span>
+            </div>
+            <div class="calc__row">
+              <span class="calc__row-label">厚生年金保険料</span>
+              <span class="calc__row-value" id="rPension">—</span>
+            </div>
+            <div class="calc__row total">
+              <span class="calc__row-label">毎月の天引き合計</span>
+              <span class="calc__row-value" id="rTotal">—</span>
+            </div>
+          </div>
+
+          <div class="calc__yearly">
+            年間負担（×12ヶ月）
+            <strong id="rYearly">—</strong>
+          </div>
+
+          <div class="calc__border" id="borderBox"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="container">
+      <div class="section__num">§ 06 — REFERENCE</div>
+      <h2 class="section__title">全等級、一覧表。</h2>
+      <p class="section__lead">
+        上の計算機の条件と連動して、該当行が<span style="color:var(--indigo);font-weight:700">藍色にハイライト</span>されます。
+      </p>
+
+      <div class="grade-table-wrap">
+        <table class="grade-table" id="gradeTable">
+          <thead>
+            <tr>
+              <th>等級</th>
+              <th>標準報酬</th>
+              <th>報酬月額範囲</th>
+              <th>健保＋子育</th>
+              <th>厚年</th>
+              <th>合計</th>
+            </tr>
+          </thead>
+          <tbody id="gradeTableBody"></tbody>
+        </table>
+      </div>
+      <p style="margin-top:12px;font-size:11px;color:var(--ink-mute);font-family:'JetBrains Mono',monospace;">
+        ※ 金額は本人負担（折半後）。単位：円。
+      </p>
+    </div>
+  </section>
+
+  <section>
+    <div class="container">
+      <div class="section__num">§ 07 — VERIFY</div>
+      <h2 class="section__title">念のため、確認する。</h2>
+      <p class="section__lead">
+        保険証が手元になくてもできる確認方法。
+      </p>
+
+      <div class="checklist">
+        <div class="check-item">
+          <div class="check-item__num">01</div>
+          <div class="check-item__body">
+            <strong>給与明細を照合</strong>
+            <span>「健康保険料」欄の金額を、上の表の自分の等級と照らし合わせる。静岡か東京かで数百円の差が出る。</span>
+          </div>
+        </div>
+        <div class="check-item">
+          <div class="check-item__num">02</div>
+          <div class="check-item__body">
+            <strong>マイナポータルで確認</strong>
+            <span>マイナンバーカード＋マイナポータルで「資格情報」を開くと、「全国健康保険協会 ○○支部」と表示される。</span>
+          </div>
+        </div>
+        <div class="check-item">
+          <div class="check-item__num">03</div>
+          <div class="check-item__body">
+            <strong>人事に直接聞く</strong>
+            <span>最も確実。「協会けんぽの何支部加入ですか？」で一発。</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="ornament">◆ ◇ ◆</div>
+    </div>
+  </section>
+
+  <section>
+    <div class="container">
+      <div class="section__num">§ 08 — UPDATE</div>
+      <h2 class="section__title">来年は、ここだけ直す。</h2>
+      <p class="section__lead">
+        健保・介護・子育ての料率は毎年3月分（4月納付分）から改定される。
+        厚生年金は18.3%で固定なので触らなくていい。更新は2通り。
+      </p>
+
+      <div class="update-card">
+        <div class="update-card__opt">
+          <div class="update-card__optnum">01</div>
+          <div>
+            <strong>自分で数字を書き換える</strong>
+            <span>
+              HTML末尾の <code>&lt;script&gt;</code> 先頭にある <code>CONFIG</code> ブロックの料率を、新年度の値に直すだけ。
+              年度表示（<code>fiscalYearJP</code>）も変えれば、ヒーローや計算機のラベルまで全部追従する。
+              等級表・厚生年金・天引き計算は<strong style="font-weight:700;color:var(--matcha-deep)">自動で再計算</strong>される。
+            </span>
+          </div>
+        </div>
+        <div class="update-card__opt">
+          <div class="update-card__optnum">02</div>
+          <div>
+            <strong>Claudeに丸投げする</strong>
+            <span>
+              新年度の「保険料額表」PDF（下の SOURCES のリンク）を開いてClaudeに渡し、
+              「<code>CONFIG</code> を令和◯年度に更新して」と頼む。数値の拾い間違いも防げて確実。
+            </span>
+          </div>
+        </div>
+
+        <div class="update-codeblock"><span class="cc">// HTML末尾の &lt;script&gt; 先頭。毎年ここだけ。</span>
+const CONFIG = {
+  fiscalYearJP : <span class="cv">'令和9年度'</span>,        <span class="cc">// 年度表示</span>
+  branches: {
+    shizuoka: { label:'静岡支部', health: <span class="cv">0.0961</span> },  <span class="cc">// 健保料率</span>
+    tokyo:    { label:'東京支部', health: <span class="cv">0.0985</span> }
+  },
+  careRate     : <span class="cv">0.0162</span>,           <span class="cc">// 介護（40〜64歳・全国一律）</span>
+  childRate    : <span class="cv">0.0023</span>,           <span class="cc">// 子ども・子育て支援金</span>
+  pensionRate  : <span class="cv">0.183</span>,            <span class="cc">// 厚生年金（固定・変更不要）</span>
+  pensionCapStd: <span class="cv">650000</span>           <span class="cc">// 厚年の標準報酬上限</span>
+};</div>
+      </div>
+
+      <div class="ornament">◆ ◇ ◆</div>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <div class="container">
+      <div class="footer__mark">— end of document —</div>
+      <div class="footer__sources">
+        SOURCES<br><br>
+        <a href="https://www.kyoukaikenpo.or.jp/assets/R8_13tokyo.pdf" target="_blank" rel="noopener">協会けんぽ 東京支部 令和8年度保険料額表</a><br>
+        <a href="https://www.kyoukaikenpo.or.jp/~/media/Files/shared/hokenryouritu/r8/ippan/R8_22shizuoka.pdf" target="_blank" rel="noopener">協会けんぽ 静岡支部 令和8年度保険料額表</a><br>
+        <a href="https://www.nenkin.go.jp/service/kounen/hokenryo/hoshu/20121017.html" target="_blank" rel="noopener">日本年金機構 定時決定</a>
+      </div>
+    </div>
+  </footer>
+
+</div>
+
+<script>
+  (function renderTimeline() {
+    const track = document.getElementById('timelineTrack');
+    const months = ['1','2','3','4','5','6','7','8','9','10','11','12'];
+    months.forEach((m, i) => {
+      const cell = document.createElement('div');
+      cell.className = 'timeline__month';
+      if (i >= 3 && i <= 5) cell.classList.add('collect');
+      else if (i === 6) cell.classList.add('submit');
+      else if (i >= 8) cell.classList.add('apply');
+      cell.innerHTML = `<span class="timeline__month-num">${m}</span><span>月</span>`;
+      track.appendChild(cell);
+    });
+  })();
+
+  /* ══════════════════════════════════════════════════════════════
+     毎年ここだけ更新すれば終わり（令和X年度の料率）
+     ── 健保・介護・子育て支援金は毎年3月分（4月納付分）から改定
+     ── 厚生年金は18.3%固定（2017年以降・法律で上限固定）→ 触らなくてOK
+     ── 数値の出典は最下部 SOURCES の「保険料額表」PDF
+     ════════════════════════════════════════════════════════════════ */
+  const CONFIG = {
+    fiscalYearJP : '令和8年度',
+    fiscalYearAD : 2026,
+    branches: {
+      shizuoka: { label: '静岡支部', health: 0.0961 },  // 健康保険料率（総率）
+      tokyo:    { label: '東京支部', health: 0.0985 }
+    },
+    careRate     : 0.0162,   // 介護保険料率（40〜64歳・全国一律）
+    childRate    : 0.0023,   // 子ども・子育て支援金率（令和8年度〜新設）
+    pensionRate  : 0.183,    // 厚生年金保険料率（固定）
+    pensionCapStd: 650000    // 厚生年金 標準報酬月額の上限
+  };
+
+  /* 標準報酬月額テーブル（区切りはほぼ毎年同じ。改定時のみ更新） */
+  const grades = [
+    { g:1,  min:0,      max:63000,   std:58000 },
+    { g:2,  min:63000,  max:73000,   std:68000 },
+    { g:3,  min:73000,  max:83000,   std:78000 },
+    { g:4,  min:83000,  max:93000,   std:88000 },
+    { g:5,  min:93000,  max:101000,  std:98000 },
+    { g:6,  min:101000, max:107000,  std:104000 },
+    { g:7,  min:107000, max:114000,  std:110000 },
+    { g:8,  min:114000, max:122000,  std:118000 },
+    { g:9,  min:122000, max:130000,  std:126000 },
+    { g:10, min:130000, max:138000,  std:134000 },
+    { g:11, min:138000, max:146000,  std:142000 },
+    { g:12, min:146000, max:155000,  std:150000 },
+    { g:13, min:155000, max:165000,  std:160000 },
+    { g:14, min:165000, max:175000,  std:170000 },
+    { g:15, min:175000, max:185000,  std:180000 },
+    { g:16, min:185000, max:195000,  std:190000 },
+    { g:17, min:195000, max:210000,  std:200000 },
+    { g:18, min:210000, max:230000,  std:220000 },
+    { g:19, min:230000, max:250000,  std:240000 },
+    { g:20, min:250000, max:270000,  std:260000 },
+    { g:21, min:270000, max:290000,  std:280000 },
+    { g:22, min:290000, max:310000,  std:300000 },
+    { g:23, min:310000, max:330000,  std:320000 },
+    { g:24, min:330000, max:350000,  std:340000 },
+    { g:25, min:350000, max:370000,  std:360000 },
+    { g:26, min:370000, max:395000,  std:380000 },
+    { g:27, min:395000, max:425000,  std:410000 },
+    { g:28, min:425000, max:455000,  std:440000 },
+    { g:29, min:455000, max:485000,  std:470000 },
+    { g:30, min:485000, max:515000,  std:500000 },
+    { g:31, min:515000, max:545000,  std:530000 },
+    { g:32, min:545000, max:575000,  std:560000 },
+    { g:33, min:575000, max:605000,  std:590000 },
+    { g:34, min:605000, max:635000,  std:620000 },
+    { g:35, min:635000, max:665000,  std:650000 },
+    { g:36, min:665000, max:695000,  std:680000 },
+    { g:37, min:695000, max:730000,  std:710000 },
+    { g:38, min:730000, max:770000,  std:750000 },
+    { g:39, min:770000, max:810000,  std:790000 },
+    { g:40, min:810000, max:855000,  std:830000 },
+    { g:41, min:855000, max:905000,  std:880000 },
+    { g:42, min:905000, max:955000,  std:930000 },
+    { g:43, min:955000, max:1005000, std:980000 },
+    { g:44, min:1005000,max:1055000, std:1030000 },
+    { g:45, min:1055000,max:1115000, std:1090000 },
+    { g:46, min:1115000,max:1175000, std:1150000 },
+    { g:47, min:1175000,max:1235000, std:1210000 },
+    { g:48, min:1235000,max:1295000, std:1270000 },
+    { g:49, min:1295000,max:1355000, std:1330000 },
+    { g:50, min:1355000,max:Infinity,std:1390000 }
+  ];
+
+  const state = { branch: 'shizuoka', age: 'under40', wage: 400000 };
+  const PENSION_HALF = CONFIG.pensionRate / 2;   // 0.0915（本人負担分）
+
+  // 折半端数処理：50銭以下切捨て・50銭超切上げ
+  function roundHanbun(v) {
+    const frac = v - Math.floor(v);
+    return frac > 0.5 ? Math.ceil(v) : Math.floor(v);
+  }
+  function fmt(n) { return Math.round(n).toLocaleString('ja-JP'); }
+
+  // 厚生年金（本人負担）。下限88,000円未満は額表上は厚年欄なし、上限はキャップ
+  function pensionEmployee(std) {
+    if (std < 88000) return 0;
+    return roundHanbun(Math.min(std, CONFIG.pensionCapStd) * PENSION_HALF);
+  }
+
+  // ある標準報酬月額の天引き内訳（本人負担・折半後）
+  function premiums(std, branch, over40) {
+    const hr = CONFIG.branches[branch].health;
+    const health  = roundHanbun(std * hr / 2);
+    const care    = over40 ? roundHanbun(std * CONFIG.careRate / 2) : 0;
+    const child   = roundHanbun(std * CONFIG.childRate / 2);
+    const pension = pensionEmployee(std);
+    const total   = health + care + child + pension;
+    return { health, care, child, pension, total, yearly: total * 12 };
+  }
+
+  function findGrade(wage) {
+    if (wage < grades[0].max) return grades[0];
+    return grades.find(g => wage >= g.min && wage < g.max) || grades[grades.length - 1];
+  }
+
+  function calculate() {
+    const g = findGrade(state.wage);
+    return Object.assign({ grade: g, std: g.std },
+      premiums(g.std, state.branch, state.age === 'over40'));
+  }
+
+  // 等級ボーダー分析：あと何円で上下の等級に動くか＝いくら変わるか
+  function borderAnalysis(wage, grade) {
+    const idx = grades.indexOf(grade);
+    const over40 = state.age === 'over40';
+    const cur = premiums(grade.std, state.branch, over40);
+    const rows = [];
+    if (idx > 0 && grade.min > 0) {
+      const lower = grades[idx - 1];
+      const need = wage - grade.min + 1;
+      const save = cur.total - premiums(lower.std, state.branch, over40).total;
+      if (need > 0 && save > 0) rows.push({ dir: 'down', grade: lower.g, amt: need, diff: save });
+    }
+    if (idx < grades.length - 1 && grade.max !== Infinity) {
+      const higher = grades[idx + 1];
+      const room = grade.max - wage;
+      const cost = premiums(higher.std, state.branch, over40).total - cur.total;
+      if (room >= 0 && cost > 0) rows.push({ dir: 'up', grade: higher.g, amt: room, diff: cost });
+    }
+    return rows;
+  }
+
+  // 数値カウントアップ
+  const _prev = {};
+  function animateNumber(el, to, prefix) {
+    const id = el.id, from = (id in _prev) ? _prev[id] : to, t0 = performance.now(), dur = 420;
+    _prev[id] = to;
+    (function step(t) {
+      const k = Math.min(1, (t - t0) / dur), e = 1 - Math.pow(1 - k, 3);
+      el.textContent = (prefix || '') + fmt(from + (to - from) * e);
+      if (k < 1) requestAnimationFrame(step);
+    })(t0);
+  }
+
+  function updateUI() {
+    const r = calculate();
+    document.getElementById('gradeNum').innerHTML =
+      `${r.grade.g}<small>標準報酬月額 ${fmt(r.std)} 円</small>`;
+    animateNumber(document.getElementById('rHealth'), r.health, '¥');
+    animateNumber(document.getElementById('rChild'), r.child, '¥');
+    animateNumber(document.getElementById('rPension'), r.pension, '¥');
+    animateNumber(document.getElementById('rTotal'), r.total, '¥');
+    animateNumber(document.getElementById('rYearly'), r.yearly, '¥');
+
+    const careRow = document.getElementById('careRow');
+    if (state.age === 'over40') {
+      careRow.style.display = '';
+      animateNumber(document.getElementById('rCare'), r.care, '¥');
+    } else {
+      careRow.style.display = 'none';
+    }
+
+    const bar = document.getElementById('visualBar');
+    bar.innerHTML = '';
+    [
+      { cls: 'health', label: '健保', val: r.health },
+      ...(r.care > 0 ? [{ cls: 'care', label: '介護', val: r.care }] : []),
+      { cls: 'child', label: '子育', val: r.child },
+      { cls: 'pension', label: '厚年', val: r.pension }
+    ].forEach(s => {
+      if (s.val <= 0) return;
+      const seg = document.createElement('div');
+      seg.className = 'calc__visual-seg ' + s.cls;
+      seg.style.flex = s.val;
+      seg.textContent = s.label;
+      bar.appendChild(seg);
+    });
+
+    renderBorder(borderAnalysis(state.wage, r.grade));
+    renderTable();
+
+    document.querySelectorAll('#gradeTableBody tr').forEach(tr => tr.classList.remove('current'));
+    const activeRow = document.querySelector(`#gradeTableBody tr[data-grade="${r.grade.g}"]`);
+    if (activeRow) {
+      activeRow.classList.add('current');
+      const box = document.querySelector('.grade-table-wrap');
+      box.scrollTo({ top: activeRow.offsetTop - 100, behavior: 'smooth' });
+    }
+  }
+
+  function renderBorder(rows) {
+    const box = document.getElementById('borderBox');
+    box.innerHTML = '';
+    rows.forEach(r => {
+      const div = document.createElement('div');
+      div.className = 'border-row ' + r.dir;
+      const verb = r.dir === 'down' ? '下げると' : '上がると';
+      const tail = r.dir === 'down' ? '軽くなる' : '増える';
+      const icon = r.dir === 'down' ? '▼' : '▲';
+      div.innerHTML =
+        `<span class="border-row__icon">${icon}</span>` +
+        `<span class="border-row__text">あと月平均 <b>¥${fmt(r.amt)}</b> ${verb} ` +
+        `<b>${r.grade}等級</b>へ → 月 <b class="amt">¥${fmt(r.diff)}</b>・` +
+        `年 <b class="amt">¥${fmt(r.diff * 12)}</b> ${tail}。</span>`;
+      box.appendChild(div);
+    });
+  }
+
+  function renderTable() {
+    const tbody = document.getElementById('gradeTableBody');
+    tbody.innerHTML = '';
+    const over40 = state.age === 'over40';
+    grades.forEach(g => {
+      const p = premiums(g.std, state.branch, over40);
+      const tr = document.createElement('tr');
+      tr.setAttribute('data-grade', g.g);
+      const rangeText = g.min === 0
+        ? `〜${fmt(g.max)}`
+        : g.max === Infinity
+          ? `${fmt(g.min)}〜`
+          : `${fmt(g.min)}〜${fmt(g.max)}`;
+      tr.innerHTML = `
+        <td>${g.g}</td>
+        <td>${fmt(g.std)}</td>
+        <td style="font-size:10px;">${rangeText}</td>
+        <td>${fmt(p.health + p.care + p.child)}</td>
+        <td>${p.pension ? fmt(p.pension) : '—'}</td>
+        <td class="total-col">¥${fmt(p.total)}</td>
+      `;
+      tbody.appendChild(tr);
+    });
+  }
+
+  document.getElementById('wageInput').addEventListener('input', (e) => {
+    state.wage = Number(e.target.value) || 0;
+    updateUI();
+  });
+
+  document.querySelectorAll('#wagePresets .calc__preset').forEach(btn => {
+    btn.addEventListener('click', () => {
+      state.wage = Number(btn.dataset.w);
+      document.getElementById('wageInput').value = state.wage;
+      updateUI();
+    });
+  });
+
+  document.querySelectorAll('#branchToggle .calc__toggle').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('#branchToggle .calc__toggle').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      state.branch = btn.dataset.branch;
+      updateUI();
+    });
+  });
+
+  document.querySelectorAll('#ageToggle .calc__toggle').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('#ageToggle .calc__toggle').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      state.age = btn.dataset.age;
+      updateUI();
+    });
+  });
+
+  /* CONFIG をUIへ反映（年度表示・支部ラベル・料率） */
+  (function applyConfig() {
+    document.querySelectorAll('.js-fy').forEach(el => el.textContent = CONFIG.fiscalYearJP);
+    document.querySelectorAll('#branchToggle .calc__toggle').forEach(btn => {
+      const b = CONFIG.branches[btn.dataset.branch];
+      if (b) btn.textContent = `${b.label} ${(b.health * 100).toFixed(2)}%`;
+    });
+    document.querySelectorAll('.js-rate').forEach(el => {
+      const b = CONFIG.branches[el.dataset.branch];
+      if (b) el.textContent = (b.health * 100).toFixed(2);
+    });
+  })();
+
+  /* スクロールで各セクションをふわっと表示 */
+  if ('IntersectionObserver' in window) {
+    const secs = document.querySelectorAll('section');
+    secs.forEach(s => s.classList.add('reveal'));
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach(en => {
+        if (en.isIntersecting) { en.target.classList.add('in'); io.unobserve(en.target); }
+      });
+    }, { threshold: 0.12 });
+    secs.forEach(s => io.observe(s));
+  }
+
+  updateUI();
+</script>
+</body>
+</html>
