@@ -909,8 +909,13 @@
     localStorage.setItem('theme', isDark ? 'light' : 'dark');
   }
 
+  // デフォルトはダークモード。以前ライトを保存していた場合も一度だけリセットする
+  if (localStorage.getItem('theme_default_v2') !== '1') {
+    localStorage.removeItem('theme');
+    localStorage.setItem('theme_default_v2', '1');
+  }
   const saved = localStorage.getItem('theme');
-  if (saved) { html.setAttribute('data-theme', saved); }
+  html.setAttribute('data-theme', saved || 'dark');
 
   /* ===================================================================
      検索（タイトル・タグ・説明文を対象）
