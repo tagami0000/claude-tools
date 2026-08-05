@@ -1,289 +1,1597 @@
 <!DOCTYPE html>
-<html lang="ja">
+<html lang="ja" data-theme="dark">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>FIREライフサイクル財務ダッシュボード</title>
+<title>生涯資産プラン ｜ Die With Zero — 資産使い切り計算機関</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700;900&family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500&family=Shippori+Mincho:wght@500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <style>
-  :root {
-    --bg:#0b0f1a;--bg2:#111827;--bg3:#1f2937;--bg4:#374151;
-    --border:#374151;--text:#f9fafb;--text2:#9ca3af;--text3:#6b7280;
-    --green:#10b981;--blue:#3b82f6;--yellow:#f59e0b;--red:#ef4444;
-    --purple:#8b5cf6;--teal:#14b8a6;--orange:#f97316;
+  /* ======================================================================
+     のびのびスチームパンク世界観 — 真鍮と歯車と蒸気の工房
+     ====================================================================== */
+
+  /* ===== 夜の工房（dark）===== */
+  :root[data-theme="dark"] {
+    --bg:#1a130c; --bg-deep:#120c07; --bg-glow:#2e2113;
+    --panel:#2a1f14; --panel2:#34271a; --panel-edge:#1d150d;
+
+    --brass:#c9a24b; --brass-light:#f0d488; --brass-bright:#ffe9a8;
+    --brass-dark:#8a6a2c; --brass-deep:#5e471c;
+    --copper:#c47a3d; --copper-light:#e0a064;
+    --amber:#ffb347; --amber-glow:rgba(255,179,71,0.55);
+    --verdigris:#4fb3a3; --rust:#d4553c; --steel:#8fa3b0;
+    --tag-ink:#f4dc94; --tag-bg1:#3a2c1c; --tag-bg2:#251a0f;
+
+    --ink:#f0e2c2; --ink2:#c4b08a; --ink3:#8c7a5c;
+    --border:#4d3a22; --border-light:#6b5230;
+
+    --grid-line:rgba(201,162,75,0.15);
+    --band-go:rgba(255,179,71,0.075);
+    --band-slow:rgba(196,122,61,0.065);
+    --band-no:rgba(143,163,176,0.075);
+    --row-line:rgba(107,82,48,0.45);
+    --vignette:radial-gradient(ellipse 120% 90% at 50% 0%, rgba(255,179,71,0.10), transparent 55%);
+    --paper-opacity:0.05; --paper-blend:overlay;
+    --shadow:rgba(0,0,0,0.55); --groove:rgba(0,0,0,0.55);
+    --lamp-show:1; --sun-show:0;
   }
-  *{box-sizing:border-box;margin:0;padding:0}
-  body{background:var(--bg);color:var(--text);font-family:'Segoe UI','Meiryo',sans-serif;min-height:100vh}
-  header{background:linear-gradient(135deg,#1a1040 0%,#0b0f1a 100%);padding:28px 32px;border-bottom:1px solid var(--border)}
-  header h1{font-size:1.5rem;font-weight:800;margin-bottom:4px}
-  header h1 span{color:var(--yellow)}
-  header p{color:var(--text2);font-size:0.85rem}
-  .layout{display:grid;grid-template-columns:280px 1fr;min-height:calc(100vh - 80px)}
 
-  /* Controls panel */
-  .controls{background:var(--bg2);border-right:1px solid var(--border);padding:20px;overflow-y:auto;max-height:calc(100vh - 80px);position:sticky;top:0}
-  .ctrl-section{margin-bottom:24px}
-  .ctrl-section h3{font-size:0.75rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--text3);margin-bottom:12px;padding-bottom:6px;border-bottom:1px solid var(--border)}
-  .slider-group{margin-bottom:14px}
-  .slider-label{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;font-size:0.78rem}
-  .slider-label span:first-child{color:var(--text2)}
-  .slider-val{color:var(--yellow);font-weight:700;font-size:0.82rem;min-width:60px;text-align:right}
-  input[type=range]{width:100%;-webkit-appearance:none;height:4px;border-radius:2px;background:var(--bg4);outline:none;cursor:pointer}
-  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;border-radius:50%;background:var(--yellow);cursor:pointer}
+  /* ===== 昼の工房（light）===== */
+  :root[data-theme="light"] {
+    --bg:#e7d8b8; --bg-deep:#ddcaa3; --bg-glow:#f3e8cd;
+    --panel:#f2e7cd; --panel2:#ebddbe; --panel-edge:#cdb88c;
 
-  /* Charts area */
-  .charts-area{padding:20px;overflow-y:auto}
-  .kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}
-  .kpi{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:14px 16px}
-  .kpi .val{font-size:1.4rem;font-weight:800;margin-bottom:2px}
-  .kpi .label{font-size:0.72rem;color:var(--text2)}
-  .chart-card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:16px 20px;margin-bottom:16px}
-  .chart-card h2{font-size:0.85rem;font-weight:600;color:var(--text2);margin-bottom:14px;text-transform:uppercase;letter-spacing:0.05em}
-  canvas{max-height:220px}
+    --brass:#a47e2b; --brass-light:#c9a24b; --brass-bright:#e0bd5e;
+    --brass-dark:#7c5d1d; --brass-deep:#5c4415;
+    --copper:#a55a23; --copper-light:#c47a3d;
+    --amber:#c8851f; --amber-glow:rgba(180,120,30,0.35);
+    --verdigris:#2c7d70; --rust:#a83a22; --steel:#5a6f7e;
+    --tag-ink:#463210; --tag-bg1:#e8d7b0; --tag-bg2:#d6c094;
 
-  @media(max-width:900px){.layout{grid-template-columns:1fr}.controls{max-height:none;position:static}.kpi-row{grid-template-columns:repeat(2,1fr)}}
+    --ink:#3a2b18; --ink2:#6a5436; --ink3:#9a8460;
+    --border:#c4ab7c; --border-light:#b09663;
+
+    --grid-line:rgba(124,93,29,0.18);
+    --band-go:rgba(200,133,31,0.10);
+    --band-slow:rgba(165,90,35,0.075);
+    --band-no:rgba(90,111,126,0.09);
+    --row-line:rgba(176,150,99,0.5);
+    --vignette:radial-gradient(ellipse 120% 90% at 50% 0%, rgba(255,255,255,0.35), transparent 60%);
+    --paper-opacity:0.10; --paper-blend:multiply;
+    --shadow:rgba(80,55,20,0.22); --groove:rgba(90,65,25,0.30);
+    --lamp-show:0; --sun-show:1;
+  }
+
+  * { box-sizing:border-box; margin:0; padding:0; }
+  html { scroll-behavior:smooth; }
+
+  body {
+    background:var(--bg); color:var(--ink);
+    font-family:'Shippori Mincho','Yu Mincho','Hiragino Mincho ProN',serif;
+    line-height:1.7; min-height:100vh; position:relative; overflow-x:hidden;
+    transition:background .4s, color .4s;
+  }
+  body::after {
+    content:''; position:fixed; inset:0;
+    background:var(--vignette),
+      radial-gradient(ellipse 100% 70% at 50% 120%, rgba(0,0,0,0.35), transparent 60%),
+      linear-gradient(180deg, var(--bg-glow), var(--bg) 30%, var(--bg-deep));
+    z-index:-3; pointer-events:none; transition:background .4s;
+  }
+  body::before {
+    content:''; position:fixed; inset:0;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    opacity:var(--paper-opacity); mix-blend-mode:var(--paper-blend);
+    z-index:-2; pointer-events:none;
+  }
+
+  #cogfield { position:fixed; inset:0; z-index:-1; pointer-events:none; overflow:hidden; }
+  .bg-cog { position:absolute; color:var(--brass-dark); opacity:.12; will-change:transform; }
+  .bg-cog svg { display:block; width:100%; height:100%; }
+  @keyframes spin  { to { transform:rotate(360deg); } }
+  @keyframes spinR { to { transform:rotate(-360deg); } }
+
+  /* ================= ヘッダー ================= */
+  header {
+    position:sticky; top:0; z-index:100;
+    background:linear-gradient(180deg,var(--panel2),var(--panel) 60%,var(--panel-edge));
+    border-bottom:3px solid var(--brass-dark);
+    box-shadow:0 4px 18px var(--shadow), inset 0 1px 0 rgba(255,225,160,.12);
+  }
+  header::after {
+    content:''; position:absolute; left:0; right:0; bottom:-3px; height:3px;
+    background:repeating-linear-gradient(90deg,var(--brass-dark) 0 14px,var(--brass-light) 14px 16px,var(--brass-dark) 16px 30px);
+    opacity:.5;
+  }
+  .header-inner {
+    max-width:1500px; margin:0 auto; display:flex; align-items:center; justify-content:space-between;
+    height:74px; gap:18px; padding:0 24px; position:relative;
+  }
+  .logo { display:flex; align-items:center; gap:13px; text-decoration:none; flex-shrink:0; }
+  .logo-cog { width:42px; height:42px; color:var(--brass); filter:drop-shadow(0 0 6px var(--amber-glow)); flex-shrink:0; }
+  .logo-cog svg { width:100%; height:100%; animation:spin 14s linear infinite; }
+  .logo-text { display:flex; flex-direction:column; line-height:1.15; }
+  .logo-text .l-main {
+    font-family:'Cinzel',serif; font-weight:700; font-size:1.1rem; letter-spacing:.05em;
+    background:linear-gradient(180deg,var(--brass-bright),var(--brass) 55%,var(--brass-dark));
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+    filter:drop-shadow(0 1px 0 rgba(0,0,0,.3));
+  }
+  .logo-text .l-sub { font-family:'Shippori Mincho',serif; font-size:.76rem; color:var(--ink3); letter-spacing:.14em; }
+  .header-right { display:flex; align-items:center; gap:12px; }
+
+  .save-lamp {
+    display:inline-flex; align-items:center; gap:8px;
+    font-family:'Shippori Mincho',serif; font-size:.74rem; color:var(--ink3);
+    background:radial-gradient(circle at 50% 35%,var(--panel2),var(--panel-edge));
+    border:2px solid var(--brass-dark); border-radius:20px; padding:5px 14px; white-space:nowrap;
+    box-shadow:inset 0 1px 0 rgba(255,225,160,.15), 0 2px 5px var(--shadow);
+    transition:color .3s, border-color .3s;
+  }
+  .save-lamp .dot { width:8px; height:8px; border-radius:50%; background:var(--brass-dark); transition:all .3s; }
+  .save-lamp.on { color:var(--brass-light); border-color:var(--brass); }
+  .save-lamp.on .dot { background:var(--amber); box-shadow:0 0 8px var(--amber-glow); }
+
+  .theme-btn {
+    position:relative; width:44px; height:44px; border-radius:50%;
+    border:2px solid var(--brass-dark);
+    background:radial-gradient(circle at 50% 38%,var(--panel2),var(--panel-edge));
+    cursor:pointer; flex-shrink:0; display:grid; place-items:center;
+    box-shadow:inset 0 1px 0 rgba(255,225,160,.18), 0 2px 6px var(--shadow);
+    transition:transform .2s, box-shadow .25s, border-color .25s;
+  }
+  .theme-btn:hover { transform:rotate(18deg) scale(1.06); border-color:var(--brass-light); box-shadow:0 0 12px var(--amber-glow); }
+  .theme-btn svg { width:23px; height:23px; position:absolute; transition:opacity .3s, transform .4s; }
+  .theme-btn .ic-lamp { color:var(--amber); opacity:var(--lamp-show); transform:scale(var(--lamp-show)); filter:drop-shadow(0 0 5px var(--amber-glow)); }
+  .theme-btn .ic-sun  { color:var(--copper); opacity:var(--sun-show); transform:scale(var(--sun-show)); }
+
+  /* ================= ヒーロー ================= */
+  main { max-width:1500px; margin:0 auto; padding:0 24px 48px; position:relative; }
+  .hero { position:relative; text-align:center; padding:46px 20px 20px; overflow:hidden; }
+  .hero-cog { position:absolute; color:var(--brass); opacity:.10; pointer-events:none; }
+  .hero-cog svg { width:100%; height:100%; }
+  .hero-cog.c1 { width:200px; height:200px; top:-50px; left:-30px; animation:spin 26s linear infinite; }
+  .hero-cog.c2 { width:130px; height:130px; bottom:-34px; right:20px; animation:spinR 20s linear infinite; }
+  .hero-eyebrow {
+    display:inline-flex; align-items:center; gap:10px; font-family:'Cinzel',serif;
+    font-size:.7rem; letter-spacing:.28em; color:var(--brass); text-transform:uppercase;
+    margin-bottom:14px; position:relative; z-index:1;
+  }
+  .hero-eyebrow::before, .hero-eyebrow::after { content:''; width:34px; height:1px; background:linear-gradient(90deg,transparent,var(--brass)); }
+  .hero-eyebrow::after { background:linear-gradient(90deg,var(--brass),transparent); }
+  .hero h1 {
+    font-family:'Shippori Mincho',serif; font-weight:800;
+    font-size:clamp(1.5rem,4vw,2.5rem); line-height:1.25; letter-spacing:.04em;
+    position:relative; z-index:1; color:var(--ink);
+  }
+  .hero h1 .em {
+    background:linear-gradient(176deg,var(--brass-bright),var(--brass-light) 35%,var(--brass) 60%,var(--brass-dark));
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+    filter:drop-shadow(0 1px 1px rgba(0,0,0,.4)) drop-shadow(0 0 14px var(--amber-glow));
+  }
+  .hero h1 .num { font-family:'Cinzel',serif; font-weight:900; }
+  .hero p { font-size:.88rem; color:var(--ink2); max-width:640px; margin:14px auto 0; position:relative; z-index:1; }
+  .divider { display:flex; align-items:center; justify-content:center; gap:14px; margin:18px auto 26px; max-width:340px; position:relative; z-index:1; }
+  .divider .line { flex:1; height:2px; background:linear-gradient(90deg,transparent,var(--brass-dark)); }
+  .divider .line.r { background:linear-gradient(90deg,var(--brass-dark),transparent); }
+  .divider .mini-cog { width:24px; height:24px; color:var(--brass); animation:spin 12s linear infinite; }
+  .divider .gem { width:9px; height:9px; transform:rotate(45deg); background:linear-gradient(135deg,var(--copper-light),var(--copper)); box-shadow:0 0 8px var(--amber-glow); }
+
+  /* ================= 共通パネル ================= */
+  .panel {
+    position:relative;
+    background:linear-gradient(150deg,var(--panel2),var(--panel) 55%,var(--panel-edge));
+    border:2px solid var(--border-light); border-radius:14px; padding:18px 20px 16px;
+    box-shadow:0 6px 16px var(--shadow), inset 0 1px 0 rgba(255,225,160,.08);
+  }
+  .rivets::before {
+    content:''; position:absolute; inset:5px; border-radius:10px; pointer-events:none;
+    background:
+      radial-gradient(circle 3.5px at 0% 0%,var(--brass-light),var(--brass-dark) 60%,transparent 70%),
+      radial-gradient(circle 3.5px at 100% 0%,var(--brass-light),var(--brass-dark) 60%,transparent 70%),
+      radial-gradient(circle 3.5px at 0% 100%,var(--brass-light),var(--brass-dark) 60%,transparent 70%),
+      radial-gradient(circle 3.5px at 100% 100%,var(--brass-light),var(--brass-dark) 60%,transparent 70%);
+    opacity:.5;
+  }
+  .panel h2 {
+    display:flex; align-items:center; gap:10px; font-family:'Shippori Mincho',serif;
+    font-size:.9rem; font-weight:700; color:var(--ink); letter-spacing:.06em;
+    margin-bottom:4px; position:relative; z-index:1;
+  }
+  .panel h2 .n {
+    font-family:'Cinzel',serif; font-size:.72rem; font-weight:700; color:var(--bg-deep);
+    background:radial-gradient(circle at 40% 35%,var(--brass-bright),var(--brass) 60%,var(--brass-dark));
+    width:22px; height:22px; border-radius:50%; display:grid; place-items:center; flex-shrink:0;
+    box-shadow:0 1px 3px var(--shadow);
+  }
+  .panel h2::after { content:''; flex:1; height:2px; background:linear-gradient(90deg,var(--border-light),transparent); }
+  .panel .sub { font-size:.74rem; color:var(--ink3); margin-bottom:14px; line-height:1.6; position:relative; z-index:1; }
+  .legend { display:flex; gap:14px; flex-wrap:wrap; margin-bottom:10px; position:relative; z-index:1; }
+  .legend span { font-size:.72rem; color:var(--ink2); display:flex; align-items:center; gap:6px; }
+  .legend i { width:11px; height:11px; border-radius:3px; display:inline-block; border:1px solid rgba(0,0,0,.25); }
+
+  /* ================= レイアウト ================= */
+  .layout { display:grid; grid-template-columns:330px 1fr; gap:22px; align-items:start; }
+
+  /* ===== 計器盤 ===== */
+  .console {
+    position:sticky; top:96px;
+    background:linear-gradient(150deg,var(--panel2),var(--panel) 55%,var(--panel-edge));
+    border:2px solid var(--border-light); border-radius:14px; padding:0 0 14px;
+    box-shadow:0 6px 18px var(--shadow), inset 0 1px 0 rgba(255,225,160,.08);
+    max-height:calc(100vh - 120px); overflow-y:auto;
+  }
+  .console::-webkit-scrollbar { width:8px; }
+  .console::-webkit-scrollbar-track { background:var(--panel-edge); border-radius:4px; }
+  .console::-webkit-scrollbar-thumb { background:var(--brass-dark); border-radius:4px; }
+  .console-head {
+    display:flex; align-items:center; justify-content:space-between; gap:10px;
+    padding:15px 18px 13px; border-bottom:2px solid var(--border);
+    position:sticky; top:0; z-index:5;
+    background:linear-gradient(180deg,var(--panel2),var(--panel));
+  }
+  .console-head .t { font-family:'Cinzel',serif; font-size:.72rem; letter-spacing:.2em; color:var(--brass); text-transform:uppercase; }
+
+  details.grp { border-bottom:1px solid var(--border); }
+  details.grp summary {
+    list-style:none; cursor:pointer; user-select:none;
+    padding:12px 18px; display:flex; align-items:center; gap:9px;
+    font-family:'Shippori Mincho',serif; font-size:.82rem; font-weight:700;
+    color:var(--ink); letter-spacing:.06em; transition:color .2s;
+  }
+  details.grp summary::-webkit-details-marker { display:none; }
+  details.grp summary:hover { color:var(--brass-light); }
+  details.grp summary .sec-cog { width:15px; height:15px; color:var(--brass); flex-shrink:0; }
+  details.grp summary .sec-cog svg { width:100%; height:100%; animation:spin 22s linear infinite; }
+  details.grp summary .chev { margin-left:auto; color:var(--ink3); font-size:.7rem; transition:transform .25s; }
+  details.grp[open] summary .chev { transform:rotate(90deg); }
+  .grp-body { padding:2px 18px 16px; }
+
+  .knob { margin-bottom:15px; }
+  .knob-head { display:flex; align-items:baseline; justify-content:space-between; gap:8px; margin-bottom:7px; }
+  .knob-head label { font-size:.78rem; color:var(--ink2); line-height:1.35; }
+  .knob-val {
+    display:inline-flex; align-items:baseline; gap:3px; flex-shrink:0;
+    background:linear-gradient(180deg,var(--bg-deep),var(--panel-edge));
+    border:1.5px solid var(--brass-dark); border-radius:6px; padding:2px 8px;
+    box-shadow:inset 0 2px 4px var(--groove);
+  }
+  .knob-val input {
+    width:58px; background:transparent; border:none; outline:none;
+    font-family:'Cinzel',serif; font-weight:700; font-size:.9rem;
+    color:var(--brass-light); text-align:right; -moz-appearance:textfield; appearance:textfield;
+  }
+  .knob-val input::-webkit-outer-spin-button, .knob-val input::-webkit-inner-spin-button { -webkit-appearance:none; margin:0; }
+  .knob-val input:focus { color:var(--brass-bright); }
+  .knob-val .unit { font-size:.66rem; color:var(--ink3); flex-shrink:0; }
+
+  input[type=range] {
+    width:100%; -webkit-appearance:none; appearance:none; height:8px; border-radius:4px;
+    background:linear-gradient(180deg,var(--bg-deep),var(--panel-edge));
+    border:1px solid var(--brass-deep); box-shadow:inset 0 2px 4px var(--groove);
+    outline:none; cursor:pointer;
+  }
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance:none; appearance:none; width:19px; height:19px; border-radius:50%;
+    background:radial-gradient(circle at 38% 32%,var(--brass-bright),var(--brass) 45%,var(--brass-dark) 85%);
+    border:1.5px solid var(--brass-deep); cursor:grab;
+    box-shadow:0 2px 5px var(--shadow), inset 0 1px 1px rgba(255,255,255,.4);
+    transition:box-shadow .2s, transform .15s;
+  }
+  input[type=range]::-webkit-slider-thumb:hover { box-shadow:0 0 12px var(--amber-glow),0 2px 5px var(--shadow); transform:scale(1.1); }
+  input[type=range]::-moz-range-thumb {
+    width:17px; height:17px; border-radius:50%;
+    background:radial-gradient(circle at 38% 32%,var(--brass-bright),var(--brass) 45%,var(--brass-dark) 85%);
+    border:1.5px solid var(--brass-deep); cursor:grab; box-shadow:0 2px 5px var(--shadow);
+  }
+  .knob.dim { opacity:.42; }
+  .knob.dim input { pointer-events:none; }
+
+  .hint { font-size:.69rem; color:var(--ink3); margin:-8px 0 14px; line-height:1.6; }
+  .hint b { color:var(--brass-light); }
+
+  /* 真鍮トグル */
+  .autorow { display:flex; align-items:center; gap:10px; margin:4px 0 14px; }
+  .autolab { font-size:.76rem; color:var(--ink2); }
+  .switch { position:relative; display:inline-block; width:38px; height:21px; flex:none; }
+  .switch input { opacity:0; width:0; height:0; }
+  .switch .sl {
+    position:absolute; inset:0; border-radius:20px; cursor:pointer; transition:.22s;
+    background:linear-gradient(180deg,var(--bg-deep),var(--panel-edge));
+    border:1.5px solid var(--brass-deep); box-shadow:inset 0 2px 4px var(--groove);
+  }
+  .switch .sl::before {
+    content:''; position:absolute; left:2px; top:2px; width:14px; height:14px; border-radius:50%;
+    background:radial-gradient(circle at 38% 32%,var(--ink3),var(--brass-deep));
+    transition:.22s;
+  }
+  .switch input:checked + .sl { border-color:var(--brass); box-shadow:inset 0 2px 4px var(--groove),0 0 8px var(--amber-glow); }
+  .switch input:checked + .sl::before {
+    transform:translateX(17px);
+    background:radial-gradient(circle at 38% 32%,var(--brass-bright),var(--brass) 55%,var(--brass-dark));
+  }
+
+  .btn-row { display:flex; flex-direction:column; gap:9px; padding:14px 18px 0; }
+  .btn {
+    font-family:'Shippori Mincho',serif; font-size:.8rem; font-weight:700; color:var(--tag-ink);
+    background:linear-gradient(180deg,var(--tag-bg1),var(--tag-bg2));
+    border:2px solid var(--brass-dark); border-radius:9px; padding:9px 14px; cursor:pointer;
+    box-shadow:inset 0 1px 0 rgba(255,225,160,.12),0 2px 5px var(--shadow);
+    transition:all .22s; letter-spacing:.04em; display:flex; align-items:center; justify-content:center; gap:8px;
+  }
+  .btn:hover { border-color:var(--brass-light); color:var(--brass-bright); box-shadow:0 0 14px var(--amber-glow),inset 0 1px 0 rgba(255,225,160,.2); transform:translateY(-1px); }
+  .btn:active { transform:translateY(1px); }
+  .btn.ghost { color:var(--ink3); background:transparent; border-color:var(--border); }
+  .btn.ghost:hover { color:var(--copper-light); border-color:var(--copper); box-shadow:none; }
+
+  /* ================= 右カラム ================= */
+  .stage { display:flex; flex-direction:column; gap:18px; min-width:0; }
+
+  /* ===== 主計器：フェーズ別の使える額 ===== */
+  .main-gauge {
+    position:relative; overflow:hidden;
+    background:linear-gradient(150deg,var(--panel2),var(--panel) 55%,var(--panel-edge));
+    border:2px solid var(--brass); border-radius:14px; padding:24px 24px 22px;
+    box-shadow:0 6px 20px var(--shadow),inset 0 1px 0 rgba(255,225,160,.1),0 0 26px var(--amber-glow);
+  }
+  .mg-cog { position:absolute; right:-46px; top:-46px; width:200px; height:200px; color:var(--brass); opacity:.09; pointer-events:none; }
+  .mg-cog svg { width:100%; height:100%; animation:spin 40s linear infinite; }
+  .mg-label {
+    font-family:'Cinzel',serif; font-size:.68rem; letter-spacing:.22em; color:var(--brass);
+    text-transform:uppercase; margin-bottom:4px; position:relative; z-index:1;
+  }
+  .mg-sub { font-size:.8rem; color:var(--ink2); margin-bottom:16px; position:relative; z-index:1; }
+  .phase-row { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; position:relative; z-index:1; }
+  .ph {
+    border:2px solid var(--border-light); border-radius:11px; padding:14px 16px 13px;
+    background:linear-gradient(170deg,var(--tag-bg1),var(--tag-bg2));
+    border-top:3px solid var(--pc); box-shadow:inset 0 1px 0 rgba(255,225,160,.08);
+    transition:border-color .25s, box-shadow .25s;
+  }
+  .ph:hover { box-shadow:0 0 16px var(--amber-glow), inset 0 1px 0 rgba(255,225,160,.14); }
+  .ph .pn { font-family:'Cinzel',serif; font-size:.78rem; font-weight:700; color:var(--pc); letter-spacing:.06em; }
+  .ph .pa { font-size:.7rem; color:var(--ink3); margin-bottom:8px; }
+  .ph .pv {
+    font-family:'Cinzel',serif; font-weight:900; font-size:clamp(1.5rem,3.2vw,2.05rem);
+    line-height:1.05; color:var(--ink);
+  }
+  .ph .pv .u { font-size:.44em; color:var(--ink2); margin-left:2px; letter-spacing:.02em; }
+  .ph .py { font-size:.7rem; color:var(--ink3); margin-top:4px; }
+  .ph.go   { --pc:var(--amber); }
+  .ph.slow { --pc:var(--copper-light); }
+  .ph.no   { --pc:var(--steel); }
+  .ph.go .pv { color:var(--brass-light); }
+
+  /* ===== KPI ===== */
+  .kpi-row { display:grid; grid-template-columns:repeat(4,1fr); gap:13px; }
+  .kpi {
+    position:relative; display:flex; align-items:center; gap:12px;
+    background:linear-gradient(150deg,var(--panel2),var(--panel) 55%,var(--panel-edge));
+    border:2px solid var(--border-light); border-radius:12px; padding:14px 15px;
+    box-shadow:0 4px 12px var(--shadow),inset 0 1px 0 rgba(255,225,160,.08);
+    transition:border-color .25s, box-shadow .25s;
+  }
+  .kpi:hover { border-color:var(--brass); box-shadow:0 6px 18px var(--shadow),0 0 14px var(--amber-glow); }
+  .kpi-medal { position:relative; width:42px; height:42px; display:grid; place-items:center; flex-shrink:0; }
+  .kpi-medal .ring { position:absolute; inset:0; color:var(--brass); opacity:.85; }
+  .kpi-medal .ring svg { width:100%; height:100%; animation:spin 26s linear infinite; }
+  .kpi-medal .emj { position:relative; z-index:1; font-size:1.05rem; filter:drop-shadow(0 1px 2px rgba(0,0,0,.4)); }
+  .kpi-body { min-width:0; }
+  .kpi-body .v { font-family:'Cinzel',serif; font-weight:800; font-size:1.2rem; line-height:1.15; color:var(--brass-light); white-space:nowrap; }
+  .kpi-body .v.warn { color:var(--rust); }
+  .kpi-body .v.good { color:var(--verdigris); }
+  .kpi-body .l { font-size:.7rem; color:var(--ink3); letter-spacing:.03em; margin-top:1px; }
+
+  .chart-box { position:relative; height:270px; }
+  .chart-box.short { height:200px; }
+
+  /* ===== 表 ===== */
+  .tscroll { overflow-x:auto; -webkit-overflow-scrolling:touch; position:relative; z-index:1; }
+  .tscroll::-webkit-scrollbar { height:8px; }
+  .tscroll::-webkit-scrollbar-track { background:var(--panel-edge); border-radius:4px; }
+  .tscroll::-webkit-scrollbar-thumb { background:var(--brass-dark); border-radius:4px; }
+  .ptable { width:100%; min-width:640px; border-collapse:collapse; font-size:.8rem; }
+  .ptable th {
+    font-family:'Cinzel',serif; font-size:.66rem; letter-spacing:.1em; text-transform:uppercase;
+    color:var(--brass); text-align:left; font-weight:600; padding:8px 10px;
+    border-bottom:2px solid var(--border-light); white-space:nowrap;
+  }
+  .ptable td { padding:11px 10px; border-bottom:1px solid var(--row-line); vertical-align:middle; }
+  .ptable tr:last-child td { border-bottom:none; }
+  .ptable tr:hover td { background:rgba(201,162,75,.05); }
+  .seg-age { font-family:'Cinzel',serif; font-weight:700; font-size:.92rem; white-space:nowrap; color:var(--ink); }
+  .seg-len { font-size:.66rem; color:var(--ink3); margin-top:1px; }
+  .seg-tag {
+    display:inline-block; font-size:.68rem; padding:3px 10px; border-radius:20px;
+    border:1px solid var(--brass-dark); color:var(--tag-ink);
+    background:linear-gradient(180deg,var(--tag-bg1),var(--tag-bg2)); white-space:nowrap;
+  }
+  .num { font-family:'Cinzel',serif; font-weight:700; font-size:.86rem; white-space:nowrap; color:var(--ink); }
+  .num .u { font-family:'Shippori Mincho',serif; font-size:.62rem; color:var(--ink3); font-weight:400; margin-left:1px; }
+  .num.save { color:var(--verdigris); }
+  .num.draw { color:var(--rust); }
+  .pcards { display:none; flex-direction:column; gap:10px; position:relative; z-index:1; }
+  .pcard { border:1.5px solid var(--border-light); border-radius:11px; padding:12px 13px; background:linear-gradient(170deg,var(--tag-bg1),var(--tag-bg2)); }
+  .pc-top { display:flex; align-items:center; gap:9px; flex-wrap:wrap; margin-bottom:10px; }
+  .pc-top .seg-tag { margin-left:auto; }
+  .pc-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px 14px; }
+  .pc-grid em { font-style:normal; font-size:.66rem; color:var(--ink3); display:block; margin-bottom:1px; }
+
+  /* ===== チェックポイント ===== */
+  .ckwrap { display:flex; gap:9px; overflow-x:auto; padding:4px 2px 8px; -webkit-overflow-scrolling:touch; position:relative; z-index:1; }
+  .ckwrap::-webkit-scrollbar { height:8px; }
+  .ckwrap::-webkit-scrollbar-track { background:var(--panel-edge); border-radius:4px; }
+  .ckwrap::-webkit-scrollbar-thumb { background:var(--brass-dark); border-radius:4px; }
+  .ck {
+    min-width:96px; flex:1; text-align:center; padding:11px 11px 10px; border-radius:11px;
+    border:1.5px solid var(--border-light);
+    background:linear-gradient(170deg,var(--tag-bg1),var(--tag-bg2));
+    box-shadow:inset 0 1px 0 rgba(255,225,160,.07);
+  }
+  .ck .ca { font-family:'Cinzel',serif; font-size:.68rem; color:var(--ink3); letter-spacing:.08em; }
+  .ck .cv { font-family:'Cinzel',serif; font-weight:800; font-size:.94rem; margin-top:3px; color:var(--ink); white-space:nowrap; }
+  .ck .cbar { height:4px; border-radius:3px; background:var(--bg-deep); margin-top:9px; position:relative; overflow:hidden; box-shadow:inset 0 1px 2px var(--groove); }
+  .ck .cbar i { position:absolute; inset:0 auto 0 0; background:linear-gradient(90deg,var(--brass-dark),var(--brass-light)); border-radius:3px; }
+  .ck.peak { border-color:var(--brass); box-shadow:0 0 12px var(--amber-glow); }
+  .ck.peak .cv { color:var(--brass-light); }
+
+  /* ===== 注記 ===== */
+  .notes { font-size:.75rem; color:var(--ink3); line-height:1.85; }
+  .notes b { color:var(--ink2); }
+  .notes a { color:var(--brass-light); }
+  .notes ul { margin:6px 0 0 1.1em; }
+  .safety {
+    border-left:3px solid var(--verdigris); border-radius:8px; padding:12px 15px; margin-bottom:14px;
+    background:linear-gradient(165deg,rgba(79,179,163,.10),transparent);
+    font-size:.78rem; color:var(--ink2); position:relative; z-index:1;
+  }
+  .safety b { color:var(--verdigris); }
+
+  footer { text-align:center; padding:34px 24px 40px; margin-top:26px; border-top:2px solid var(--border); position:relative; }
+  footer::before {
+    content:''; position:absolute; top:-3px; left:50%; transform:translateX(-50%);
+    width:120px; height:4px; background:linear-gradient(90deg,transparent,var(--brass),transparent);
+  }
+  .footer-cogs { display:flex; align-items:center; justify-content:center; gap:10px; margin-bottom:12px; color:var(--brass-dark); }
+  .footer-cogs .fc { width:22px; height:22px; }
+  .footer-cogs .fc.big { width:30px; height:30px; color:var(--brass); }
+  .footer-cogs .fc svg { width:100%; height:100%; }
+  .footer-cogs .fc.s1 svg { animation:spin 10s linear infinite; }
+  .footer-cogs .fc.s2 svg { animation:spinR 14s linear infinite; }
+  footer p { font-family:'Cormorant Garamond',serif; font-style:italic; font-size:.82rem; color:var(--ink3); letter-spacing:.06em; }
+
+  /* ======================================================================
+     ここから装飾強化 — 蒸気・圧力計・リベット帯・ガラス反射
+     ====================================================================== */
+
+  /* ===== 蒸気 ===== */
+  .steam { position:absolute; bottom:6px; left:50%; transform:translateX(-50%); display:flex; gap:30px; z-index:0; opacity:.55; pointer-events:none; }
+  .steam i {
+    display:block; width:16px; height:16px; border-radius:50%;
+    background:radial-gradient(circle, rgba(255,240,210,.85), transparent 70%);
+    filter:blur(3px); animation:rise 5.5s ease-in infinite;
+  }
+  .steam i:nth-child(2){animation-delay:1.3s} .steam i:nth-child(3){animation-delay:2.6s}
+  .steam i:nth-child(4){animation-delay:.7s}  .steam i:nth-child(5){animation-delay:1.9s}
+  @keyframes rise {
+    0%{transform:translateY(12px) scale(.55);opacity:0}
+    22%{opacity:.65}
+    100%{transform:translateY(-84px) scale(1.9);opacity:0}
+  }
+
+  /* ===== 圧力計（主計器の文字盤）===== */
+  .mg-grid { display:grid; grid-template-columns:224px 1fr; gap:24px; align-items:center; position:relative; z-index:1; }
+  .dial { width:100%; max-width:224px; margin:0 auto; }
+  .dial svg { width:100%; height:auto; display:block; filter:drop-shadow(0 6px 14px var(--shadow)); }
+  .dial-num { font-family:'Cinzel',serif; font-size:11px; font-weight:700; fill:var(--ink2); }
+  .dial-cap { font-family:'Cinzel',serif; font-size:8.5px; letter-spacing:.18em; fill:var(--ink3); }
+  .dial-read { font-family:'Cinzel',serif; font-size:25px; font-weight:900; fill:var(--brass-light); }
+  .dial-unit { font-family:'Shippori Mincho',serif; font-size:9.5px; fill:var(--ink3); letter-spacing:.06em; }
+  #dNeedle { transform-box:view-box; transform-origin:100px 100px; transition:transform .55s cubic-bezier(.2,.9,.25,1); }
+
+  /* ===== 積立額の読み取り窓 ===== */
+  .save-strip { margin-top:18px; padding-top:15px; border-top:2px solid var(--border); position:relative; z-index:1; }
+  .ss-head {
+    display:flex; align-items:center; gap:9px; font-size:.75rem; color:var(--ink2);
+    letter-spacing:.05em; margin-bottom:11px;
+  }
+  .ss-head::before { content:''; width:7px; height:7px; border-radius:50%; background:var(--amber); box-shadow:0 0 7px var(--amber-glow); flex-shrink:0; }
+  .ss-head::after { content:''; flex:1; height:2px; background:linear-gradient(90deg,var(--border-light),transparent); }
+  .ss-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; }
+  .ss {
+    background:linear-gradient(180deg,var(--bg-deep),var(--panel-edge));
+    border:1.5px solid var(--brass-dark); border-radius:9px; padding:10px 13px 9px;
+    box-shadow:inset 0 2px 6px var(--groove);
+  }
+  .ssl { font-size:.67rem; color:var(--ink3); letter-spacing:.03em; margin-bottom:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .ssv { font-family:'Cinzel',serif; font-weight:800; font-size:1.2rem; line-height:1.2; color:var(--brass-light); white-space:nowrap; }
+  .ssv .u { font-family:'Shippori Mincho',serif; font-size:.58rem; color:var(--ink3); font-weight:400; margin-left:2px; }
+  .ssv.draw { color:var(--rust); }
+  .ssv.good { color:var(--verdigris); }
+
+  /* ===== パネル上端のリベット帯 ===== */
+  .panel::after {
+    content:''; position:absolute; left:16px; right:16px; top:0; height:3px; border-radius:0 0 3px 3px;
+    background:repeating-linear-gradient(90deg,var(--brass-dark) 0 12px,var(--brass-light) 12px 14px,var(--brass-dark) 14px 26px);
+    opacity:.32; pointer-events:none;
+  }
+  .panel h2 { text-shadow:0 1px 0 rgba(0,0,0,.35), 0 -1px 0 rgba(255,225,160,.05); }
+  .panel h2 .n { text-shadow:none; }
+
+  /* ===== メダル・つまみのガラス反射 ===== */
+  .kpi-medal::after, .ph::after {
+    content:''; position:absolute; pointer-events:none; border-radius:inherit;
+  }
+  .kpi-medal::after {
+    inset:6px; border-radius:50%;
+    background:linear-gradient(160deg, rgba(255,255,255,.16), transparent 55%);
+  }
+  .ph { position:relative; overflow:hidden; }
+  .ph::after {
+    inset:0; background:linear-gradient(158deg, rgba(255,255,255,.07), transparent 42%);
+  }
+  .ph .pn, .ph .pv { position:relative; z-index:1; }
+  .ph .pn { text-shadow:0 1px 0 rgba(0,0,0,.4); }
+  .ph .pv { text-shadow:0 2px 2px rgba(0,0,0,.35); }
+
+  /* ===== チェックポイントを計器管に ===== */
+  .ck { position:relative; overflow:hidden; }
+  .ck::after {
+    content:''; position:absolute; inset:0; pointer-events:none;
+    background:linear-gradient(160deg, rgba(255,255,255,.06), transparent 45%);
+  }
+  .ck .cbar { border:1px solid var(--brass-deep); height:6px; }
+  .ck .cbar::after {
+    content:''; position:absolute; inset:0; pointer-events:none;
+    background:repeating-linear-gradient(90deg, transparent 0 9px, var(--groove) 9px 10px);
+    opacity:.55;
+  }
+  .ck .cbar i { box-shadow:0 0 6px var(--amber-glow); }
+  .ck .ca, .ck .cv { position:relative; z-index:1; }
+
+  /* ===== 表ヘッダーを真鍮プレートに ===== */
+  .ptable thead tr { }
+  .ptable th {
+    background:linear-gradient(180deg,var(--tag-bg1),var(--tag-bg2));
+    position:sticky; top:0;
+  }
+  .ptable th:first-child { border-top-left-radius:7px; }
+  .ptable th:last-child  { border-top-right-radius:7px; }
+
+  /* ===== 真鍮パイプの仕切り ===== */
+  .pipe { display:flex; align-items:center; justify-content:center; gap:0; margin:2px 0 4px; opacity:.75; }
+  .pipe .tube {
+    flex:1; height:9px; border-radius:5px;
+    background:linear-gradient(180deg,var(--brass-light) 0%,var(--brass) 32%,var(--brass-deep) 78%,var(--brass-dark) 100%);
+    box-shadow:0 2px 5px var(--shadow), inset 0 1px 0 rgba(255,255,255,.28);
+  }
+  .pipe .flange {
+    width:15px; height:19px; border-radius:3px; flex-shrink:0;
+    background:linear-gradient(180deg,var(--brass-light),var(--brass) 40%,var(--brass-dark));
+    box-shadow:0 2px 5px var(--shadow), inset 0 1px 0 rgba(255,255,255,.3);
+  }
+  .pipe .valve {
+    width:26px; height:26px; border-radius:50%; flex-shrink:0; margin:0 -3px;
+    background:radial-gradient(circle at 38% 32%,var(--brass-bright),var(--brass) 45%,var(--brass-dark) 90%);
+    border:1.5px solid var(--brass-deep);
+    box-shadow:0 2px 6px var(--shadow), inset 0 1px 1px rgba(255,255,255,.35);
+  }
+
+  /* ===== 登場アニメーション ===== */
+  @keyframes riseIn { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:none; } }
+  .stage > * { animation:riseIn .55s cubic-bezier(.2,.8,.3,1) backwards; }
+  .stage > *:nth-child(1){animation-delay:.04s} .stage > *:nth-child(2){animation-delay:.10s}
+  .stage > *:nth-child(3){animation-delay:.16s} .stage > *:nth-child(4){animation-delay:.22s}
+  .stage > *:nth-child(5){animation-delay:.28s} .stage > *:nth-child(6){animation-delay:.34s}
+  .stage > *:nth-child(7){animation-delay:.40s} .stage > *:nth-child(8){animation-delay:.46s}
+  .console { animation:riseIn .55s cubic-bezier(.2,.8,.3,1) backwards; animation-delay:.06s; }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration:.001s !important; animation-iteration-count:1 !important; transition-duration:.001s !important; }
+    .steam { display:none; }
+  }
+
+  /* ===== レスポンシブ ===== */
+  @media (max-width:900px) {
+    .mg-grid { grid-template-columns:1fr; gap:18px; }
+    .dial { max-width:200px; }
+    .ss-grid { grid-template-columns:repeat(2,1fr); }
+  }
+  @media (max-width:520px) { .ss-grid { grid-template-columns:1fr; } }
+  @media (max-width:1180px) {
+    .layout { grid-template-columns:1fr; }
+    .console { position:static; max-height:none; order:2; }
+    .stage { order:1; }
+    .kpi-row { grid-template-columns:repeat(2,1fr); }
+  }
+  @media (max-width:760px) {
+    .phase-row { grid-template-columns:1fr; }
+    .ptable { display:none; }
+    .pcards { display:flex; }
+  }
+  @media (max-width:640px) {
+    .header-inner { height:auto; padding:12px 16px; flex-wrap:wrap; gap:10px; }
+    main { padding:0 14px 36px; }
+    .main-gauge { padding:18px; }
+    .kpi-row { grid-template-columns:1fr; }
+    input[type=range] { height:10px; }
+    input[type=range]::-webkit-slider-thumb { width:23px; height:23px; }
+  }
 </style>
 </head>
 <body>
+
+<div id="cogfield"></div>
+
 <header>
-  <h1>FIRE <span>ライフサイクル</span> 財務ダッシュボード</h1>
-  <p>50年退職・100年ゼロ資産設計 — 3チャート同期シミュレーション</p>
+  <div class="header-inner">
+    <a href="index.html" class="logo">
+      <div class="logo-cog" id="logo-cog"></div>
+      <div class="logo-text">
+        <span class="l-main">DIE WITH ZERO</span>
+        <span class="l-sub">生涯資産プラン計算機関</span>
+      </div>
+    </a>
+    <div class="header-right">
+      <span class="save-lamp" id="save-lamp"><span class="dot"></span><span id="save-text">設定を自動保存</span></span>
+      <button class="theme-btn" onclick="toggleTheme()" aria-label="昼夜切替">
+        <svg class="ic-lamp" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M9 18h6M10 22h4M12 2a7 7 0 0 0-4 12.7V17h8v-2.3A7 7 0 0 0 12 2z"/>
+        </svg>
+        <svg class="ic-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="4.5"/>
+          <path d="M12 1.5v2.5M12 20v2.5M4.2 4.2l1.8 1.8M18 18l1.8 1.8M1.5 12h2.5M20 12h2.5M4.2 19.8L6 18M18 6l1.8-1.8"/>
+        </svg>
+      </button>
+    </div>
+  </div>
 </header>
 
-<div class="layout">
-<div class="controls">
+<main>
+  <section class="hero">
+    <div class="hero-cog c1"></div>
+    <div class="hero-cog c2"></div>
+    <div class="hero-eyebrow">Lifetime Capital Combustion</div>
+    <h1><span class="num" id="h1R">50</span>歳で<span class="em">リタイア</span>、<span class="num" id="h1E">100</span>歳で<span class="em">ゼロ</span>。</h1>
+    <p>資産・収入・使い方カーブを一本の時間軸で。若いうちに厚く使う「前厚」プランを、すべての設定値を動かしながら確かめられます。</p>
+    <div class="steam"><i></i><i></i><i></i><i></i><i></i></div>
+    <div class="divider">
+      <span class="line"></span><span class="gem"></span>
+      <span class="mini-cog" id="div-cog"></span>
+      <span class="gem"></span><span class="line r"></span>
+    </div>
+  </section>
 
-  <div class="ctrl-section">
-    <h3>基本設定</h3>
-    <div class="slider-group">
-      <div class="slider-label"><span>現在の年齢</span><span class="slider-val" id="v-age">30</span></div>
-      <input type="range" id="s-age" min="20" max="50" value="30" oninput="sync('age',this.value,'歳')">
-    </div>
-    <div class="slider-group">
-      <div class="slider-label"><span>退職年齢</span><span class="slider-val" id="v-retire">50</span></div>
-      <input type="range" id="s-retire" min="40" max="70" value="50" oninput="sync('retire',this.value,'歳')">
-    </div>
-    <div class="slider-group">
-      <div class="slider-label"><span>寿命設定</span><span class="slider-val" id="v-life">100</span></div>
-      <input type="range" id="s-life" min="80" max="110" value="100" oninput="sync('life',this.value,'歳')">
-    </div>
-  </div>
-
-  <div class="ctrl-section">
-    <h3>収入・支出（現役）</h3>
-    <div class="slider-group">
-      <div class="slider-label"><span>現在の年収</span><span class="slider-val" id="v-income">600</span></div>
-      <input type="range" id="s-income" min="200" max="2000" step="50" value="600" oninput="sync('income',this.value,'万円')">
-    </div>
-    <div class="slider-group">
-      <div class="slider-label"><span>年収増加率</span><span class="slider-val" id="v-incgrow">2</span></div>
-      <input type="range" id="s-incgrow" min="0" max="10" step="0.5" value="2" oninput="sync('incgrow',this.value,'%/年')">
-    </div>
-    <div class="slider-group">
-      <div class="slider-label"><span>現役時の生活費</span><span class="slider-val" id="v-expense">300</span></div>
-      <input type="range" id="s-expense" min="100" max="1000" step="50" value="300" oninput="sync('expense',this.value,'万円/年')">
-    </div>
+  <div class="pipe">
+    <span class="flange"></span><span class="tube"></span><span class="valve"></span><span class="tube"></span><span class="flange"></span>
   </div>
 
-  <div class="ctrl-section">
-    <h3>退職後</h3>
-    <div class="slider-group">
-      <div class="slider-label"><span>退職後生活費</span><span class="slider-val" id="v-retexp">240</span></div>
-      <input type="range" id="s-retexp" min="100" max="800" step="20" value="240" oninput="sync('retexp',this.value,'万円/年')">
-    </div>
-    <div class="slider-group">
-      <div class="slider-label"><span>年金受給額</span><span class="slider-val" id="v-pension">80</span></div>
-      <input type="range" id="s-pension" min="0" max="300" step="10" value="80" oninput="sync('pension',this.value,'万円/年')">
-    </div>
-    <div class="slider-group">
-      <div class="slider-label"><span>年金開始年齢</span><span class="slider-val" id="v-penage">65</span></div>
-      <input type="range" id="s-penage" min="60" max="75" value="65" oninput="sync('penage',this.value,'歳')">
-    </div>
-  </div>
+  <div class="layout">
 
-  <div class="ctrl-section">
-    <h3>資産運用</h3>
-    <div class="slider-group">
-      <div class="slider-label"><span>現在の資産</span><span class="slider-val" id="v-asset">500</span></div>
-      <input type="range" id="s-asset" min="0" max="5000" step="100" value="500" oninput="sync('asset',this.value,'万円')">
-    </div>
-    <div class="slider-group">
-      <div class="slider-label"><span>現役期 運用利回り</span><span class="slider-val" id="v-roi1">5</span></div>
-      <input type="range" id="s-roi1" min="0" max="15" step="0.5" value="5" oninput="sync('roi1',this.value,'%')">
-    </div>
-    <div class="slider-group">
-      <div class="slider-label"><span>退職後 運用利回り</span><span class="slider-val" id="v-roi2">3</span></div>
-      <input type="range" id="s-roi2" min="0" max="10" step="0.5" value="3" oninput="sync('roi2',this.value,'%')">
-    </div>
-    <div class="slider-group">
-      <div class="slider-label"><span>インフレ率</span><span class="slider-val" id="v-inf">2</span></div>
-      <input type="range" id="s-inf" min="0" max="5" step="0.5" value="2" oninput="sync('inf',this.value,'%')">
-    </div>
-  </div>
+    <!-- ============ 計器盤 ============ -->
+    <aside class="console">
+      <div class="console-head">
+        <span class="t">Control Console</span>
+        <span class="t" style="color:var(--ink3);letter-spacing:.08em" id="realNote">実質・今の購買力</span>
+      </div>
+      <div id="ctrlHost"></div>
+      <div class="btn-row">
+        <button class="btn ghost" onclick="resetAll()">↺ 初期値に戻す</button>
+      </div>
+    </aside>
 
-  <div class="ctrl-section">
-    <h3>副収入</h3>
-    <div class="slider-group">
-      <div class="slider-label"><span>副収入（現役）</span><span class="slider-val" id="v-side1">0</span></div>
-      <input type="range" id="s-side1" min="0" max="500" step="10" value="0" oninput="sync('side1',this.value,'万円/年')">
-    </div>
-    <div class="slider-group">
-      <div class="slider-label"><span>副収入（退職後）</span><span class="slider-val" id="v-side2">50</span></div>
-      <input type="range" id="s-side2" min="0" max="300" step="10" value="50" oninput="sync('side2',this.value,'万円/年')">
-    </div>
-  </div>
+    <!-- ============ 計器（右） ============ -->
+    <section class="stage">
 
-  <div class="ctrl-section">
-    <h3>リスク・その他</h3>
-    <div class="slider-group">
-      <div class="slider-label"><span>緊急出費リザーブ</span><span class="slider-val" id="v-reserve">200</span></div>
-      <input type="range" id="s-reserve" min="0" max="1000" step="50" value="200" oninput="sync('reserve',this.value,'万円')">
-    </div>
-    <div class="slider-group">
-      <div class="slider-label"><span>税・社保負担率</span><span class="slider-val" id="v-tax">30</span></div>
-      <input type="range" id="s-tax" min="10" max="50" step="1" value="30" oninput="sync('tax',this.value,'%')">
-    </div>
-  </div>
+      <div class="main-gauge">
+        <div class="mg-cog" id="mg-cog"></div>
+        <div class="mg-label">Sustainable Burn Rate</div>
+        <div class="mg-sub" id="mgSub">このプランなら、各時期に月いくら使ってよいか</div>
+        <div class="mg-grid">
+          <div class="dial" id="dial"></div>
+          <div class="phase-row">
+            <div class="ph go">
+              <div class="pn">GO-GO</div><div class="pa" id="goRange">—</div>
+              <div class="pv"><span id="goVal">—</span><span class="u"> 万/月</span></div>
+              <div class="py" id="goYear">—</div>
+            </div>
+            <div class="ph slow">
+              <div class="pn">SLOW-GO</div><div class="pa" id="slowRange">—</div>
+              <div class="pv"><span id="slowVal">—</span><span class="u"> 万/月</span></div>
+              <div class="py" id="slowYear">—</div>
+            </div>
+            <div class="ph no">
+              <div class="pn">NO-GO</div><div class="pa" id="noRange">—</div>
+              <div class="pv"><span id="noVal">—</span><span class="u"> 万/月</span></div>
+              <div class="py" id="noYear">—</div>
+            </div>
+          </div>
+        </div>
 
-</div><!-- /controls -->
+        <div class="save-strip">
+          <div class="ss-head" id="ssHead">毎月の積立額 — この支出プランを守った場合、いくら貯めることになるか</div>
+          <div class="ss-grid">
+            <div class="ss">
+              <div class="ssl" id="ssNowL">いまの積立</div>
+              <div class="ssv" id="ssNow">—</div>
+            </div>
+            <div class="ss">
+              <div class="ssl" id="ssEndL">リタイア直前の積立</div>
+              <div class="ssv" id="ssEnd">—</div>
+            </div>
+            <div class="ss">
+              <div class="ssl">いまの貯蓄率</div>
+              <div class="ssv" id="ssRate">—</div>
+            </div>
+            <div class="ss">
+              <div class="ssl" id="ssTotalL">現役期の積立総額</div>
+              <div class="ssv" id="ssTotal">—</div>
+            </div>
+          </div>
+        </div>
+      </div>
 
-<div class="charts-area">
-  <div class="kpi-row">
-    <div class="kpi"><div class="val" id="kpi-peak" style="color:var(--green)">--</div><div class="label">ピーク資産</div></div>
-    <div class="kpi"><div class="val" id="kpi-fi" style="color:var(--blue)">--</div><div class="label">FIRE達成年齢</div></div>
-    <div class="kpi"><div class="val" id="kpi-zero" style="color:var(--yellow)">--</div><div class="label">資産ゼロ予測年齢</div></div>
-    <div class="kpi"><div class="val" id="kpi-save" style="color:var(--purple)">--</div><div class="label">現役期 平均貯蓄率</div></div>
-  </div>
+      <div class="kpi-row">
+        <div class="kpi">
+          <div class="kpi-medal"><span class="ring"></span><span class="emj">⛰️</span></div>
+          <div class="kpi-body"><div class="v" id="kPeak">—</div><div class="l" id="kPeakL">ピーク資産</div></div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-medal"><span class="ring"></span><span class="emj">🚪</span></div>
+          <div class="kpi-body"><div class="v" id="kRetire">—</div><div class="l" id="kRetireL">リタイア時の資産</div></div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-medal"><span class="ring"></span><span class="emj">💴</span></div>
+          <div class="kpi-body"><div class="v" id="kPension">—</div><div class="l" id="kPensionL">年金（年額）</div></div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-medal"><span class="ring"></span><span class="emj">⚖️</span></div>
+          <div class="kpi-body"><div class="v" id="kStatus">—</div><div class="l" id="kStatusL">プラン判定</div></div>
+        </div>
+      </div>
 
-  <div class="chart-card">
-    <h2>📈 資産推移（万円）</h2>
-    <canvas id="chart-asset"></canvas>
+      <div class="panel rivets">
+        <h2><span class="n">1</span>資産の山</h2>
+        <div class="sub">働いて積み上げ、リタイア後に取り崩して使い切る軌道。帯の色は go-go／slow-go／no-go の各期。</div>
+        <div class="legend">
+          <span><i style="background:var(--brass)"></i>資産</span>
+          <span><i style="background:var(--band-go);border-color:var(--amber)"></i>go-go期</span>
+          <span><i style="background:var(--band-slow);border-color:var(--copper-light)"></i>slow-go期</span>
+          <span><i style="background:var(--band-no);border-color:var(--steel)"></i>no-go期</span>
+        </div>
+        <div class="chart-box"><canvas id="chartAsset"></canvas></div>
+      </div>
+
+      <div class="panel rivets">
+        <h2><span class="n">2</span>収入と支出</h2>
+        <div class="sub">毎年の「入ってくるお金」と「使うお金」。差がそのまま貯蓄／取り崩しになります。</div>
+        <div class="legend">
+          <span><i style="background:var(--verdigris)"></i>収入（給料・年金）</span>
+          <span><i style="background:var(--copper-light)"></i>支出（生活費）</span>
+        </div>
+        <div class="chart-box short"><canvas id="chartFlow"></canvas></div>
+      </div>
+
+      <div class="panel rivets">
+        <h2><span class="n">3</span>毎月の積立 ／ 取り崩し</h2>
+        <div class="sub">縦軸は<b>万円／月</b>。プラス（緑）の年は毎月それだけ積み立て、マイナス（赤）の年は毎月それだけ取り崩しています。</div>
+        <div class="legend">
+          <span><i style="background:var(--verdigris)"></i>積立（黒字）</span>
+          <span><i style="background:var(--rust)"></i>取り崩し（赤字）</span>
+        </div>
+        <div class="chart-box short"><canvas id="chartNet"></canvas></div>
+      </div>
+
+      <div class="panel rivets">
+        <h2><span class="n">4</span>フェーズ別 積立／取り崩し</h2>
+        <div class="sub">このプラン通りに暮らすために、各時期「毎月いくら積み立てる／取り崩す」のか。昇給に合わせて積立額も自然に増えていきます。</div>
+        <div class="tscroll"><table class="ptable" id="planTable"></table></div>
+        <div class="pcards" id="planCards"></div>
+      </div>
+
+      <div class="panel rivets">
+        <h2><span class="n">5</span>資産チェックポイント</h2>
+        <div class="sub">5年ごとの通過目標ライン。実際の資産がここを下回ったら黄色信号 → リタイア年齢を後ろ倒しで調整（安全弁）。上回っていれば前倒しも視野に。</div>
+        <div class="ckwrap" id="ckStrip"></div>
+      </div>
+
+      <div class="panel rivets">
+        <h2><span class="n">6</span>この計算盤の前提</h2>
+        <div class="safety">
+          <b>安全弁の考え方</b>：運用利回りは毎年一定と仮定した単純モデルです。実際の相場は上下するので、リタイア直後に暴落が来るリスク（シークエンス・オブ・リターン・リスク）は織り込めていません。チェックポイントを下回ったらリタイアを後ろ倒しする、という調整前提で使ってください。
+        </div>
+        <div class="notes">
+          <ul>
+            <li>金額はすべて<b>実質（今の購買力に換算した額）</b>。利回りも賃金上昇率も実質値で入力するため、将来の数字が見かけ上インフレで膨らみません。</li>
+            <li>毎年「資産＋収入−支出」を計算し、その後に運用利回りをかけます。支出は go-go期を基準（倍率1.0）とし、slow-go／no-go期は設定した倍率で自動的に下がります。</li>
+            <li>基準支出額は、<b>指定した年齢でちょうど「最後に残す額」になる</b>ように二分探索で逆算しています。</li>
+            <li>年金の自動推計は概算です。手取り→額面を係数0.78で換算し、<b>平均標準報酬額 × 5.481/1000 × 加入月数 ＋ 老齢基礎年金 84.73万円/年</b>（令和8年度・満額）で計算。標準報酬月額の上限は現行の65万円を使用しています（2027年9月以降、2029年9月までに段階的に75万円へ引き上げ予定のため、高収入の場合は実際にはやや多くなる可能性があります）。経過的加算・加給年金・繰上げ繰下げ増減率は含みません。<b>正確な額はねんきん定期便・ねんきんネットで確認してください。</b></li>
+            <li>税金・社会保険料は「手取り年収」に織り込み済みとみなします。リタイア後の国民年金保険料・国民健康保険料は含みません。</li>
+          </ul>
+        </div>
+      </div>
+
+    </section>
   </div>
-  <div class="chart-card">
-    <h2>💹 収入・支出フロー（万円/年）</h2>
-    <canvas id="chart-flow"></canvas>
+</main>
+
+<footer>
+  <div class="footer-cogs">
+    <span class="fc s1" id="fc1"></span>
+    <span class="fc big s2" id="fc2"></span>
+    <span class="fc s1" id="fc3"></span>
   </div>
-  <div class="chart-card">
-    <h2>📊 貯蓄・取り崩しバー（万円/年）</h2>
-    <canvas id="chart-bar"></canvas>
-  </div>
-</div>
-</div><!-- /layout -->
+  <p>Spend it while the boiler still burns.</p>
+</footer>
 
 <script>
-const params = {
-  age:30,retire:50,life:100,income:600,incgrow:2,expense:300,
-  retexp:240,pension:80,penage:65,asset:500,roi1:5,roi2:3,
-  inf:2,side1:0,side2:50,reserve:200,tax:30
+"use strict";
+
+/* =====================================================================
+   歯車SVGの手続き生成
+   ===================================================================== */
+function gearSVG(teeth, opts) {
+  opts = opts || {};
+  const size = 100, c = size / 2;
+  const rTooth = 50, rBody = 40, toothW = (360 / teeth) * 0.42, holeR = opts.hole || 14;
+  let t = '';
+  for (let i = 0; i < teeth; i++) {
+    const a = (360 / teeth) * i, w1 = toothW, w2 = toothW * 0.62, rad = Math.PI / 180;
+    const p = (ang, r) => `${(c + r * Math.cos(ang * rad)).toFixed(2)},${(c + r * Math.sin(ang * rad)).toFixed(2)}`;
+    t += `<polygon points="${p(a - w1, rBody - 2)} ${p(a - w2, rTooth)} ${p(a + w2, rTooth)} ${p(a + w1, rBody - 2)}"/>`;
+  }
+  let sp = '';
+  const n = opts.spokes != null ? opts.spokes : 5;
+  for (let i = 0; i < n; i++) {
+    const a = (360 / n) * i * (Math.PI / 180), sr = 26;
+    sp += `<circle cx="${(c + sr * Math.cos(a)).toFixed(2)}" cy="${(c + sr * Math.sin(a)).toFixed(2)}" r="6" fill="rgba(0,0,0,0.30)"/>`;
+  }
+  return `<svg viewBox="0 0 ${size} ${size}" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+    <g>${t}<circle cx="${c}" cy="${c}" r="${rBody}"/></g>${sp}
+    <circle cx="${c}" cy="${c}" r="${holeR}" fill="rgba(0,0,0,0.45)"/>
+    <circle cx="${c}" cy="${c}" r="${holeR - 3}" fill="none" stroke="rgba(255,225,160,0.25)" stroke-width="1.2"/>
+  </svg>`;
+}
+const put = (id, teeth, o) => { const e = document.getElementById(id); if (e) e.innerHTML = gearSVG(teeth, o); };
+put('logo-cog', 10, { hole: 16, spokes: 5 });
+put('div-cog', 9, { hole: 18, spokes: 0 });
+put('mg-cog', 16, { hole: 16, spokes: 6 });
+put('fc1', 8, { hole: 16, spokes: 0 });
+put('fc2', 12, { hole: 14, spokes: 6 });
+put('fc3', 8, { hole: 16, spokes: 0 });
+document.querySelectorAll('.hero-cog').forEach((el, i) => { el.innerHTML = gearSVG([14, 10][i] || 12, { hole: 16, spokes: 6 }); });
+document.querySelectorAll('.kpi-medal .ring').forEach(el => el.innerHTML = gearSVG(11, { hole: 30, spokes: 0 }));
+
+(function cogfield() {
+  const f = document.getElementById('cogfield');
+  [{ x: '-3%', y: '10%', s: 240, t: 16, d: 60, r: 1 },
+   { x: '89%', y: '4%', s: 150, t: 12, d: 44, r: -1 },
+   { x: '92%', y: '62%', s: 300, t: 18, d: 80, r: 1 },
+   { x: '3%', y: '74%', s: 180, t: 14, d: 52, r: -1 }].forEach(c => {
+    const d = document.createElement('div');
+    d.className = 'bg-cog';
+    d.style.cssText = `left:${c.x};top:${c.y};width:${c.s}px;height:${c.s}px;animation:${c.r > 0 ? 'spin' : 'spinR'} ${c.d}s linear infinite`;
+    d.innerHTML = gearSVG(c.t, { hole: 16, spokes: 6 });
+    f.appendChild(d);
+  });
+})();
+
+/* =====================================================================
+   圧力計（真鍮の文字盤）
+   ===================================================================== */
+/* max = 目盛の上限、maj = 大目盛の数（ラベルが必ずキリのいい数になる組み合わせ） */
+const DIAL_SCALES = [
+  { max: 10, maj: 5 }, { max: 15, maj: 3 }, { max: 20, maj: 4 }, { max: 30, maj: 3 },
+  { max: 40, maj: 4 }, { max: 50, maj: 5 }, { max: 60, maj: 3 }, { max: 80, maj: 4 },
+  { max: 100, maj: 5 }, { max: 150, maj: 3 }, { max: 200, maj: 4 }, { max: 300, maj: 3 },
+  { max: 500, maj: 5 }
+];
+function pickDial(v) {
+  const need = Math.max(v * 1.25, 6);
+  return DIAL_SCALES.find(s => s.max >= need) || { max: Math.ceil(need / 100) * 100, maj: 4 };
+}
+const dialAngle = (v, max) => -120 + Math.max(0, Math.min(v / max, 1)) * 240;
+function dialPt(a, r) { const t = a * Math.PI / 180; return [100 + r * Math.sin(t), 100 - r * Math.cos(t)]; }
+const f1 = n => n.toFixed(1);
+
+function dialArc(v0, v1, max, r) {
+  const a0 = dialAngle(v0, max), a1 = dialAngle(v1, max);
+  if (a1 - a0 < 0.5) return '';
+  const [x0, y0] = dialPt(a0, r), [x1, y1] = dialPt(a1, r);
+  return `M ${f1(x0)} ${f1(y0)} A ${r} ${r} 0 ${(a1 - a0) > 180 ? 1 : 0} 1 ${f1(x1)} ${f1(y1)}`;
+}
+function dialTri(v, max, baseR, tipR) {
+  const a = dialAngle(v, max);
+  const [tx, ty] = dialPt(a, tipR), [x1, y1] = dialPt(a - 2.8, baseR), [x2, y2] = dialPt(a + 2.8, baseR);
+  return `${f1(tx)},${f1(ty)} ${f1(x1)},${f1(y1)} ${f1(x2)},${f1(y2)}`;
+}
+
+function dialFace(max, maj) {
+  let ticks = '';
+  const N = maj * 5;
+  for (let i = 0; i <= N; i++) {
+    const v = max * i / N, a = dialAngle(v, max), major = i % 5 === 0;
+    const [x1, y1] = dialPt(a, 78), [x2, y2] = dialPt(a, major ? 66 : 72);
+    ticks += `<line x1="${f1(x1)}" y1="${f1(y1)}" x2="${f1(x2)}" y2="${f1(y2)}" stroke="${major ? 'var(--brass-light)' : 'var(--brass-dark)'}" stroke-width="${major ? 2 : 1}" stroke-linecap="round"/>`;
+    if (major) {
+      const [lx, ly] = dialPt(a, 54);
+      ticks += `<text class="dial-num" x="${f1(lx)}" y="${f1(ly + 4)}" text-anchor="middle">${Math.round(v)}</text>`;
+    }
+  }
+  let rivets = '';
+  for (let i = 0; i < 8; i++) {
+    const [x, y] = dialPt(i * 45 + 22.5, 91.5);
+    rivets += `<circle cx="${f1(x)}" cy="${f1(y)}" r="2.6" fill="var(--brass-bright)" opacity="0.7"/>`;
+  }
+  return `<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="dBezel" x1="0" y1="0" x2="0.45" y2="1">
+      <stop offset="0%" stop-color="var(--brass-bright)"/><stop offset="34%" stop-color="var(--brass)"/>
+      <stop offset="68%" stop-color="var(--brass-dark)"/><stop offset="100%" stop-color="var(--brass-deep)"/>
+    </linearGradient>
+    <radialGradient id="dFace" cx="0.38" cy="0.30" r="0.88">
+      <stop offset="0%" stop-color="var(--panel2)"/><stop offset="68%" stop-color="var(--panel)"/>
+      <stop offset="100%" stop-color="var(--panel-edge)"/>
+    </radialGradient>
+    <linearGradient id="dNeedleG" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="var(--amber)"/><stop offset="60%" stop-color="var(--copper)"/>
+      <stop offset="100%" stop-color="var(--brass-deep)"/>
+    </linearGradient>
+    <linearGradient id="dGlass" x1="0" y1="0" x2="0.3" y2="1">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.15"/>
+      <stop offset="55%" stop-color="#ffffff" stop-opacity="0.02"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+    </linearGradient>
+    <clipPath id="dClip"><circle cx="100" cy="100" r="88"/></clipPath>
+  </defs>
+  <circle cx="100" cy="100" r="95" fill="url(#dBezel)"/>
+  <circle cx="100" cy="100" r="88" fill="url(#dFace)" stroke="var(--brass-deep)" stroke-width="1.5"/>
+  ${rivets}
+  <path id="dArc" fill="none" stroke="var(--copper)" stroke-width="4" stroke-linecap="round" opacity="0.5"/>
+  ${ticks}
+  <polygon id="dMkNo" fill="var(--steel)" opacity="0.9"/>
+  <polygon id="dMkSlow" fill="var(--copper-light)" opacity="0.9"/>
+  <text class="dial-read" id="dRead" x="100" y="150" text-anchor="middle">—</text>
+  <text class="dial-unit" x="100" y="166" text-anchor="middle">万円／月・go-go期</text>
+  <g id="dNeedle"><polygon points="96.6,106 100,30 103.4,106 101.6,118 98.4,118" fill="url(#dNeedleG)"/></g>
+  <circle cx="100" cy="100" r="10" fill="url(#dBezel)" stroke="var(--brass-deep)" stroke-width="1"/>
+  <circle cx="100" cy="100" r="3.6" fill="var(--bg-deep)"/>
+  <ellipse cx="72" cy="54" rx="76" ry="44" fill="url(#dGlass)" clip-path="url(#dClip)" transform="rotate(-18 72 54)"/>
+</svg>`;
+}
+
+let dialMax = null;
+function renderDial(B, p) {
+  const host = document.getElementById('dial'); if (!host) return;
+  const ok = B !== null && isFinite(B) && B > 0;
+  const go = ok ? B / 12 : 0, slow = go * p.slowMult, no = go * p.noMult;
+  const sc = ok ? pickDial(go) : { max: 40, maj: 4 };
+  const max = sc.max;
+  if (max !== dialMax || !host.querySelector('#dNeedle')) { host.innerHTML = dialFace(max, sc.maj); dialMax = max; }
+  host.querySelector('#dArc').setAttribute('d', ok ? dialArc(Math.min(no, slow, go), go, max, 84) : '');
+  host.querySelector('#dMkSlow').setAttribute('points', ok ? dialTri(slow, max, 88, 80) : '');
+  host.querySelector('#dMkNo').setAttribute('points', ok ? dialTri(no, max, 88, 80) : '');
+  host.querySelector('#dNeedle').style.transform = `rotate(${dialAngle(go, max).toFixed(2)}deg)`;
+  host.querySelector('#dRead').textContent = ok ? go.toFixed(1) : '—';
+}
+
+/* =====================================================================
+   設定値の定義
+   ===================================================================== */
+const CONTROLS = [
+  { g: '基本設定', open: true, items: [
+    { k: 'startAge',  l: '現在の年齢',              min: 20, max: 60,  step: 1, def: 32,  u: '歳' },
+    { k: 'retireAge', l: 'リタイア年齢',            min: 35, max: 75,  step: 1, def: 50,  u: '歳' },
+    { k: 'endAge',    l: '資産ゼロ年齢（想定寿命）', min: 75, max: 110, step: 1, def: 100, u: '歳' },
+  ]},
+  { g: '収入と資産', open: true, items: [
+    { k: 'currentAssets', l: '今ある資産',           min: 0,   max: 20000, step: 50,  def: 500, u: '万円' },
+    { k: 'takehome',      l: '手取り年収',           min: 100, max: 2000,  step: 5,   def: 500, u: '万円/年' },
+    { k: 'wageGrowth',    l: '賃金上昇率（実質）',    min: 0,   max: 5,     step: 0.1, def: 1.0, u: '%/年' },
+  ], hint: '💡 手取り年収は税・社会保険料を引いたあとの金額。昇給率は物価上昇を差し引いた「実質」の伸び。' },
+  { g: '運用と年金', open: true, items: [
+    { k: 'realReturn',     l: '運用利回り（実質）',       min: 0,  max: 8,  step: 0.1, def: 4.0,  u: '%/年' },
+    { k: 'pensionStart',   l: '年金の受給開始年齢',       min: 60, max: 75, step: 1,   def: 65,   u: '歳' },
+    { k: 'pensionJoinAge', l: '厚生年金の加入開始年齢',   min: 18, max: 35, step: 1,   def: 23,   u: '歳' },
+    { k: 'pensionMonthly', l: '年金（月額）',             min: 0,  max: 40, step: 0.1, def: 14.4, u: '万円/月' },
+  ], auto: true },
+  { g: 'お金の使い方カーブ（前厚）', open: true, items: [
+    { k: 'goGoEnd',   l: 'go-go期の終わり',      min: 45,  max: 85, step: 1,    def: 60,   u: '歳' },
+    { k: 'slowGoEnd', l: 'slow-go期の終わり',    min: 55,  max: 99, step: 1,    def: 75,   u: '歳' },
+    { k: 'slowMult',  l: 'slow-go期 使う割合',   min: 0.4, max: 1,  step: 0.01, def: 0.85, u: '倍' },
+    { k: 'noMult',    l: 'no-go期 使う割合',     min: 0.3, max: 1,  step: 0.01, def: 0.72, u: '倍' },
+  ], hint: '⚙️ go-go期（元気に動ける時期）を基準1.0として、あとの時期にどれだけ使うかの割合。' },
+  { g: '詳細設定', open: false, items: [
+    { k: 'legacy', l: '最後に残す額（相続など）', min: 0, max: 10000, step: 50, def: 0, u: '万円' },
+  ]},
+];
+const ALL = {}; CONTROLS.forEach(g => g.items.forEach(i => ALL[i.k] = i));
+const DEFAULTS = {}; Object.keys(ALL).forEach(k => DEFAULTS[k] = ALL[k].def);
+DEFAULTS.autoPension = 1;
+
+const STORE_KEY = 'diewithzero_v2';
+let P = { ...DEFAULTS };
+
+/* ===== 保存・復元 ===== */
+function save() {
+  try { localStorage.setItem(STORE_KEY, JSON.stringify(P)); flashLamp('保存しました'); }
+  catch (e) { flashLamp('保存できません'); }
+}
+function load() {
+  try {
+    const raw = localStorage.getItem(STORE_KEY); if (!raw) return;
+    const o = JSON.parse(raw);
+    Object.keys(DEFAULTS).forEach(k => { if (typeof o[k] === 'number' && isFinite(o[k])) P[k] = o[k]; });
+  } catch (e) { /* 壊れていたら初期値 */ }
+}
+let lampTimer = null;
+function flashLamp(msg) {
+  const lamp = document.getElementById('save-lamp');
+  document.getElementById('save-text').textContent = msg;
+  lamp.classList.add('on');
+  clearTimeout(lampTimer);
+  lampTimer = setTimeout(() => {
+    lamp.classList.remove('on');
+    document.getElementById('save-text').textContent = '設定を自動保存';
+  }, 1400);
+}
+let saveTimer = null;
+const saveDebounced = () => { clearTimeout(saveTimer); saveTimer = setTimeout(save, 450); };
+
+/* =====================================================================
+   年金の自動推計（概算）
+   手取り→額面を係数0.78で換算し、
+   平均標準報酬額 × 5.481/1000 × 加入月数 ＋ 老齢基礎年金 84.73万/年（令和8年度満額）
+   ===================================================================== */
+const KISO_ANNUAL = 84.73;   // 万円/年（令和8年度・満額）
+const SHAHO_CAP = 65;        // 標準報酬月額の上限（万円/月・現行）
+const NET_TO_GROSS = 0.78;
+
+function autoPension(p) {
+  const join = p.pensionJoinAge, end = Math.min(p.retireAge, 70);
+  let months = 0, sum = 0;
+  for (let a = join; a < end; a++) {
+    // モデル開始前は現在の手取り水準で働いていたと仮定
+    const netAnnual = (a < p.startAge)
+      ? p.takehome
+      : p.takehome * Math.pow(1 + p.wageGrowth / 100, a - p.startAge);
+    let gm = netAnnual / 12 / NET_TO_GROSS;
+    gm = Math.min(gm, SHAHO_CAP);
+    sum += gm * 12; months += 12;
+  }
+  if (months <= 0) return KISO_ANNUAL / 12;
+  const avg = sum / months;
+  return (avg * 0.005481 * months + KISO_ANNUAL) / 12;   // 万円/月
+}
+
+/* =====================================================================
+   シミュレーション（すべて実質＝今の購買力）
+   ===================================================================== */
+function effParams(p) {
+  const q = { ...p };
+  q.pensionMonthly = p.autoPension ? autoPension(p) : p.pensionMonthly;
+  return q;
+}
+function grossIncome(age, p) {
+  let inc = 0;
+  if (age >= p.startAge && age < p.retireAge) {
+    inc += p.takehome * Math.pow(1 + p.wageGrowth / 100, age - p.startAge);
+  }
+  if (age >= p.pensionStart && age < p.endAge) inc += p.pensionMonthly * 12;
+  return inc;
+}
+function mult(age, p) {
+  return age <= p.goGoEnd ? 1 : (age <= p.slowGoEnd ? p.slowMult : p.noMult);
+}
+function finalBal(B, p) {
+  let A = p.currentAssets;
+  for (let a = p.startAge; a < p.endAge; a++) {
+    A += grossIncome(a, p) - B * mult(a, p);
+    A *= (1 + p.realReturn / 100);
+  }
+  return A;
+}
+function solveB(p) {
+  let lo = 0, hi = 200000;
+  if (finalBal(hi, p) > p.legacy) return null;   // 上限まで使っても余る（実質ありえない）
+  for (let i = 0; i < 200; i++) {
+    const m = (lo + hi) / 2;
+    if (finalBal(m, p) > p.legacy) lo = m; else hi = m;
+  }
+  return (lo + hi) / 2;
+}
+
+function compute(raw) {
+  const p = effParams(raw);
+  const B = solveB(p);
+  const points = [], flows = [], byAge = {};
+  let A = p.currentAssets, peak = { age: p.startAge, val: A }, minMid = A;
+  points.push({ x: p.startAge, y: A });
+  byAge[p.startAge] = { assets: A };
+  if (B !== null) {
+    for (let a = p.startAge; a < p.endAge; a++) {
+      const inc = grossIncome(a, p), spend = B * mult(a, p), net = inc - spend;
+      flows.push({ age: a, inc, spend, net });
+      A += net; A *= (1 + p.realReturn / 100);
+      points.push({ x: a + 1, y: A });
+      if (A < minMid && a < p.endAge - 1) minMid = A;
+      if (A > peak.val) peak = { age: a + 1, val: A };
+    }
+  }
+  points.forEach(pt => { byAge[pt.x] = byAge[pt.x] || {}; byAge[pt.x].assets = pt.y; });
+  flows.forEach(f => { byAge[f.age] = byAge[f.age] || {}; Object.assign(byAge[f.age], f); });
+  const retireAssets = byAge[p.retireAge] ? byAge[p.retireAge].assets : null;
+  const feasible = B !== null && B > 0 && minMid > -1;
+  return { p, raw, B, points, flows, byAge, peak, minMid, feasible, retireAssets };
+}
+
+/* =====================================================================
+   フォーマッタ
+   ===================================================================== */
+const comma = n => Math.round(n).toLocaleString('ja-JP');
+function fmtMan(v) {
+  const a = Math.abs(v);
+  if (a >= 10000) return (v / 10000).toFixed(2) + '億円';
+  return comma(v) + '万円';
+}
+const fmtMo = annual => (annual / 12).toFixed(1);
+const cssVar = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+
+/* =====================================================================
+   計器盤の生成
+   ===================================================================== */
+function fmtStep(it, v) {
+  return it.step >= 1 ? String(Math.round(v)) : (it.step === 0.01 ? v.toFixed(2) : v.toFixed(1));
+}
+function buildControls() {
+  const host = document.getElementById('ctrlHost');
+  let html = '';
+  CONTROLS.forEach(g => {
+    html += `<details class="grp"${g.open ? ' open' : ''}><summary><span class="sec-cog"></span>${g.g}<span class="chev">▶</span></summary><div class="grp-body">`;
+    if (g.auto) {
+      html += `<div class="autorow">
+        <label class="switch"><input type="checkbox" id="autoPen"><span class="sl"></span></label>
+        <span class="autolab">年金額を収入から自動推計する</span>
+      </div>`;
+    }
+    g.items.forEach(it => {
+      html += `<div class="knob" id="knob_${it.k}">
+        <div class="knob-head">
+          <label for="n_${it.k}">${it.l}</label>
+          <span class="knob-val"><input type="number" id="n_${it.k}" data-k="${it.k}" step="${it.step}"><span class="unit">${it.u}</span></span>
+        </div>
+        <input type="range" id="i_${it.k}" data-k="${it.k}" min="${it.min}" max="${it.max}" step="${it.step}">
+      </div>`;
+    });
+    if (g.hint) html += `<p class="hint">${g.hint}</p>`;
+    html += `</div></details>`;
+  });
+  host.innerHTML = html;
+  document.querySelectorAll('.sec-cog').forEach(el => el.innerHTML = gearSVG(9, { hole: 26, spokes: 0 }));
+
+  host.querySelectorAll('input[type=range][data-k]').forEach(el =>
+    el.addEventListener('input', e => setParam(el.dataset.k, e.target.value, true)));
+  host.querySelectorAll('input[type=number][data-k]').forEach(el => {
+    el.addEventListener('input', e => setParam(el.dataset.k, e.target.value, false));
+    el.addEventListener('blur', syncUI);
+  });
+  document.getElementById('autoPen').addEventListener('change', e => {
+    P.autoPension = e.target.checked ? 1 : 0;
+    applyAutoState(); update(); saveDebounced();
+  });
+}
+function applyAutoState() {
+  const on = !!P.autoPension;
+  const knob = document.getElementById('knob_pensionMonthly');
+  if (knob) knob.classList.toggle('dim', on);
+  ['i_pensionMonthly', 'n_pensionMonthly'].forEach(id => { const e = document.getElementById(id); if (e) e.disabled = on; });
+  const jk = document.getElementById('knob_pensionJoinAge');
+  if (jk) jk.classList.toggle('dim', !on);
+  ['i_pensionJoinAge', 'n_pensionJoinAge'].forEach(id => { const e = document.getElementById(id); if (e) e.disabled = !on; });
+}
+function syncUI() {
+  Object.keys(ALL).forEach(k => {
+    const it = ALL[k];
+    const s = document.getElementById('i_' + k), n = document.getElementById('n_' + k);
+    let v = P[k];
+    if (k === 'pensionMonthly' && P.autoPension) v = autoPension(effBase());
+    if (s) s.value = Math.min(Math.max(v, it.min), it.max);
+    if (n) n.value = fmtStep(it, v);
+  });
+  document.getElementById('autoPen').checked = !!P.autoPension;
+  applyAutoState();
+}
+function effBase() { return { ...P }; }
+
+function setParam(k, raw, fromSlider) {
+  const it = ALL[k];
+  let v = parseFloat(raw);
+  if (!isFinite(v)) return;
+  if (v < it.min) v = it.min;
+  if (fromSlider && v > it.max) v = it.max;
+  v = Math.round(v / it.step) * it.step;
+  v = parseFloat(v.toFixed(4));
+  P[k] = v;
+  const s = document.getElementById('i_' + k), n = document.getElementById('n_' + k);
+  if (fromSlider) { if (n) n.value = fmtStep(it, v); }
+  else { if (s) s.value = Math.min(Math.max(v, it.min), it.max); }
+  update(); saveDebounced();
+}
+function resetAll() { P = { ...DEFAULTS }; syncUI(); update(); save(); }
+
+/* =====================================================================
+   チャート
+   ===================================================================== */
+let charts = {};
+let lastState = null;
+
+const phaseBands = {
+  id: 'phaseBands',
+  beforeDatasetsDraw(chart) {
+    const m = chart.$meta; if (!m) return;
+    const { ctx, chartArea: { top, bottom }, scales: { x } } = chart;
+    const band = (a0, a1, fill) => {
+      a0 = Math.max(a0, m.startAge); a1 = Math.min(a1, m.endAge);
+      if (a1 <= a0) return;
+      const x0 = x.getPixelForValue(a0), x1 = x.getPixelForValue(a1);
+      if (!isFinite(x0) || !isFinite(x1)) return;
+      ctx.fillStyle = fill; ctx.fillRect(x0, top, x1 - x0, bottom - top);
+    };
+    ctx.save();
+    band(m.startAge, m.goGoEnd, cssVar('--band-go'));
+    band(m.goGoEnd, m.slowGoEnd, cssVar('--band-slow'));
+    band(m.slowGoEnd, m.endAge, cssVar('--band-no'));
+    ctx.restore();
+  }
 };
 
-function sync(key, val, unit) {
-  params[key] = parseFloat(val);
-  document.getElementById('v-'+key).textContent = val + unit;
-  update();
-}
+const markers = {
+  id: 'markers',
+  afterDatasetsDraw(chart) {
+    const m = chart.$meta; if (!m) return;
+    const { ctx, chartArea: { top, bottom }, scales: { x } } = chart;
+    const line = (age, color, label) => {
+      if (age < m.startAge || age > m.endAge) return;
+      const px = x.getPixelForValue(age); if (!isFinite(px)) return;
+      ctx.save();
+      ctx.setLineDash([4, 4]); ctx.lineWidth = 1.5; ctx.strokeStyle = color;
+      ctx.beginPath(); ctx.moveTo(px, top); ctx.lineTo(px, bottom); ctx.stroke();
+      ctx.setLineDash([]);
+      if (label && chart.$labels) {
+        ctx.fillStyle = color;
+        ctx.font = "600 11px 'Shippori Mincho', serif";
+        const right = px > (chart.chartArea.left + chart.chartArea.right) / 2;
+        ctx.textAlign = right ? 'right' : 'left';
+        ctx.fillText(label, px + (right ? -5 : 5), top + 12);
+      }
+      ctx.restore();
+    };
+    line(m.retireAge, cssVar('--ink2'), 'リタイア ' + m.retireAge);
+    line(m.pensionStart, cssVar('--verdigris'), '年金 ' + m.pensionStart);
+  }
+};
 
-function simulate() {
-  const {age,retire,life,income,incgrow,expense,retexp,pension,penage,
-         asset,roi1,roi2,inf,side1,side2,reserve,tax} = params;
-  const years = [], assets = [], incomes = [], expenses = [], netflows = [];
-  let a = asset;
-  let peakAsset = a;
-  let fiAge = null;
-  let zeroAge = null;
-  const fireTarget = retexp * 25; // 4% rule
-  let totalSave = 0, workYears = 0;
-
-  for (let yr = age; yr <= life; yr++) {
-    years.push(yr);
-    const isRetired = yr >= retire;
-    const inflation = Math.pow(1 + inf/100, yr - age);
-    let inc, exp, roi;
-
-    if (!isRetired) {
-      const rawInc = income * Math.pow(1 + incgrow/100, yr - age);
-      inc = rawInc * (1 - tax/100) + side1;
-      exp = expense * inflation;
-      roi = roi1/100;
-      const save = inc - exp;
-      totalSave += save;
-      workYears++;
-    } else {
-      const pen = yr >= penage ? pension : 0;
-      inc = side2 + pen;
-      exp = retexp * inflation;
-      roi = roi2/100;
+function baseOpts(withLegend) {
+  return {
+    responsive: true, maintainAspectRatio: false,
+    animation: false,
+    interaction: { mode: 'nearest', axis: 'x', intersect: false },
+    layout: { padding: { top: 14 } },
+    plugins: {
+      legend: { display: !!withLegend, labels: { color: cssVar('--ink2'), font: { size: 11 }, boxWidth: 14, boxHeight: 10, usePointStyle: true } },
+      tooltip: {
+        backgroundColor: cssVar('--panel-edge'), borderColor: cssVar('--brass-dark'), borderWidth: 1.5,
+        titleColor: cssVar('--brass-light'), bodyColor: cssVar('--ink'), padding: 10,
+        titleFont: { family: "'Cinzel',serif", size: 13 },
+        callbacks: {
+          title: it => Math.round(it[0].parsed.x) + ' 歳',
+          label: c => ' ' + c.dataset.label + '：' + fmtMan(c.parsed.y)
+        }
+      }
+    },
+    scales: {
+      x: {
+        type: 'linear', bounds: 'data',
+        ticks: { color: cssVar('--ink3'), stepSize: 10, font: { size: 10 }, callback: v => v },
+        grid: { color: cssVar('--grid-line') }
+      },
+      y: {
+        ticks: { color: cssVar('--ink3'), font: { size: 10 }, callback: v => (Math.abs(v) >= 10000 ? (v / 10000).toFixed(1) + '億' : comma(v)) },
+        grid: { color: cssVar('--grid-line') }
+      }
     }
-
-    const prevA = a;
-    a = a * (1 + roi) + (inc - exp);
-    if (a > peakAsset) peakAsset = a;
-    if (!fiAge && a >= fireTarget) fiAge = yr;
-    if (!zeroAge && prevA > 0 && a <= 0) { zeroAge = yr; a = 0; }
-
-    assets.push(Math.round(a));
-    incomes.push(Math.round(inc));
-    expenses.push(Math.round(exp));
-    netflows.push(Math.round(inc - exp));
-  }
-  return {years, assets, incomes, expenses, netflows, peakAsset, fiAge, zeroAge, totalSave, workYears, fireTarget};
+  };
 }
 
-const colors = { green:'#10b981', blue:'#3b82f6', yellow:'#f59e0b', red:'#ef4444', purple:'#8b5cf6', teal:'#14b8a6' };
-const chartOpts = (title) => ({
-  responsive:true, maintainAspectRatio:true,
-  plugins:{legend:{labels:{color:'#9ca3af',font:{size:11}}},tooltip:{callbacks:{label:ctx=>` ${ctx.dataset.label}: ${ctx.parsed.y.toLocaleString()}万円`}}},
-  scales:{
-    x:{ticks:{color:'#6b7280',maxTicksLimit:15},grid:{color:'#374151'}},
-    y:{ticks:{color:'#6b7280',callback:v=>v.toLocaleString()},grid:{color:'#374151'}}
-  }
-});
+/* 縦グラデーションの塗り（真鍮が上で熱く、下へ冷めていく） */
+function areaGrad(stops) {
+  return c => {
+    const { chart } = c; const { ctx, chartArea } = chart;
+    if (!chartArea) return stops[0][1];
+    const g = ctx.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
+    stops.forEach(([o, col]) => g.addColorStop(o, col));
+    return g;
+  };
+}
 
-let charts = {};
 function initCharts() {
-  charts.asset = new Chart(document.getElementById('chart-asset').getContext('2d'), {
-    type:'line', data:{labels:[],datasets:[{label:'資産残高',data:[],borderColor:colors.green,backgroundColor:'rgba(16,185,129,0.1)',fill:true,tension:0.3,pointRadius:0}]},
-    options:{...chartOpts(),plugins:{...chartOpts().plugins,annotation:{}}}
+  Chart.defaults.font.family = "'Shippori Mincho','Yu Mincho',serif";
+
+  charts.asset = new Chart(document.getElementById('chartAsset'), {
+    type: 'line',
+    data: { datasets: [{
+      label: '資産', data: [], borderColor: cssVar('--brass'),
+      backgroundColor: areaGrad([[0, 'rgba(255,179,71,0.46)'], [0.5, 'rgba(201,162,75,0.17)'], [1, 'rgba(138,106,44,0.02)']]),
+      fill: true, tension: .25, pointRadius: 0, borderWidth: 3, borderCapStyle: 'round', borderJoinStyle: 'round'
+    }]},
+    options: baseOpts(false), plugins: [phaseBands, markers]
   });
-  charts.flow = new Chart(document.getElementById('chart-flow').getContext('2d'), {
-    type:'line', data:{labels:[],datasets:[
-      {label:'収入',data:[],borderColor:colors.blue,backgroundColor:'rgba(59,130,246,0.1)',fill:false,tension:0.3,pointRadius:0},
-      {label:'支出',data:[],borderColor:colors.red,backgroundColor:'rgba(239,68,68,0.1)',fill:false,tension:0.3,pointRadius:0}
+  charts.asset.$labels = true;
+
+  charts.flow = new Chart(document.getElementById('chartFlow'), {
+    type: 'line',
+    data: { datasets: [
+      { label: '収入', data: [], borderColor: cssVar('--verdigris'),
+        backgroundColor: areaGrad([[0, 'rgba(79,179,163,0.32)'], [1, 'rgba(79,179,163,0.01)']]),
+        fill: true, tension: .2, pointRadius: 0, borderWidth: 2.4 },
+      { label: '支出', data: [], borderColor: cssVar('--copper-light'), fill: false, tension: .2, pointRadius: 0, borderWidth: 2.4, borderDash: [] }
     ]},
-    options:chartOpts()
+    options: baseOpts(true), plugins: [markers]
   });
-  charts.bar = new Chart(document.getElementById('chart-bar').getContext('2d'), {
-    type:'bar', data:{labels:[],datasets:[{label:'純フロー（収入−支出）',data:[],backgroundColor:[]}]},
-    options:{...chartOpts(),scales:{...chartOpts().scales,y:{...chartOpts().scales.y}}}
+
+  charts.net = new Chart(document.getElementById('chartNet'), {
+    type: 'bar',
+    data: { datasets: [{ label: '積立／取り崩し', data: [], backgroundColor: [], borderWidth: 0, borderRadius: 2, barPercentage: 1, categoryPercentage: 1 }] },
+    options: baseOpts(false), plugins: [markers]
   });
+  // このチャートだけ「万円／月」単位
+  charts.net.options.plugins.tooltip.callbacks.label =
+    c => ' ' + (c.parsed.y >= 0 ? '積立' : '取り崩し') + '：月 ' + Math.abs(c.parsed.y).toFixed(1) + '万円';
+  charts.net.options.scales.y.ticks.callback = v => v.toFixed(0);
 }
 
+function refreshChartTheme() {
+  const b = baseOpts(false);
+  ['asset', 'flow', 'net'].forEach(k => {
+    const c = charts[k], o = c.options;
+    o.plugins.legend.labels.color = b.plugins.legend.labels.color;
+    Object.assign(o.plugins.tooltip, {
+      backgroundColor: b.plugins.tooltip.backgroundColor, borderColor: b.plugins.tooltip.borderColor,
+      titleColor: b.plugins.tooltip.titleColor, bodyColor: b.plugins.tooltip.bodyColor
+    });
+    o.scales.x.ticks.color = b.scales.x.ticks.color; o.scales.x.grid.color = b.scales.x.grid.color;
+    o.scales.y.ticks.color = b.scales.y.ticks.color; o.scales.y.grid.color = b.scales.y.grid.color;
+  });
+  charts.asset.data.datasets[0].borderColor = cssVar('--brass');
+  charts.flow.data.datasets[0].borderColor = cssVar('--verdigris');
+  charts.flow.data.datasets[1].borderColor = cssVar('--copper-light');
+  ['asset', 'flow', 'net'].forEach(k => charts[k].update('none'));
+  dialMax = null;               // 文字盤を新テーマの色で描き直す
+  if (lastState) renderDial(lastState.B, lastState.p);
+}
+
+/* =====================================================================
+   フェーズ別テーブル
+   ===================================================================== */
+function phaseName(a, p) {
+  const ph = a <= p.goGoEnd ? 'go-go' : (a <= p.slowGoEnd ? 'slow-go' : 'no-go');
+  const work = a < p.retireAge ? '就労' : 'リタイア後';
+  return `${work}・${ph}`;
+}
+function segmentPlan(s) {
+  const p = s.p;
+  const cuts = new Set([p.startAge, p.endAge]);
+  [p.retireAge, p.pensionStart, p.goGoEnd + 1, p.slowGoEnd + 1].forEach(a => {
+    if (a > p.startAge && a < p.endAge) cuts.add(a);
+  });
+  const bs = [...cuts].sort((a, b) => a - b);
+  const segs = [];
+  for (let i = 0; i < bs.length - 1; i++) {
+    const a0 = bs[i], a1 = bs[i + 1] - 1;
+    if (a1 < a0) continue;
+    const f0 = s.byAge[a0] || {}, f1 = s.byAge[a1] || {};
+    let sum = 0;
+    for (let a = a0; a <= a1; a++) { const d = s.byAge[a]; if (d && d.net != null) sum += d.net; }
+    segs.push({
+      a0, a1, sum,
+      inc0: f0.inc || 0, inc1: f1.inc || 0,
+      sp0: f0.spend || 0, sp1: f1.spend || 0,
+      net0: f0.net || 0, net1: f1.net || 0,
+      tag: phaseName(a0, p)
+    });
+  }
+  return segs;
+}
+function renderPlan(s) {
+  const p = s.p, segs = segmentPlan(s);
+  const rng = (a, b) => Math.abs(a - b) < 0.05
+    ? `${fmtMo(a)}<span class="u">万</span>`
+    : `${fmtMo(a)}→${fmtMo(b)}<span class="u">万</span>`;
+  const sRng = (a, b) => {
+    const sg = v => (v >= 0 ? '+' : '−') + Math.abs(v / 12).toFixed(1);
+    return Math.abs(a - b) < 0.05 ? `${sg(a)}<span class="u">万</span>` : `${sg(a)}→${sg(b)}<span class="u">万</span>`;
+  };
+
+  let rows = '', cards = '';
+  segs.forEach(sg => {
+    const dispEnd = (sg.a1 === p.endAge - 1) ? p.endAge : sg.a1;
+    const yrs = sg.a1 - sg.a0 + 1, pos = sg.sum >= 0;
+    const incCell = (sg.inc0 < 1 && sg.inc1 < 1) ? '—' : rng(sg.inc0, sg.inc1);
+    rows += `<tr>
+      <td><div class="seg-age">${sg.a0}〜${dispEnd}<span class="u">歳</span></div><div class="seg-len">${yrs}年間</div></td>
+      <td><span class="seg-tag">${sg.tag}</span></td>
+      <td class="num">${incCell}</td>
+      <td class="num">${rng(sg.sp0, sg.sp1)}</td>
+      <td class="num ${pos ? 'save' : 'draw'}">${sRng(sg.net0, sg.net1)}</td>
+      <td class="num ${pos ? 'save' : 'draw'}">${(pos ? '+' : '−') + fmtMan(Math.abs(sg.sum))}</td>
+    </tr>`;
+    cards += `<div class="pcard">
+      <div class="pc-top"><span class="seg-age">${sg.a0}〜${dispEnd}<span class="u">歳</span></span><span class="seg-len">${yrs}年間</span><span class="seg-tag">${sg.tag}</span></div>
+      <div class="pc-grid">
+        <div><em>収入（月）</em><b class="num">${incCell}</b></div>
+        <div><em>支出（月）</em><b class="num">${rng(sg.sp0, sg.sp1)}</b></div>
+        <div><em>積立／取崩（月）</em><b class="num ${pos ? 'save' : 'draw'}">${sRng(sg.net0, sg.net1)}</b></div>
+        <div><em>期間合計</em><b class="num ${pos ? 'save' : 'draw'}">${(pos ? '+' : '−') + fmtMan(Math.abs(sg.sum))}</b></div>
+      </div>
+    </div>`;
+  });
+  document.getElementById('planTable').innerHTML =
+    '<thead><tr><th>期間</th><th>フェーズ</th><th>収入(月)</th><th>支出(月)</th><th>積立／取崩(月)</th><th>期間合計</th></tr></thead><tbody>' + rows + '</tbody>';
+  document.getElementById('planCards').innerHTML = cards;
+}
+
+function renderCheckpoints(s) {
+  const p = s.p, pts = [];
+  const first = Math.ceil((p.startAge + 1) / 5) * 5;
+  for (let a = first; a < p.endAge; a += 5) {
+    const d = s.byAge[a]; if (d && d.assets != null) pts.push({ age: a, assets: d.assets });
+  }
+  pts.push({ age: p.endAge, assets: Math.max(0, p.legacy) });
+  let maxV = 1; pts.forEach(q => { if (q.assets > maxV) maxV = q.assets; });
+  document.getElementById('ckStrip').innerHTML = pts.map(q => {
+    const pct = Math.max(2, Math.min(100, q.assets / maxV * 100));
+    const isPeak = q.assets === maxV && maxV > 1;
+    return `<div class="ck${isPeak ? ' peak' : ''}"><div class="ca">${q.age}歳</div><div class="cv">${fmtMan(q.assets)}</div><div class="cbar"><i style="width:${pct}%"></i></div></div>`;
+  }).join('');
+}
+
+/* =====================================================================
+   更新
+   ===================================================================== */
 function update() {
-  const d = simulate();
-  const {years,assets,incomes,expenses,netflows,peakAsset,fiAge,zeroAge,totalSave,workYears} = d;
+  const s = compute(P), p = s.p, B = s.B;
+  lastState = s;
 
-  document.getElementById('kpi-peak').textContent = Math.round(peakAsset).toLocaleString() + '万円';
-  document.getElementById('kpi-fi').textContent = fiAge ? fiAge + '歳' : '未達成';
-  document.getElementById('kpi-zero').textContent = zeroAge ? zeroAge + '歳' : '100歳以降';
-  const avgSave = workYears > 0 ? Math.round(totalSave / workYears) : 0;
-  document.getElementById('kpi-save').textContent = avgSave.toLocaleString() + '万円/年';
+  document.getElementById('h1R').textContent = p.retireAge;
+  document.getElementById('h1E').textContent = p.endAge;
 
-  charts.asset.data.labels = years;
-  charts.asset.data.datasets[0].data = assets;
+  // 年金の自動推計値をUIへ反映
+  if (P.autoPension) {
+    const it = ALL.pensionMonthly, v = p.pensionMonthly;
+    const sl = document.getElementById('i_pensionMonthly'), nu = document.getElementById('n_pensionMonthly');
+    if (sl) sl.value = Math.min(Math.max(v, it.min), it.max);
+    if (nu) nu.value = fmtStep(it, v);
+  }
+
+  // --- 圧力計 ---
+  renderDial(B, p);
+
+  // --- フェーズ別の使える額 ---
+  const setPhase = (id, range, val, yr) => {
+    document.getElementById(id + 'Range').textContent = range;
+    document.getElementById(id + 'Val').textContent = val;
+    document.getElementById(id + 'Year').textContent = yr;
+  };
+  if (B === null || !isFinite(B)) {
+    setPhase('go', '—', '—', '—'); setPhase('slow', '—', '—', '—'); setPhase('no', '—', '—', '—');
+    document.getElementById('mgSub').textContent = '設定を計算できません。年齢の前後関係を確認してください。';
+  } else {
+    document.getElementById('mgSub').textContent = 'このプランなら、各時期に月いくら使ってよいか（実質・今の購買力）';
+    const goEnd = Math.min(p.goGoEnd, p.endAge), slowEnd = Math.min(p.slowGoEnd, p.endAge);
+    setPhase('go', `${p.startAge}–${goEnd}歳`, fmtMo(B), `年 ${fmtMan(B)}`);
+    if (slowEnd > goEnd) setPhase('slow', `${goEnd + 1}–${slowEnd}歳`, fmtMo(B * p.slowMult), `年 ${fmtMan(B * p.slowMult)}`);
+    else setPhase('slow', '該当なし', '—', '—');
+    if (p.endAge > slowEnd) setPhase('no', `${slowEnd + 1}–${p.endAge}歳`, fmtMo(B * p.noMult), `年 ${fmtMan(B * p.noMult)}`);
+    else setPhase('no', '該当なし', '—', '—');
+  }
+
+  // --- 毎月の積立額 ---
+  const work = s.flows.filter(f => f.age < p.retireAge);
+  const setSS = (id, val, unit, cls) => {
+    const el = document.getElementById(id);
+    el.className = 'ssv' + (cls ? ' ' + cls : '');
+    el.innerHTML = val + (unit ? `<span class="u">${unit}</span>` : '');
+  };
+  if (work.length === 0) {
+    document.getElementById('ssHead').textContent = 'すでにリタイア後の設定です（積立期間なし）';
+    ['ssNow', 'ssEnd', 'ssRate', 'ssTotal'].forEach(id => setSS(id, '—', ''));
+    document.getElementById('ssNowL').textContent = 'いまの積立';
+    document.getElementById('ssEndL').textContent = 'リタイア直前の積立';
+    document.getElementById('ssTotalL').textContent = '現役期の積立総額';
+  } else {
+    document.getElementById('ssHead').textContent = '毎月の積立額 — この支出プランを守った場合、いくら貯めることになるか';
+    const f0 = work[0], fz = work[work.length - 1];
+    const total = work.reduce((a, f) => a + f.net, 0);
+    const mo = v => (v >= 0 ? '' : '−') + Math.abs(v / 12).toFixed(1);
+
+    document.getElementById('ssNowL').textContent = `いま（${f0.age}歳）の積立`;
+    setSS('ssNow', mo(f0.net), ' 万/月', f0.net >= 0 ? 'good' : 'draw');
+
+    document.getElementById('ssEndL').textContent = `リタイア直前（${fz.age}歳）の積立`;
+    setSS('ssEnd', mo(fz.net), ' 万/月', fz.net >= 0 ? 'good' : 'draw');
+
+    const rate = f0.inc > 0 ? f0.net / f0.inc * 100 : 0;
+    setSS('ssRate', rate.toFixed(0), ' %', rate >= 0 ? '' : 'draw');
+
+    document.getElementById('ssTotalL').textContent = `${f0.age}〜${fz.age}歳の積立総額`;
+    setSS('ssTotal', (total >= 0 ? '' : '−') + fmtMan(Math.abs(total)).replace('万円', '').replace('億円', ''),
+      Math.abs(total) >= 10000 ? ' 億円' : ' 万円', total >= 0 ? 'good' : 'draw');
+  }
+
+  // --- KPI ---
+  document.getElementById('kPeak').textContent = fmtMan(s.peak.val);
+  document.getElementById('kPeakL').textContent = `ピーク資産（${s.peak.age}歳ごろ）`;
+
+  const kr = document.getElementById('kRetire');
+  kr.className = 'v';
+  if (s.retireAssets != null) {
+    kr.textContent = fmtMan(s.retireAssets);
+    if (s.retireAssets < 0) kr.classList.add('warn');
+  } else kr.textContent = '—';
+  document.getElementById('kRetireL').textContent = `リタイア時の資産（${p.retireAge}歳）`;
+
+  document.getElementById('kPension').textContent = fmtMan(p.pensionMonthly * 12);
+  document.getElementById('kPensionL').textContent =
+    `年金・年額（月${p.pensionMonthly.toFixed(1)}万・${P.autoPension ? '自動推計' : '手入力'}）`;
+
+  const ks = document.getElementById('kStatus'), ksl = document.getElementById('kStatusL');
+  ks.className = 'v';
+  if (s.feasible) { ks.textContent = '✓ 成立'; ks.classList.add('good'); ksl.textContent = '途中で資産がマイナスにならない'; }
+  else { ks.textContent = '⚠ 要調整'; ks.classList.add('warn'); ksl.textContent = 'リタイアを遅らせるか支出を下げて'; }
+
+  // --- チャート ---
+  const meta = { startAge: p.startAge, endAge: p.endAge, retireAge: p.retireAge, pensionStart: p.pensionStart, goGoEnd: p.goGoEnd, slowGoEnd: p.slowGoEnd };
+  ['asset', 'flow', 'net'].forEach(k => {
+    charts[k].$meta = meta;
+    charts[k].options.scales.x.min = p.startAge;
+    charts[k].options.scales.x.max = p.endAge;
+  });
+
+  charts.asset.data.datasets[0].data = s.points;
   charts.asset.update('none');
 
-  charts.flow.data.labels = years;
-  charts.flow.data.datasets[0].data = incomes;
-  charts.flow.data.datasets[1].data = expenses;
+  charts.flow.data.datasets[0].data = s.flows.map(f => ({ x: f.age, y: f.inc }));
+  charts.flow.data.datasets[1].data = s.flows.map(f => ({ x: f.age, y: f.spend }));
   charts.flow.update('none');
 
-  charts.bar.data.labels = years;
-  charts.bar.data.datasets[0].data = netflows;
-  charts.bar.data.datasets[0].backgroundColor = netflows.map(v => v >= 0 ? 'rgba(16,185,129,0.7)' : 'rgba(239,68,68,0.7)');
-  charts.bar.update('none');
+  charts.net.data.datasets[0].data = s.flows.map(f => ({ x: f.age, y: f.net / 12 }));   // 万円／月
+  charts.net.data.datasets[0].backgroundColor = s.flows.map(f => f.net >= 0 ? 'rgba(79,179,163,0.75)' : 'rgba(212,85,60,0.75)');
+  charts.net.update('none');
+
+  renderPlan(s);
+  renderCheckpoints(s);
 }
 
+/* =====================================================================
+   テーマ
+   ===================================================================== */
+const htmlEl = document.documentElement;
+function toggleTheme() {
+  const isDark = htmlEl.getAttribute('data-theme') === 'dark';
+  htmlEl.setAttribute('data-theme', isDark ? 'light' : 'dark');
+  localStorage.setItem('theme', isDark ? 'light' : 'dark');
+  setTimeout(refreshChartTheme, 60);
+}
+htmlEl.setAttribute('data-theme', localStorage.getItem('theme') || 'dark');
+
+/* ===== 起動 ===== */
+load();
+buildControls();
 initCharts();
+syncUI();
 update();
 </script>
 </body>
