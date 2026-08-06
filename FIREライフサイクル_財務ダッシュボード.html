@@ -1024,7 +1024,11 @@ function load() {
   try {
     const raw = localStorage.getItem(STORE_KEY); if (!raw) return;
     const o = JSON.parse(raw);
-    Object.keys(DEFAULTS).forEach(k => { if (typeof o[k] === 'number' && isFinite(o[k])) P[k] = o[k]; });
+    Object.keys(DEFAULTS).forEach(k => {
+      if (typeof o[k] !== 'number' || !isFinite(o[k])) return;
+      const it = ALL[k];                                   // autoPension は ALL に無いのでそのまま通す
+      P[k] = it ? Math.min(Math.max(o[k], it.min), it.max) : o[k];
+    });
   } catch (e) { /* 壊れていたら初期値 */ }
 }
 let lampTimer = null;
@@ -1124,8 +1128,10 @@ function compute(raw) {
   points.forEach(pt => { byAge[pt.x] = byAge[pt.x] || {}; byAge[pt.x].assets = pt.y; });
   flows.forEach(f => { byAge[f.age] = byAge[f.age] || {}; Object.assign(byAge[f.age], f); });
   const retireAssets = byAge[p.retireAge] ? byAge[p.retireAge].assets : null;
-  const feasible = B !== null && B > 0 && minMid > -1;
-  return { p, raw, B, points, flows, byAge, peak, minMid, feasible, retireAssets };
+  // 一切使わなくても「最後に残す額」に届かないなら、そもそもこのプランは成立しない
+  const legacyReachable = finalBal(0, p) >= p.legacy - 1e-6;
+  const feasible = B !== null && B > 0 && minMid > -1 && legacyReachable;
+  return { p, raw, B, points, flows, byAge, peak, minMid, feasible, legacyReachable, retireAssets };
 }
 
 /* =====================================================================
@@ -1180,7 +1186,7 @@ function buildControls() {
   });
   document.getElementById('autoPen').addEventListener('change', e => {
     P.autoPension = e.target.checked ? 1 : 0;
-    applyAutoState(); update(); saveDebounced();
+    syncUI(); update(); saveDebounced();   // syncUI 経由で年金月額欄の表示も実際の使用値に戻す
   });
 }
 function applyAutoState() {
@@ -1211,7 +1217,7 @@ function setParam(k, raw, fromSlider) {
   let v = parseFloat(raw);
   if (!isFinite(v)) return;
   if (v < it.min) v = it.min;
-  if (fromSlider && v > it.max) v = it.max;
+  if (v > it.max) v = it.max;
   v = Math.round(v / it.step) * it.step;
   v = parseFloat(v.toFixed(4));
   P[k] = v;
@@ -1449,7 +1455,9 @@ function renderCheckpoints(s) {
   for (let a = first; a < p.endAge; a += 5) {
     const d = s.byAge[a]; if (d && d.assets != null) pts.push({ age: a, assets: d.assets });
   }
-  pts.push({ age: p.endAge, assets: Math.max(0, p.legacy) });
+  // 目標値ではなく実際の到達額を出す（届かないプランでは両者が食い違うため）
+  const fin = s.byAge[p.endAge];
+  pts.push({ age: p.endAge, assets: (fin && fin.assets != null) ? fin.assets : Math.max(0, p.legacy) });
   let maxV = 1; pts.forEach(q => { if (q.assets > maxV) maxV = q.assets; });
   document.getElementById('ckStrip').innerHTML = pts.map(q => {
     const pct = Math.max(2, Math.min(100, q.assets / maxV * 100));
@@ -1494,7 +1502,9 @@ function update() {
     setPhase('go', `${p.startAge}–${goEnd}歳`, fmtMo(B), `年 ${fmtMan(B)}`);
     if (slowEnd > goEnd) setPhase('slow', `${goEnd + 1}–${slowEnd}歳`, fmtMo(B * p.slowMult), `年 ${fmtMan(B * p.slowMult)}`);
     else setPhase('slow', '該当なし', '—', '—');
-    if (p.endAge > slowEnd) setPhase('no', `${slowEnd + 1}–${p.endAge}歳`, fmtMo(B * p.noMult), `年 ${fmtMan(B * p.noMult)}`);
+    // no-go の開始は mult() と同じ判定に合わせる（goGoEnd > slowGoEnd なら slow-go は消滅し、no-go は goGoEnd の翌年から）
+    const noStart = Math.max(goEnd, slowEnd);
+    if (p.endAge > noStart) setPhase('no', `${noStart + 1}–${p.endAge}歳`, fmtMo(B * p.noMult), `年 ${fmtMan(B * p.noMult)}`);
     else setPhase('no', '該当なし', '—', '—');
   }
 
@@ -1550,6 +1560,10 @@ function update() {
   const ks = document.getElementById('kStatus'), ksl = document.getElementById('kStatusL');
   ks.className = 'v';
   if (s.feasible) { ks.textContent = '✓ 成立'; ks.classList.add('good'); ksl.textContent = '途中で資産がマイナスにならない'; }
+  else if (!s.legacyReachable) {
+    ks.textContent = '⚠ 到達不可'; ks.classList.add('warn');
+    ksl.textContent = `一切使わなくても「最後に残す額」${fmtMan(p.legacy)}に届きません`;
+  }
   else { ks.textContent = '⚠ 要調整'; ks.classList.add('warn'); ksl.textContent = 'リタイアを遅らせるか支出を下げて'; }
 
   // --- チャート ---
