@@ -1,0 +1,974 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>200トークスクリプト図解</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f6f4f0; --surface:#ffffff; --surface-2:#f0ece6; --ink:#1c1a17; --ink-2:#55504a; --ink-3:#8b857d;
+  --line:#e2ddd5; --line-2:#cfc8bd; --shadow:0 1px 2px rgba(30,25,20,.05),0 6px 20px rgba(30,25,20,.06);
+  --warn:#c92a2a; --warn-s:#fff1f1; --ok:#2b8a3e; --ok-s:#ebfbee; --ng:#c92a2a; --ng-s:#fff0f0;
+  --c1:#d9480f; --c2:#d97706; --c3:#2b8a3e; --c4:#0b7285; --c5:#1971c2; --c6:#6741d9; --c7:#a61e4d; --cx:#5c5f66;
+  --c:var(--cx);
+  --radius:14px;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#141311; --surface:#1d1b19; --surface-2:#262320; --ink:#f1ede7; --ink-2:#bdb6ad; --ink-3:#8c857c;
+    --line:#34302b; --line-2:#48423b; --shadow:0 1px 2px rgba(0,0,0,.3),0 6px 20px rgba(0,0,0,.25);
+    --warn:#ff8787; --warn-s:#3a1d1d; --ok:#69db7c; --ok-s:#16301c; --ng:#ff8787; --ng-s:#3a1d1d;
+    --c1:#ff8a50; --c2:#fbbf24; --c3:#69db7c; --c4:#3bc9db; --c5:#74c0fc; --c6:#b197fc; --c7:#f783ac; --cx:#adb5bd;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#141311; --surface:#1d1b19; --surface-2:#262320; --ink:#f1ede7; --ink-2:#bdb6ad; --ink-3:#8c857c;
+  --line:#34302b; --line-2:#48423b; --shadow:0 1px 2px rgba(0,0,0,.3),0 6px 20px rgba(0,0,0,.25);
+  --warn:#ff8787; --warn-s:#3a1d1d; --ok:#69db7c; --ok-s:#16301c; --ng:#ff8787; --ng-s:#3a1d1d;
+  --c1:#ff8a50; --c2:#fbbf24; --c3:#69db7c; --c4:#3bc9db; --c5:#74c0fc; --c6:#b197fc; --c7:#f783ac; --cx:#adb5bd;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:72px}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Noto Sans JP","Hiragino Sans","Hiragino Kaku Gothic ProN","Yu Gothic UI","Meiryo",system-ui,sans-serif;font-size:15px;line-height:1.75;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+a{color:inherit}
+b,strong{font-weight:700}
+.wrap{max-width:1200px;margin:0 auto;padding:0 16px}
+.soft{background:color-mix(in srgb,var(--c) 11%,var(--surface))}
+
+/* ===== top bar ===== */
+.topbar{position:sticky;top:0;z-index:20;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.topbar .wrap{display:flex;align-items:center;gap:10px;height:56px}
+.brand{font-weight:900;font-size:14px;white-space:nowrap;letter-spacing:.02em}
+.navlinks{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;flex:1;min-width:0;mask-image:linear-gradient(90deg,#000 92%,transparent)}
+.navlinks::-webkit-scrollbar{display:none}
+.navlinks a{flex:none;text-decoration:none;font-size:12.5px;font-weight:700;padding:5px 10px;border-radius:999px;color:var(--ink-2);border:1px solid transparent}
+.navlinks a:hover{background:var(--surface);border-color:var(--line)}
+.navlinks a i{font-style:normal;display:inline-grid;place-items:center;width:18px;height:18px;border-radius:50%;background:var(--c);color:#fff;font-size:11px;margin-right:5px;vertical-align:1px}
+.tools{display:flex;gap:6px;align-items:center}
+.search{position:relative}
+.search input{width:170px;height:34px;border-radius:999px;border:1px solid var(--line-2);background:var(--surface);color:var(--ink);padding:0 12px 0 32px;font:inherit;font-size:13px}
+.search input:focus{outline:2px solid color-mix(in srgb,var(--c5) 50%,transparent);outline-offset:1px}
+.search svg{position:absolute;left:10px;top:9px;width:16px;height:16px;color:var(--ink-3)}
+.btn{height:34px;border-radius:999px;border:1px solid var(--line-2);background:var(--surface);color:var(--ink);font:inherit;font-size:12.5px;font-weight:700;padding:0 12px;cursor:pointer;white-space:nowrap}
+.btn[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.icon-btn{width:34px;padding:0;display:grid;place-items:center}
+.icon-btn svg{width:16px;height:16px}
+.hitcount{font-size:12px;color:var(--ink-3);white-space:nowrap}
+@media (max-width:860px){
+  .topbar .wrap{flex-wrap:wrap;height:auto;padding-top:8px;padding-bottom:8px;row-gap:6px}
+  .brand{display:none}
+  .navlinks{order:3;flex-basis:100%}
+  .tools{flex:1}
+  .search{flex:1}
+  .search input{width:100%}
+}
+
+/* ===== hero ===== */
+.hero{padding:56px 0 28px}
+.kicker{display:inline-block;font-size:12px;font-weight:700;letter-spacing:.08em;color:var(--ink-2);background:var(--surface);border:1px solid var(--line);padding:4px 12px;border-radius:999px}
+.hero h1{font-size:clamp(28px,5vw,48px);line-height:1.25;font-weight:900;margin:16px 0 12px;letter-spacing:-.01em}
+.hero h1 span{background:linear-gradient(90deg,var(--c1),var(--c2) 22%,var(--c3) 40%,var(--c4) 56%,var(--c5) 70%,var(--c6) 85%,var(--c7));-webkit-background-clip:text;background-clip:text;color:transparent}
+.hero .lead{font-size:16px;color:var(--ink-2);max-width:760px;margin:0}
+.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:26px}
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:14px 16px}
+.stat b{display:block;font-size:30px;line-height:1.1;font-weight:900}
+.stat span{font-size:12.5px;color:var(--ink-2)}
+@media (max-width:640px){.stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+/* ===== generic blocks ===== */
+section.block{padding:40px 0}
+.sec-title{display:flex;align-items:baseline;gap:12px;margin:0 0 6px}
+.sec-title h2{font-size:24px;font-weight:900;margin:0}
+.sec-title small{color:var(--ink-3);font-weight:700;font-size:12px;letter-spacing:.06em}
+.sec-lead{color:var(--ink-2);margin:0 0 20px}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow)}
+.panel h3{margin:0 0 12px;font-size:16px;font-weight:900;display:flex;align-items:center;gap:8px}
+.panel h3::before{content:"";width:6px;height:18px;border-radius:3px;background:var(--c)}
+.grid-2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.grid-3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+@media (max-width:860px){.grid-2,.grid-3{grid-template-columns:1fr}}
+.mt{margin-top:14px}
+.note{font-size:12.5px;color:var(--ink-3)}
+.chip{display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:700;padding:2px 10px;border-radius:999px;background:var(--surface-2);color:var(--ink-2);border:1px solid var(--line)}
+.ref{font-size:11.5px;font-weight:700;color:var(--c);background:color-mix(in srgb,var(--c) 12%,var(--surface));padding:1px 8px;border-radius:999px;white-space:nowrap;text-decoration:none}
+a.ref:hover{text-decoration:underline}
+
+/* how to use */
+.howto{counter-reset:h}
+.howto li{list-style:none;position:relative;padding:12px 14px 12px 52px;background:var(--surface);border:1px solid var(--line);border-radius:12px;margin-bottom:8px}
+.howto li::before{counter-increment:h;content:counter(h);position:absolute;left:14px;top:12px;width:26px;height:26px;border-radius:8px;background:var(--ink);color:var(--bg);display:grid;place-items:center;font-weight:900;font-size:13px}
+.howto b{display:block}
+.howto span{font-size:13px;color:var(--ink-2)}
+.howto ol{padding:0;margin:0}
+.readflow{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:12px}
+.readflow span{font-size:13px;font-weight:700;padding:6px 12px;border-radius:10px;background:var(--surface-2);border:1px solid var(--line)}
+.readflow em{font-style:normal;color:var(--ink-3)}
+
+/* ===== stepper (overall map) ===== */
+.phases{display:grid;grid-template-columns:3fr 1fr 3fr;gap:10px;margin-bottom:8px}
+.phases div{font-size:11.5px;font-weight:700;color:var(--ink-3);letter-spacing:.06em;border-top:2px solid var(--line-2);padding-top:6px;text-align:center}
+.stepper{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:10px;list-style:none;padding:0;margin:0}
+.stepper li{position:relative}
+.stepper a{display:flex;flex-direction:column;height:100%;text-decoration:none;background:var(--surface);border:1px solid var(--line);border-top:4px solid var(--c);border-radius:12px;padding:12px;transition:transform .15s}
+.stepper a:hover{transform:translateY(-2px)}
+.stepper li:not(:last-child)::after{content:"";position:absolute;right:-9px;top:34px;width:8px;height:8px;border-top:2px solid var(--line-2);border-right:2px solid var(--line-2);transform:rotate(45deg);z-index:1}
+.st-n{font-size:11px;font-weight:900;color:var(--c);letter-spacing:.08em}
+.st-name{font-size:15px;font-weight:900;line-height:1.35;margin:2px 0 6px}
+.st-goal{font-size:12px;color:var(--ink-2);line-height:1.55;flex:1}
+.st-count{margin-top:10px;font-size:12px;color:var(--ink-3)}
+.st-count b{font-size:22px;color:var(--ink);font-weight:900;margin-right:2px}
+.st-off{opacity:.75}
+@media (max-width:1200px){.st-name{font-size:13.5px}.st-goal{font-size:11.5px}.stepper a{padding:10px}}
+@media (max-width:980px){
+  .phases{display:none}
+  .stepper{grid-template-columns:1fr}
+  .stepper li:not(:last-child)::after{right:auto;left:26px;top:auto;bottom:-9px;transform:rotate(135deg)}
+  .stepper a{flex-direction:row;flex-wrap:wrap;align-items:baseline;gap:4px 10px}
+  .st-goal{flex-basis:100%}
+  .st-count{margin:0 0 0 auto;order:2}
+}
+
+/* ===== street flow ===== */
+.flowmap{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px 22px;align-items:stretch}
+.fnode{position:relative;background:var(--surface);border:2px solid var(--c);border-radius:12px;padding:10px 12px;text-align:center}
+.fnode b{display:block;font-size:14.5px;font-weight:900}
+.fnode small{display:block;font-size:11.5px;color:var(--ink-2);line-height:1.45;margin-top:2px}
+.fnode.main:not(:last-of-type)::after{content:"";position:absolute;right:-18px;top:50%;width:14px;height:2px;background:var(--line-2)}
+.fnode.main:not(:last-of-type)::before{content:"";position:absolute;right:-19px;top:calc(50% - 4px);width:7px;height:7px;border-top:2px solid var(--line-2);border-right:2px solid var(--line-2);transform:rotate(45deg)}
+.fside{border:2px dashed color-mix(in srgb,var(--c) 70%,var(--line));background:color-mix(in srgb,var(--c) 7%,var(--surface));border-radius:12px;padding:10px 12px;font-size:12.5px;line-height:1.55;position:relative}
+.fside b{font-size:13.5px}
+.fside .up{display:block;font-size:11px;font-weight:700;color:var(--ink-3);margin-bottom:2px}
+.fside.a{grid-column:1 / span 2}
+.fside.b{grid-column:3 / span 1}
+.fside.c{grid-column:4 / span 2}
+@media (max-width:980px){
+  .flowmap{grid-template-columns:1fr;gap:8px}
+  .fside.a,.fside.b,.fside.c{grid-column:auto;margin-left:22px}
+  .fnode.main::after,.fnode.main::before{display:none}
+  .f1{order:1}.fa{order:2}.f2{order:3}.f3{order:4}.fb{order:5}.f4{order:6}.fc{order:7}.f5{order:8}
+}
+
+/* principles */
+.principles{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px;counter-reset:pr}
+.pr{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 14px 14px 56px;position:relative}
+.pr::before{counter-increment:pr;content:counter(pr,decimal-leading-zero);position:absolute;left:14px;top:12px;font-size:20px;font-weight:900;color:var(--ink-3)}
+.pr b{display:block;font-size:14.5px}
+.pr span{display:block;font-size:12.5px;color:var(--ink-2);margin-top:2px}
+.pr em{font-style:normal;display:block;font-size:12px;color:var(--ink-3);margin-top:4px}
+
+.safety{border:1.5px solid color-mix(in srgb,var(--warn) 55%,var(--line));background:var(--warn-s);border-radius:var(--radius);padding:16px 18px}
+.safety h3{margin:0 0 8px;font-size:15px;font-weight:900;color:var(--warn);display:flex;gap:8px;align-items:center}
+.safety ul{margin:0;padding-left:1.2em}
+.safety li{font-size:13.5px;margin:2px 0}
+.safety li .ref{margin-left:4px}
+
+/* ===== chapter ===== */
+.chapter{padding:56px 0 24px;border-top:1px solid var(--line)}
+.ch-head{display:flex;gap:18px;align-items:flex-start;margin-bottom:22px}
+.ch-num{flex:none;width:78px;height:78px;border-radius:20px;background:var(--c);color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:10.5px;font-weight:900;letter-spacing:.12em;line-height:1}
+:root[data-theme="dark"] .ch-num{color:#141311}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .ch-num{color:#141311}}
+.ch-num b{font-size:36px;letter-spacing:0;margin-top:4px}
+.ch-kicker{margin:0;font-size:12px;font-weight:700;color:var(--c);letter-spacing:.06em}
+.ch-head h2{margin:2px 0 6px;font-size:clamp(22px,3.4vw,30px);font-weight:900;line-height:1.3}
+.ch-goal{margin:0;color:var(--ink-2);max-width:820px}
+.ch-goal b{color:var(--ink)}
+@media (max-width:560px){.ch-num{width:60px;height:60px;border-radius:16px}.ch-num b{font-size:28px}.ch-head{gap:12px}}
+.groupnav{display:flex;flex-wrap:wrap;gap:6px;margin:22px 0 4px}
+.groupnav a{text-decoration:none;font-size:12.5px;font-weight:700;padding:5px 12px;border-radius:999px;background:var(--surface);border:1px solid var(--line);color:var(--ink-2)}
+.groupnav a:hover{border-color:var(--c);color:var(--c)}
+.groupnav a span{color:var(--ink-3);font-weight:500;margin-left:4px}
+details.chprin{margin-top:14px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:0 16px}
+details.chprin summary{cursor:pointer;font-weight:700;font-size:13.5px;padding:12px 0;list-style:none;display:flex;align-items:center;gap:8px}
+details.chprin summary::-webkit-details-marker{display:none}
+details.chprin summary::before{content:"+";display:grid;place-items:center;width:20px;height:20px;border-radius:6px;background:var(--c);color:#fff;font-weight:900}
+details.chprin[open] summary::before{content:"−"}
+details.chprin ul{margin:0 0 14px;padding-left:1.2em}
+details.chprin li{font-size:13.5px;margin:3px 0}
+
+/* selector (ch1) */
+.selector{display:grid;gap:8px}
+.sel-row{display:grid;grid-template-columns:1fr 28px 1fr;align-items:center;gap:0}
+.sel-if{background:var(--surface-2);border:1px solid var(--line);border-radius:10px;padding:9px 12px;font-size:13.5px}
+.sel-arrow{text-align:center;color:var(--ink-3);font-weight:900}
+.sel-then{background:color-mix(in srgb,var(--c) 10%,var(--surface));border:1.5px solid color-mix(in srgb,var(--c) 45%,var(--line));border-radius:10px;padding:9px 12px;font-size:13.5px;display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+.sel-then b{font-weight:900}
+@media (max-width:560px){.sel-row{grid-template-columns:1fr}.sel-arrow{transform:rotate(90deg);line-height:1.2}}
+
+.okng{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.okng > div{border-radius:12px;padding:12px 14px;font-size:13.5px}
+.okng .ok{background:var(--ok-s);border:1.5px solid color-mix(in srgb,var(--ok) 45%,transparent)}
+.okng .ng{background:var(--ng-s);border:1.5px solid color-mix(in srgb,var(--ng) 45%,transparent)}
+.okng .lbl{display:inline-block;font-weight:900;font-size:12px;padding:1px 9px;border-radius:999px;color:#fff;margin-bottom:6px}
+.okng .ok .lbl{background:var(--ok)} .okng .ng .lbl{background:var(--ng)}
+:root[data-theme="dark"] .okng .lbl{color:#141311}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .okng .lbl{color:#141311}}
+.okng p{margin:0}
+@media (max-width:560px){.okng{grid-template-columns:1fr}}
+
+.tips{display:grid;gap:8px}
+.tip{display:grid;grid-template-columns:auto 1fr;gap:4px 10px;align-items:start;background:var(--surface-2);border-radius:10px;padding:10px 12px}
+.tip .k{font-weight:900;font-size:13.5px}
+.tip .v{grid-column:2;font-size:12.5px;color:var(--ink-2)}
+.tip .ico{grid-row:span 2;width:28px;height:28px;border-radius:8px;background:var(--c);color:#fff;display:grid;place-items:center;font-weight:900;font-size:13px}
+:root[data-theme="dark"] .tip .ico{color:#141311}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .tip .ico{color:#141311}}
+
+/* two-step stop (ch2) */
+.twostep{display:grid;grid-template-columns:1fr 36px 1fr;align-items:stretch}
+.twostep .s{background:var(--surface-2);border-radius:12px;padding:12px 14px}
+.twostep .s small{display:block;font-size:11px;font-weight:900;color:var(--c);letter-spacing:.08em}
+.twostep .s b{display:block;font-size:15px;margin:2px 0}
+.twostep .s span{font-size:12.5px;color:var(--ink-2)}
+.twostep .ar{display:grid;place-items:center;color:var(--ink-3);font-weight:900;font-size:18px}
+@media (max-width:560px){.twostep{grid-template-columns:1fr}.twostep .ar{transform:rotate(90deg)}}
+
+/* weight scale (ch2) */
+.scale{position:relative;padding-top:30px}
+.scale .bar{height:10px;border-radius:999px;background:linear-gradient(90deg,color-mix(in srgb,var(--c) 20%,var(--surface-2)),var(--c))}
+.scale .ends{display:flex;justify-content:space-between;font-size:11.5px;font-weight:700;color:var(--ink-3);position:absolute;top:4px;left:0;right:0}
+.scale .marks{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px;margin-top:10px}
+.scale .m{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:8px 10px;font-size:12.5px;position:relative}
+.scale .m::before{content:"";position:absolute;top:-11px;left:16px;width:2px;height:10px;background:var(--line-2)}
+.scale .m b{display:block;font-size:13px}
+@media (max-width:860px){.scale .marks{grid-template-columns:repeat(2,minmax(0,1fr))}.scale .m::before{display:none}}
+
+.pack{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.pack span{background:color-mix(in srgb,var(--c) 10%,var(--surface));border:1.5px solid color-mix(in srgb,var(--c) 40%,var(--line));border-radius:10px;padding:7px 12px;font-size:13px;font-weight:700}
+.pack em{font-style:normal;color:var(--ink-3);font-weight:900}
+
+/* response matrix (ch2) */
+.matrix{display:grid;gap:8px}
+.mx{display:grid;grid-template-columns:150px 1fr;gap:12px;align-items:start;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+.mx .who{font-weight:900;font-size:14px}
+.mx .who small{display:block;font-weight:700;font-size:11.5px;color:var(--ink-3)}
+.mx .hows{display:flex;flex-wrap:wrap;gap:6px}
+.mx .hows span{font-size:12.5px;background:var(--surface-2);border-radius:8px;padding:4px 10px}
+.mx .hows span i{font-style:normal;font-weight:700;color:var(--c);margin-right:4px}
+.mx.warnrow{border-color:color-mix(in srgb,var(--warn) 50%,var(--line))}
+.mx .stop{flex-basis:100%;font-size:12.5px;color:var(--warn);font-weight:700}
+@media (max-width:640px){.mx{grid-template-columns:1fr;gap:6px}}
+
+/* ladder (ch3/ch5/ch6) */
+.ladder{display:grid;gap:6px;counter-reset:ld}
+.rung{display:grid;grid-template-columns:34px 1fr;gap:10px;align-items:start;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:10px 12px}
+.rung::before{counter-increment:ld;content:counter(ld);width:28px;height:28px;border-radius:50%;background:color-mix(in srgb,var(--c) 15%,var(--surface));color:var(--c);display:grid;place-items:center;font-weight:900;font-size:13px;border:1.5px solid color-mix(in srgb,var(--c) 50%,var(--line))}
+.rung b{display:block;font-size:14px}
+.rung span{font-size:12.5px;color:var(--ink-2)}
+.rung .refs{margin-top:4px;display:flex;flex-wrap:wrap;gap:4px}
+
+.depth{display:flex;gap:0;align-items:stretch;overflow:hidden;border-radius:12px;border:1px solid var(--line)}
+.depth div{flex:1;padding:12px 8px;text-align:center;font-size:12.5px;font-weight:700;line-height:1.4;display:flex;align-items:center;justify-content:center;min-width:0}
+.depth div:nth-child(1){background:color-mix(in srgb,var(--c) 8%,var(--surface))}
+.depth div:nth-child(2){background:color-mix(in srgb,var(--c) 18%,var(--surface))}
+.depth div:nth-child(3){background:color-mix(in srgb,var(--c) 30%,var(--surface))}
+.depth div:nth-child(4){background:color-mix(in srgb,var(--c) 44%,var(--surface))}
+.depth div:nth-child(5){background:color-mix(in srgb,var(--c) 60%,var(--surface))}
+.depth div:nth-child(6){background:color-mix(in srgb,var(--c) 78%,var(--surface));color:var(--surface)}
+.depth-axis{display:flex;justify-content:space-between;font-size:11.5px;color:var(--ink-3);font-weight:700;margin-top:6px}
+@media (max-width:640px){.depth{flex-direction:column}.depth div{padding:8px}}
+
+.quad{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.quad > div{background:var(--surface);border:1px solid var(--line);border-top:3px solid var(--c);border-radius:12px;padding:12px 14px}
+.quad b{display:block;font-size:14.5px;font-weight:900}
+.quad .role{display:block;font-size:11.5px;font-weight:700;color:var(--c);margin-bottom:4px}
+.quad p{margin:6px 0 0;font-size:12.5px;color:var(--ink-2)}
+@media (max-width:860px){.quad{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:480px){.quad{grid-template-columns:1fr}}
+
+/* timeline (ch4) */
+.timeline{position:relative;display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:10px;padding-top:6px}
+.timeline::before{content:"";position:absolute;left:4%;right:4%;top:20px;height:3px;background:linear-gradient(90deg,var(--c3),var(--c4),var(--c5));border-radius:3px}
+.tl{position:relative;padding-top:30px}
+.tl::before{content:"";position:absolute;top:13px;left:50%;transform:translateX(-50%);width:17px;height:17px;border-radius:50%;background:var(--surface);border:4px solid var(--c)}
+.tl .when{display:block;text-align:center;font-size:11.5px;font-weight:900;color:var(--c);margin-bottom:6px}
+.tl .card2{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:10px 12px;font-size:12.5px;color:var(--ink-2);height:calc(100% - 30px)}
+.tl .card2 b{display:block;font-size:13.5px;color:var(--ink);margin-bottom:2px}
+.tl .card2 .ref{display:inline-block;margin-top:6px}
+@media (max-width:980px){
+  .timeline{grid-template-columns:1fr;padding-left:26px;gap:8px}
+  .timeline::before{left:8px;right:auto;top:6px;bottom:6px;width:3px;height:auto;background:linear-gradient(180deg,var(--c3),var(--c4),var(--c5))}
+  .tl{padding-top:0}
+  .tl::before{left:-26px;top:10px;transform:none}
+  .tl .when{text-align:left;margin-bottom:4px}
+  .tl .card2{height:auto}
+}
+.revive{margin-top:12px;display:grid;grid-template-columns:auto 1fr;gap:12px;align-items:center;border:2px dashed color-mix(in srgb,var(--c) 55%,var(--line));border-radius:12px;padding:12px 14px;background:color-mix(in srgb,var(--c) 6%,var(--surface))}
+.revive .tag2{font-weight:900;font-size:13px;white-space:nowrap}
+.revive .opts{display:flex;flex-wrap:wrap;gap:6px}
+.revive .opts span{font-size:12.5px;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:4px 10px}
+@media (max-width:640px){.revive{grid-template-columns:1fr}}
+
+.prio{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.prio span{font-weight:900;border-radius:10px;padding:8px 14px;color:#fff}
+:root[data-theme="dark"] .prio span{color:#141311}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .prio span{color:#141311}}
+.prio span:nth-of-type(1){background:var(--c);font-size:18px}
+.prio span:nth-of-type(2){background:color-mix(in srgb,var(--c) 70%,var(--surface));font-size:15.5px}
+.prio span:nth-of-type(3){background:color-mix(in srgb,var(--c) 45%,var(--surface));font-size:13.5px}
+.prio em{font-style:normal;font-weight:900;color:var(--ink-3)}
+
+.rally{display:grid;grid-template-columns:1fr;gap:6px}
+.day{background:var(--surface-2);border-radius:12px;padding:8px 12px;display:flex;flex-wrap:wrap;align-items:center;gap:6px 8px}
+.day > b{font-size:12px;color:var(--ink-3);letter-spacing:.06em;min-width:3.2em}
+.msg{display:flex;gap:6px;align-items:center;font-size:12px;white-space:nowrap}
+.msg .me,.msg .her{padding:3px 10px;border-radius:12px;font-weight:700}
+.msg .me{background:var(--c);color:#fff}
+:root[data-theme="dark"] .msg .me{color:#141311}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .msg .me{color:#141311}}
+.msg .her{background:var(--surface);border:1px solid var(--line)}
+.msg small{color:var(--ink-3)}
+
+.signal{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.signal div{border-radius:10px;padding:10px 12px;font-size:12.5px}
+.signal .g{background:var(--ok-s)} .signal .r{background:var(--ng-s)}
+.signal b{display:block;font-size:13px}
+
+/* escalation (ch6) */
+.esc{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.esc span{flex:1;min-width:76px;text-align:center;padding:10px 6px;font-size:13px;font-weight:700;background:color-mix(in srgb,var(--c) calc(8% + var(--i) * 9%),var(--surface));border:1px solid var(--line);margin-left:-1px}
+.esc span:first-child{border-radius:12px 0 0 12px;margin-left:0}
+.esc span:last-child{border-radius:0 12px 12px 0}
+.stopbox{display:flex;gap:12px;align-items:center;margin-top:12px;background:var(--warn-s);border:1.5px solid color-mix(in srgb,var(--warn) 55%,var(--line));border-radius:12px;padding:12px 14px}
+.stopbox .oct{flex:none;width:44px;height:44px;background:var(--warn);color:#fff;font-weight:900;font-size:11px;display:grid;place-items:center;clip-path:polygon(30% 0,70% 0,100% 30%,100% 70%,70% 100%,30% 100%,0 70%,0 30%)}
+:root[data-theme="dark"] .stopbox .oct{color:#141311}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .stopbox .oct{color:#141311}}
+.stopbox p{margin:0;font-size:13px}
+
+/* ch7 */
+.withheld{display:grid;grid-template-columns:1.2fr 1fr;gap:14px}
+@media (max-width:860px){.withheld{grid-template-columns:1fr}}
+.withheld .why p{margin:0 0 10px;font-size:14px;color:var(--ink-2)}
+.withheld .why p b{color:var(--ink)}
+.toc7{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
+.toc7 div{background:var(--surface-2);border-radius:10px;padding:10px 12px;font-size:13px}
+.toc7 b{display:block;font-size:14px}
+.consent{display:grid;gap:6px;margin:0;padding:0;list-style:none}
+.consent li{background:var(--surface-2);border-radius:10px;padding:8px 12px;font-size:13px}
+.consent li b{display:block;font-size:13.5px}
+
+/* bonus */
+.shops{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:10px}
+.shop{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+.shop .type{font-size:11.5px;font-weight:700;color:var(--c)}
+.shop b{display:block;font-size:14.5px;margin:2px 0 4px}
+.shop p{margin:0;font-size:12.5px;color:var(--ink-2)}
+.shop a{font-size:12px;color:var(--c5);word-break:break-all}
+
+.program{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
+.program span{font-weight:900;font-size:13.5px;padding:8px 14px;border-radius:10px;background:var(--surface);border:1px solid var(--line)}
+.program span:last-child{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.program em{font-style:normal;color:var(--ink-3);font-weight:900}
+
+/* ===== groups & cards (rendered from data) ===== */
+.group{margin-top:34px}
+.group-head{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 12px;margin-bottom:6px}
+.group-head h3{margin:0;font-size:19px;font-weight:900}
+.group-head h3::before{content:"";display:inline-block;width:10px;height:10px;border-radius:3px;background:var(--c);margin-right:8px;vertical-align:2px}
+.group-head .range{font-size:12px;font-weight:700;color:var(--ink-3)}
+.group-sum{margin:0 0 14px;color:var(--ink-2);font-size:13.5px;max-width:900px;border-left:3px solid color-mix(in srgb,var(--c) 45%,var(--line));padding-left:12px}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(310px,1fr));gap:12px}
+@media (max-width:420px){.cards{grid-template-columns:1fr}}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:14px 16px 14px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:9px;scroll-margin-top:80px;min-width:0}
+.card:target{outline:3px solid var(--c);outline-offset:2px}
+.c-head{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.pid{font-size:12px;font-weight:900;color:#fff;background:var(--c);border-radius:7px;padding:1px 7px;font-variant-numeric:tabular-nums}
+:root[data-theme="dark"] .pid{color:#141311}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .pid{color:#141311}}
+.c-head h4{margin:0;font-size:14.5px;font-weight:900;flex:1;min-width:0}
+.badge{font-size:11px;font-weight:900;color:var(--c);border:1.5px solid var(--c);border-radius:999px;padding:0 8px;white-space:nowrap}
+.tag{font-size:11px;font-weight:700;color:var(--ink-2);background:var(--surface-2);border-radius:999px;padding:1px 8px;white-space:nowrap}
+.scene{margin:0;font-size:12.5px;color:var(--ink-2);line-height:1.6}
+.cue{position:relative;align-self:flex-start;max-width:100%;background:color-mix(in srgb,var(--c) 12%,var(--surface));border:1.5px solid color-mix(in srgb,var(--c) 40%,var(--line));border-radius:14px 14px 14px 4px;padding:6px 12px;font-size:15px;font-weight:700;line-height:1.5}
+.cue.act{font-weight:500;font-size:13px;border-style:dashed;border-radius:10px}
+.flow{list-style:none;margin:0;padding:0;counter-reset:f;position:relative}
+.flow li{position:relative;padding:2px 0 6px 26px;font-size:13px;line-height:1.6}
+.flow li::before{counter-increment:f;content:counter(f);position:absolute;left:0;top:3px;width:18px;height:18px;border-radius:50%;background:color-mix(in srgb,var(--c) 16%,var(--surface));color:var(--c);font-size:11px;font-weight:900;display:grid;place-items:center}
+.flow li:not(:last-child)::after{content:"";position:absolute;left:8.5px;top:23px;bottom:0;width:1.5px;background:color-mix(in srgb,var(--c) 25%,var(--line))}
+.points{margin:0;padding:10px 12px;list-style:none;background:var(--surface-2);border-radius:10px;display:grid;gap:5px}
+.points li{position:relative;padding-left:18px;font-size:12.8px;line-height:1.6}
+.points li::before{content:"";position:absolute;left:2px;top:7px;width:8px;height:8px;border-radius:2px;background:var(--c);transform:rotate(45deg)}
+.points .ph{font-size:10.5px;font-weight:900;letter-spacing:.1em;color:var(--ink-3);padding-left:0}
+.points .ph::before{display:none}
+.branch{margin:0;font-size:12px;color:var(--ink-2);display:flex;gap:6px;align-items:flex-start}
+.branch::before{content:"↳";font-weight:900;color:var(--c)}
+.caution{margin:0;font-size:12px;color:var(--warn);background:var(--warn-s);border-radius:8px;padding:6px 10px;line-height:1.55}
+.caution::before{content:"注意 ";font-weight:900}
+body.compact .flow,body.compact .points,body.compact .group-sum{display:none}
+body.compact .cards{grid-template-columns:repeat(auto-fill,minmax(250px,1fr))}
+.hidden{display:none !important}
+.nohit{display:none;padding:40px 0;text-align:center;color:var(--ink-3)}
+.loading{padding:20px;border:1px dashed var(--line-2);border-radius:12px;color:var(--ink-3);text-align:center}
+
+footer{border-top:1px solid var(--line);padding:30px 0 60px;color:var(--ink-3);font-size:12.5px}
+footer p{margin:4px 0}
+
+@media print{
+  .topbar,.tools{display:none}
+  body{background:#fff}
+  .card,.panel,.mx,.rung{break-inside:avoid;box-shadow:none}
+  .chapter{break-before:page}
+}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="wrap">
+    <div class="brand">200トーク図解</div>
+    <nav class="navlinks" aria-label="章">
+      <a href="#map">全体像</a>
+      <a href="#ch1" style="--c:var(--c1)"><i>1</i>声掛け</a>
+      <a href="#ch2" style="--c:var(--c2)"><i>2</i>立ち止め</a>
+      <a href="#ch3" style="--c:var(--c3)"><i>3</i>番号</a>
+      <a href="#ch4" style="--c:var(--c4)"><i>4</i>メンテ</a>
+      <a href="#ch5" style="--c:var(--c5)"><i>5</i>関係構築</a>
+      <a href="#ch6" style="--c:var(--c6)"><i>6</i>性的誘惑</a>
+      <a href="#ch7" style="--c:var(--c7)"><i>7</i>クローズ</a>
+      <a href="#bonus">特典</a>
+    </nav>
+    <div class="tools">
+      <label class="search">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <input id="q" type="search" placeholder="パターンを検索（例: 彼氏）" aria-label="パターンを検索">
+      </label>
+      <span class="hitcount" id="hit"></span>
+      <button class="btn" id="compact" aria-pressed="false" title="カードを台詞と要点だけに縮める">台詞だけ</button>
+      <button class="btn icon-btn" id="theme" title="ライト／ダーク切替" aria-label="ライト／ダーク切替"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg></button>
+    </div>
+  </div>
+</div>
+
+<main>
+<header class="hero">
+  <div class="wrap">
+    <span class="kicker">PDF 277ページ → 図解 1ページ</span>
+    <h1>チバの全トーク・全ラインスクリプト集<br><span>200パターン 図解</span></h1>
+    <p class="lead">路上の声掛けからアポ後まで、7つのステップに並んだトークとLINEの台本を、<b>「どの場面で」「何を言い」「なぜ効くか」</b>の3点で1枚ずつのカードに整理しました。</p>
+    <div class="stats">
+      <div class="stat"><b>7</b><span>ステップ（章）</span></div>
+      <div class="stat"><b>200</b><span>パターン（全収録数）</span></div>
+      <div class="stat"><b>160</b><span>カード化（第1〜6章の全パターン）</span></div>
+      <div class="stat"><b>40</b><span>第7章（構成と注意事項のみ掲載）</span></div>
+    </div>
+  </div>
+</header>
+
+<section class="block" id="howto" style="padding-top:8px">
+  <div class="wrap grid-2">
+    <div>
+      <div class="sec-title"><h2>このPDFの使い方</h2><small>HOW TO USE</small></div>
+      <p class="sec-lead">ここに載っているのは、著者が現場で使い、モニター読者の反応もよかったものだけを残した「殿堂入り」のトークです。</p>
+      <ol class="howto">
+        <li><b>現場で困ったときの「参照先」にする</b><span>画面を見て納得するためのものではない。路上で実践しながら、詰まったら引く辞書として使う。</span></li>
+        <li><b>1章ずつ集中して読み、実践する</b><span>成長もステップ単位で振り返ると効率がいい。得意か苦手なステップを1つ選び、そこを重点的に覚える。</span></li>
+        <li><b>「全フェーズ・全ステップ解説PDF」と併用する</b><span>理論や各ステップの攻略ポイントは別冊の解説PDF、具体的な台本はこのPDF、と役割を分けている。</span></li>
+      </ol>
+    </div>
+    <div>
+      <div class="sec-title"><h2>読み方の順番</h2><small>READING ORDER</small></div>
+      <p class="sec-lead">著者のおすすめは、意識しなくても口から出るようになるまで繰り返すことです。</p>
+      <div class="panel" style="--c:var(--cx)">
+        <h3>覚えるまでの4段階</h3>
+        <div class="readflow"><span>まず全体をざっと一周</span><em>→</em><span>時間をかけて何度も精読</span><em>→</em><span>飽きるまで読み込む</span><em>→</em><span>実践を繰り返す</span></div>
+        <p class="note" style="margin-top:12px">ゴールは、どのトークも「当たり前の言い回し」として無意識に使える状態。巻末では「読み込み → イメトレ → 実践準備 → 本格実践 → 成果」の180日プログラムも紹介されている。</p>
+      </div>
+      <div class="panel mt" style="--c:var(--cx)">
+        <h3>このページの見方</h3>
+        <p class="note" style="margin:0 0 8px">各カードは次の順で並んでいます。上の検索で台詞やキーワードを絞り込めます。</p>
+        <div class="pack" style="--c:var(--c5)"><span>番号・名前</span><em>→</em><span>使う場面</span><em>→</em><span>核の一言</span><em>→</em><span>流れ</span><em>→</em><span>ポイント</span><em>→</em><span>次の分岐</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== MAP ===== -->
+<section class="block" id="map">
+  <div class="wrap">
+    <div class="sec-title"><h2>全体像：7ステップの美女ナンパスキーム</h2><small>OVERVIEW</small></div>
+    <p class="sec-lead">各ステップで目標を1つだけ達成し、次のステップへ受け渡していきます。カードをクリックするとその章へ移動します。</p>
+    <div class="phases"><div>路上（その場）</div><div>連絡</div><div>アポ（当日）</div></div>
+    <ol class="stepper">
+      <li style="--c:var(--c1)"><a href="#ch1"><span class="st-n">STEP 1</span><span class="st-name">声掛け</span><span class="st-goal">反応を引き出して、会話を始める</span><span class="st-count"><b>30</b>パターン</span></a></li>
+      <li style="--c:var(--c2)"><a href="#ch2"><span class="st-n">STEP 2</span><span class="st-name">立ち止め</span><span class="st-goal">足を止め、話しかけた理由で納得させる</span><span class="st-count"><b>50</b>パターン</span></a></li>
+      <li style="--c:var(--c3)"><a href="#ch3"><span class="st-n">STEP 3</span><span class="st-name">ナンバークローズ</span><span class="st-goal">LINEを交換し、その場で次の約束まで</span><span class="st-count"><b>30</b>パターン</span></a></li>
+      <li style="--c:var(--c4)"><a href="#ch4"><span class="st-n">STEP 4</span><span class="st-name">メンテナンス</span><span class="st-goal">電話・LINEで日程を確定し、ドタキャンを防ぐ</span><span class="st-count"><b>20</b>パターン</span></a></li>
+      <li style="--c:var(--c5)"><a href="#ch5"><span class="st-n">STEP 5</span><span class="st-name">関係構築</span><span class="st-goal">話を引き出し、共感と自分の価値を伝える</span><span class="st-count"><b>20</b>パターン</span></a></li>
+      <li style="--c:var(--c6)"><a href="#ch6"><span class="st-n">STEP 6</span><span class="st-name">性的誘惑</span><span class="st-goal">段階を踏んだ話題と接触（嫌がれば即中止）</span><span class="st-count"><b>10</b>パターン</span></a></li>
+      <li style="--c:var(--c7)" class="st-off"><a href="#ch7"><span class="st-n">STEP 7</span><span class="st-name">クローズ</span><span class="st-goal">連れ出しと「グダ崩し」（構成と注意事項のみ）</span><span class="st-count"><b>40</b>パターン</span></a></li>
+    </ol>
+
+    <div class="panel mt" style="--c:var(--cx);margin-top:22px">
+      <h3>路上での1回の流れ（第1〜3章のつながり）</h3>
+      <div class="flowmap">
+        <div class="fnode main f1" style="--c:var(--c1)"><b>声掛け</b><small>最初の一言<br>1.1–1.30</small></div>
+        <div class="fnode main f2" style="--c:var(--c2)"><b>立ち止め</b><small>足を止める<br>2.1–2.5</small></div>
+        <div class="fnode main f3" style="--c:var(--c2)"><b>話しかけた理由</b><small>理由・開示・後悔・誠実<br>2.6–2.20</small></div>
+        <div class="fnode main f4" style="--c:var(--c3)"><b>LINEゲット</b><small>番号・ID交換<br>3.1–3.7</small></div>
+        <div class="fnode main f5" style="--c:var(--c3)"><b>その場で約束</b><small>日程決め＋10分並んで歩く<br>3.8–3.20</small></div>
+        <div class="fside a fa" style="--c:var(--c2)"><span class="up">反応なし・断られた</span><b>ガンシカ崩し＆切り返し</b>（2.21–2.50）で笑いや同調を挟み、反応が取れたら立ち止めに戻る。<b>「無理」には1〜2パターン粘ってだめなら退く。</b></div>
+        <div class="fside b fb" style="--c:var(--c2)"><span class="up">反応が悪い</span>切り返し・グダ崩しへ回して、反応を取り直す。</div>
+        <div class="fside c fc" style="--c:var(--c3)"><span class="up">渋られた・彼氏がいる</span><b>グダ崩し</b>（3.21–3.30）と<b>ブーメランフック</b>（3.6–3.7）で、教えるハードルを下げる。</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="block" id="principles" style="padding-top:0">
+  <div class="wrap">
+    <div class="sec-title"><h2>全章に共通する7つの原則</h2><small>CORE PRINCIPLES</small></div>
+    <p class="sec-lead">200パターンを横断して何度も出てくる考え方です。台本を忘れても、これを押さえておけば応用がききます。</p>
+    <div class="principles">
+      <div class="pr"><b>小さなYESから大きなお願いへ</b><span>先に応じやすいお願いを通してから本題を出すと、通りやすくなる。</span><em>「こっち見て」→「止まって」／「連絡のつく時間は？」→「LINE教えて」</em></div>
+      <div class="pr"><b>決めつけと二択で、答えやすくする</b><span>何でも答えられる質問は相手が詰まる。こちらから候補を出して反応を引き出す。</span><em>「〜帰り？」／「平日と週末どっち？」「金と土どっち？」</em></div>
+      <div class="pr"><b>ネガティブはポジティブに言い換える</b><span>マイナスの言葉を言われたら、プラスの意味に変えて返す。全体の印象が明るくなる。</span><em>「チャライ」→「積極的なだけ」</em></div>
+      <div class="pr"><b>具体的な数字と約束で、不安を消す</b><span>「いつまでも付きまとわれるかも」という不安を、時間や回数の上限で先回りして消す。</span><em>「1分だけ」「2通返事がなければもう送らない」</em></div>
+      <div class="pr"><b>偶然と善意を演出する</b><span>狙って待っていた雰囲気は最後まで尾を引く。たまたま気づいた・心配になった、という形をとる。</span><em>「おっ」と今気づいた風に／転びそうだった、ぶつかりそうだった</em></div>
+      <div class="pr"><b>好意も価値も、間接的に伝える</b><span>顔ではなく髪型や服を褒める。自分の価値は自慢せず、周りの評価や相談の形でにじませる。</span><em>ファッション・トーク／価値伝達トーク</em></div>
+      <div class="pr"><b>主導権を持ち、忙しい人でいる</b><span>暇だとは言わない。日程の候補はこちらから出す。連絡の頻度もこちらが決める。</span><em>理由トーク3／日程調整ライン／直前ライン</em></div>
+    </div>
+    <div class="safety mt">
+      <h3>⚠ 著者が繰り返している注意事項</h3>
+      <ul>
+        <li>実際にぶつからない・正面に立って進路をふさがない・相手に触れない。斜め前に出て、避けられる余白を必ず残す。<a class="ref" href="#p-1-12">1.12</a><a class="ref" href="#p-2-1">2.1</a><a class="ref" href="#p-2-5">2.5</a></li>
+        <li>強い拒絶（「無理」）には1〜2パターン粘ってもだめなら退く。それ以上はトラブルのもと。<a class="ref" href="#p-2-45">2.45</a><a class="ref" href="#p-2-46">2.46</a></li>
+        <li>性的な話題は弱いものから。嫌がったらすぐやめる。接触は手から段階を踏み、嫌がることはしない。<a class="ref" href="#p-6-1">6.1</a><a class="ref" href="#p-6-6">6.6</a></li>
+        <li>強引な接触・連れ出し・キスは違法行為。明確なNOが出たら中断して普通の会話に戻る。「本当にやめて」「無理」と言われたら即やめて退く。避妊は100%。<a class="ref" href="#ch7">第7章</a></li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ===== CH1 ===== -->
+<section class="chapter" id="ch1" style="--c:var(--c1)">
+  <div class="wrap">
+    <header class="ch-head">
+      <div class="ch-num">STEP<b>1</b></div>
+      <div>
+        <p class="ch-kicker">Chapter 1 · 30パターン · 原本 6p〜</p>
+        <h2>声掛けステップ</h2>
+        <p class="ch-goal">ゴールは<b>相手の反応を引き出して、会話を始めること</b>だけ。奇をてらった一言より、こちらの存在に気づかせる無難な一言のほうが反応がいい。反応が取れたら第2章の立ち止めへ、取れなければガンシカ崩しへ回す。</p>
+      </div>
+    </header>
+
+    <div class="grid-2">
+      <div class="panel">
+        <h3>相手の状況で、型を選ぶ</h3>
+        <div class="selector">
+          <div class="sel-row"><div class="sel-if">駅の改札などで<b>立ち止まって待っている</b></div><div class="sel-arrow">→</div><div class="sel-then"><b>待ち合わせトーク</b><a class="ref" href="#p-1-1">1.1–1.5</a></div></div>
+          <div class="sel-row"><div class="sel-if">歩いていて、<b>行き先や帰り道が読める</b></div><div class="sel-arrow">→</div><div class="sel-then"><b>ファースト・トーク</b><a class="ref" href="#p-1-6">1.6–1.10</a></div></div>
+          <div class="sel-row"><div class="sel-if">目の前で<b>何か起きた</b>（つまずく・人混み・大型ビジョン・救急車・キャッチ）</div><div class="sel-arrow">→</div><div class="sel-then"><b>シチュエーション・トーク</b><a class="ref" href="#p-1-11">1.11–1.15</a></div></div>
+          <div class="sel-row"><div class="sel-if">髪型・服・ネイル・小物に<b>特徴がある</b></div><div class="sel-arrow">→</div><div class="sel-then"><b>ファッション・トーク</b><a class="ref" href="#p-1-16">1.16–1.25</a></div></div>
+          <div class="sel-row"><div class="sel-if"><b>本命級</b>で、強い好意をまっすぐ伝えたい</div><div class="sel-arrow">→</div><div class="sel-then"><b>運命トーク</b><a class="ref" href="#p-1-26">1.26–1.28</a></div></div>
+          <div class="sel-row"><div class="sel-if">本屋・電車・ホームなど<b>声を出せない場所</b></div><div class="sel-arrow">→</div><div class="sel-then"><b>ケータイトーク</b>（緊急用）<a class="ref" href="#p-1-29">1.29–1.30</a></div></div>
+        </div>
+      </div>
+      <div>
+        <div class="panel">
+          <h3>一言目の4つのコツ</h3>
+          <div class="tips">
+            <div class="tip"><span class="ico">1</span><span class="k">「おっ」と、今気づいた風に</span><span class="v">待ち構えて狙っていた感を消す。最初の印象と意図は、その後のアポまで影響し続ける。</span></div>
+            <div class="tip"><span class="ico">2</span><span class="k">一言目は大きめの声で、姿を見せる</span><span class="v">スマホに夢中な相手でも、こちらを見る段階まで持っていく。</span></div>
+            <div class="tip"><span class="ico">3</span><span class="k">申し訳なさそうにしない</span><span class="v">アンケートのような低姿勢だと効果が激減。気になったから聞いた、と堂々と。</span></div>
+            <div class="tip"><span class="ico">4</span><span class="k">早口でどんどん投げる</span><span class="v">キャッチボールを待たず、決めつけや次の一言を続けて反応の突破口を作る。</span></div>
+          </div>
+        </div>
+        <div class="okng mt">
+          <div class="ok"><span class="lbl">褒めてOK</span><p><b>髪型・服・ネイル・髪留め・小物</b><br>間接的な褒め言葉なので、いやらしさが出ない。何度使ってもいい。</p></div>
+          <div class="ng"><span class="lbl">声掛けでNG</span><p><b>顔・スタイル</b><br>下心が透けて見える。声掛けの段階では使わない。</p></div>
+        </div>
+      </div>
+    </div>
+    <div class="groups" data-chunks="1a 1b"><div class="loading">データを読み込み中…</div></div>
+  </div>
+</section>
+
+<!-- ===== CH2 ===== -->
+<section class="chapter" id="ch2" style="--c:var(--c2)">
+  <div class="wrap">
+    <header class="ch-head">
+      <div class="ch-num">STEP<b>2</b></div>
+      <div>
+        <p class="ch-kicker">Chapter 2 · 50パターン · 原本 53p〜</p>
+        <h2>立ち止めステップ</h2>
+        <p class="ch-goal">声掛けの直後に<b>相手の足を止め、「なぜ話しかけたか」に納得してもらう</b>ステップ。トークがうまいから止まるのではなく、<b>止まってもらえたからトークがうまくいく</b>。言葉より体の動きで止めてしまうほうが結果がいい。</p>
+      </div>
+    </header>
+
+    <div class="grid-2">
+      <div class="panel">
+        <h3>立ち止めは「ワン・ツー」の2段階</h3>
+        <div class="twostep">
+          <div class="s"><small>ONE · 小さなお願い</small><b>「一瞬こっち見て」</b><span>ハードルが低いので、ほとんどの人が応じる。</span></div>
+          <div class="ar">→</div>
+          <div class="s"><small>TWO · 本題</small><b>「一瞬止まって」</b><span>同時に相手の斜め前に出て、手で止まってほしいと示す。</span></div>
+        </div>
+        <div class="okng mt">
+          <div class="ok"><span class="lbl">こうする</span><p>具体的な指示と時間を添える（「足止めて」「1分で済む」）。止まらなければひるまず切り返しへ。</p></div>
+          <div class="ng"><span class="lbl">絶対NG</span><p>真正面に立つ・ぶつかる・触れる。進路妨害になる。避けられる余白を必ず残す。</p></div>
+        </div>
+      </div>
+      <div class="panel">
+        <h3>自己開示は「一息で投げる」</h3>
+        <p class="note" style="margin:0 0 10px">声を掛けられた直後の相手は混乱している。そこへ自分の情報を早口でぶつけると、こちらの人物像が立体的になって安心につながる。</p>
+        <div class="pack"><span>職業（○○系の会社員）</span><span>勤務地・住まいの駅</span><span>年齢（30代など）</span><span>キャッチ・スカウトではない</span></div>
+        <p class="note" style="margin:10px 0 0">ネガティブな言葉は入れない。会社名までは不要だが、駅名や地名を出すと安心感が増す。<a class="ref" href="#p-2-11">2.11–2.15</a></p>
+      </div>
+    </div>
+
+    <div class="panel mt">
+      <h3>「話しかけた理由」の重さの目盛り</h3>
+      <p class="note" style="margin:0">理由トーク・後悔トーク・誠実トークは、伝える好意の重さで使い分ける。重いほど刺されば強いが、断られたときのダメージも大きい。</p>
+      <div class="scale">
+        <div class="ends"><span>ライト</span><span>ヘビー</span></div>
+        <div class="bar"></div>
+        <div class="marks">
+          <div class="m"><b>時間が空いたから</b>暇人ではなく忙しい人として<br><a class="ref" href="#p-2-8">2.8</a> <a class="ref" href="#p-2-10">2.10</a></div>
+          <div class="m"><b>ピンときた</b>軽い言葉で運命感を<br><a class="ref" href="#p-2-9">2.9</a></div>
+          <div class="m"><b>表の理由＋裏の理由</b>ドタキャン（表）＋もしかして（裏）<br><a class="ref" href="#p-2-7">2.7</a></div>
+          <div class="m"><b>正直タイプ</b>自分でも驚いている体で<br><a class="ref" href="#p-2-6">2.6</a></div>
+          <div class="m"><b>後悔したくない</b>短く、真剣に<br><a class="ref" href="#p-2-16">2.16–2.18</a></div>
+          <div class="m"><b>誠実に好意を伝える</b>目を見て、間を置いて<br><a class="ref" href="#p-2-19">2.19–2.20</a></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel mt">
+      <h3>相手の反応別・切り返し早見表（2.21–2.50）</h3>
+      <p class="note" style="margin:0 0 10px">返ってくる言葉はほぼ決まっているので、全部に返しを用意しておけば反射的に切り返せる。その分の頭を、相手の服装や表情の観察に回せる。</p>
+      <div class="matrix">
+        <div class="mx"><div class="who">無視・早足<small>ガンシカ</small></div><div class="hows"><span><i>笑わせる</i>怒った顔のまね 2.21</span><span><i>動きを指摘</i>競歩？ 2.22・俊敏だね 2.26</span><span><i>不安を先に消す</i>怪しくない 2.23・勧誘じゃない 2.24・キャッチじゃない 2.25</span><span><i>疑問を生む</i>俺も用事ある 2.27</span><span><i>小さなお願い</i>顔だけ見て 2.28</span><span><i>時間を区切る</i>1分だけ 2.29</span><span><i>表情とジェスチャー</i>覗き込んで手を振る 2.30</span></div></div>
+        <div class="mx"><div class="who">「チャライ」</div><div class="hows"><span><i>言い換え</i>積極的なだけ 2.31</span><span><i>即答の正論</i>見た目で判断しないで 2.32</span><span><i>真顔で</i>ちょっとしか 2.33</span></div></div>
+        <div class="mx"><div class="who">「忙しいので」</div><div class="hows"><span><i>受け入れて次</i>今日は帰っていい、でも30秒 2.34</span><span><i>同調</i>俺も忙しい 2.35</span><span><i>ハードル下げ</i>1分立ち話だけ 2.36</span><span><i>同調＋提案</i>俺も用事ある 2.37</span></div></div>
+        <div class="mx"><div class="who">「帰るところ」</div><div class="hows"><span><i>同調→共有→提案</i>途中まで一緒に 2.38</span><span><i>関係ない話題で崩す</i>こっち側を歩きたい 2.39</span></div></div>
+        <div class="mx"><div class="who">「大丈夫です」<small>「結構です」</small></div><div class="hows"><span><i>ポジティブ解釈</i>OKってこと？ 2.40</span><span><i>疑問＋提案</i>何が大丈夫？ 2.41</span><span><i>好意を挟む</i>好意がなきゃ声かけない 2.42</span></div></div>
+        <div class="mx"><div class="who">「待ち合わせ」</div><div class="hows"><span><i>正論を挟む</i>一緒に待てば暇じゃない 2.43</span><span><i>しつこくない宣言</i>すぐ消えるから 2.44</span></div></div>
+        <div class="mx warnrow"><div class="who">「無理！」<small>強い拒絶</small></div><div class="hows"><span><i>粘り＋笑い</i>無理が無理 2.45</span><span><i>無茶なお願い</i>4時間だけ 2.46・40杯だけ 2.47</span><span><i>証明する</i>いい人なのに 2.48</span><span><i>職業のせいに</i>しつこい？ 2.49</span><span><i>拒絶を返す</i>俺も無理 2.50</span><span class="stop">⚠ 1〜2パターン粘ってもだめなら必ず退く。それ以上はトラブルのもと。</span></div></div>
+      </div>
+    </div>
+    <div class="groups" data-chunks="2a 2b"><div class="loading">データを読み込み中…</div></div>
+  </div>
+</section>
+
+<!-- ===== CH3 ===== -->
+<section class="chapter" id="ch3" style="--c:var(--c3)">
+  <div class="wrap">
+    <header class="ch-head">
+      <div class="ch-num">STEP<b>3</b></div>
+      <div>
+        <p class="ch-kicker">Chapter 3 · 30パターン · 原本 114p〜</p>
+        <h2>ナンバークローズ・ステップ</h2>
+        <p class="ch-goal">立ち止まってくれた時点で、相手はある程度こちらに興味がある。そこから<b>取りこぼしなくLINE（9割以上）を聞き、その場で次の約束まで決めてしまう</b>。会って話せる時間は貴重なので、日程決めを後回しにしない。</p>
+      </div>
+    </header>
+    <div class="grid-2">
+      <div class="panel">
+        <h3>LINEゲットまでの階段</h3>
+        <div class="ladder">
+          <div class="rung"><div><b>小さなYESを取る</b><span>「連絡がつきやすいのは何時ごろ？」と先に聞く。</span><div class="refs"><a class="ref" href="#p-3-2">3.2</a></div></div></div>
+          <div class="rung"><div><b>本題は「奇襲」で</b><span>会話の流れでいきなり、画面を向けたスマホを差し出す。ためを作ると迷う時間を与える。</span><div class="refs"><a class="ref" href="#p-3-17">3.17–3.20</a></div></div></div>
+          <div class="rung"><div><b>渋られたら、ハードルを下げる</b><span>しつこくしない上限を示す／「生理的に無理？」と聞く／一度話させて／自分のIDを先に渡す。</span><div class="refs"><a class="ref" href="#p-3-1">3.1</a><a class="ref" href="#p-3-3">3.3–3.5</a><a class="ref" href="#p-3-6">3.6–3.7</a></div></div></div>
+          <div class="rung"><div><b>彼氏がいると言われても、ひるまない</b><span>当然のように流し、関係を壊す気はないと伝えて、すぐスマホを差し出す。</span><div class="refs"><a class="ref" href="#p-3-21">3.21–3.30</a></div></div></div>
+        </div>
+      </div>
+      <div class="panel">
+        <h3>交換したあとの3点セット</h3>
+        <div class="ladder">
+          <div class="rung"><div><b>連絡の段取りを決める</b><span>友達と通話する人か聞き、電話する日時を決める。難しければLINEにする。</span><div class="refs"><a class="ref" href="#p-3-8">3.8–3.11</a></div></div></div>
+          <div class="rung"><div><b>その場で日程まで決める</b><span>「いつがいい？」ではなく二択で。平日か週末か → 金か土か → 時間と場所。</span><div class="refs"><a class="ref" href="#p-3-13">3.13–3.16</a></div></div></div>
+          <div class="rung"><div><b>すぐに解散しない</b><span>交換後もおよそ10分は一緒に歩いて話す。すぐ消えると「死にLINE」になりやすい。</span><div class="refs"><a class="ref" href="#p-3-12">3.12</a></div></div></div>
+        </div>
+        <p class="note mt" style="margin-bottom:0">グダ崩しは1対1の撃ち合いではなく、次々に出る断り文句へ連続で返していくイメージ。噛んだり考え込んだりすると効果が落ちるので、全部覚えておく。</p>
+      </div>
+    </div>
+    <div class="groups" data-chunks="3"><div class="loading">データを読み込み中…</div></div>
+  </div>
+</section>
+
+<!-- ===== CH4 ===== -->
+<section class="chapter" id="ch4" style="--c:var(--c4)">
+  <div class="wrap">
+    <header class="ch-head">
+      <div class="ch-num">STEP<b>4</b></div>
+      <div>
+        <p class="ch-kicker">Chapter 4 · 20パターン · 原本 157p〜</p>
+        <h2>メンテナンス・ステップ（電話・LINE）</h2>
+        <p class="ch-goal">連絡の目的は<b>アポの日程を確定させ、ドタキャンを防ぐこと</b>だけ。雑談で引っぱらず、シンプルに用件を済ませる。会えない時間に関係を深めようとしない。</p>
+      </div>
+    </header>
+    <div class="panel">
+      <h3>交換からアポまでのタイムライン</h3>
+      <div class="timeline">
+        <div class="tl" style="--c:var(--c3)"><span class="when">交換30分〜1日以内</span><div class="card2"><b>ファーストライン</b>時間を割いてくれた感謝＋「あの後〜できた？」<br><a class="ref" href="#p-4-6">4.6–4.8</a></div></div>
+        <div class="tl" style="--c:var(--c3)"><span class="when">返信が来たら</span><div class="card2"><b>セカンドライン</b>すぐアポの話へ。手帳に書いたか確認、または電話の約束<br><a class="ref" href="#p-4-9">4.9–4.11</a></div></div>
+        <div class="tl" style="--c:var(--c4)"><span class="when">夜22〜23時</span><div class="card2"><b>ファーストコール</b>手帳やカレンダーを出させて日程確定。10分以内で切る<br><a class="ref" href="#p-4-1">4.1–4.5</a></div></div>
+        <div class="tl" style="--c:var(--c4)"><span class="when">決まらないとき</span><div class="card2"><b>日程調整ライン</b>候補はこちらから複数。「どれか1日なら調整できる」<br><a class="ref" href="#p-4-12">4.12–4.14</a></div></div>
+        <div class="tl" style="--c:var(--c5)"><span class="when">アポ3日前</span><div class="card2"><b>直前ライン1</b>予定に変更がないか確認。返信の速さで成否が読める<br><a class="ref" href="#p-4-15">4.15</a></div></div>
+        <div class="tl" style="--c:var(--c5)"><span class="when">前日</span><div class="card2"><b>直前ライン2</b>「楽しみにしてる、着く時間がわかったら連絡して」<br><a class="ref" href="#p-4-16">4.16</a></div></div>
+      </div>
+      <div class="revive">
+        <span class="tag2">返信が途絶えた（2日〜1週間以上）→ 復活ライン</span>
+        <div class="opts"><span>似ている動物・キャラの写真を送る <a class="ref" href="#p-4-17">4.17</a></span><span>「昨日○○にいた？」 <a class="ref" href="#p-4-18">4.18</a></span><span>「今○○にいる？」から近況報告アポへ <a class="ref" href="#p-4-19">4.19</a></span><span>「生きてる？」→「恋してる？」 <a class="ref" href="#p-4-20">4.20</a></span></div>
+      </div>
+    </div>
+    <div class="grid-3 mt">
+      <div class="panel">
+        <h3>連絡手段の優先順位</h3>
+        <div class="prio"><span>対面</span><em>＞</em><span>電話</span><em>＞</em><span>LINE</span></div>
+        <p class="note" style="margin:12px 0 0">文字は誤解されやすく、何度も読み返されるので小さなミスが命取り。電話できる状況なら電話へ。会っているときは楽しげに、LINEは淡々と。顔文字やスタンプはほぼ使わない。</p>
+      </div>
+      <div class="panel">
+        <h3>返信ペースの一例</h3>
+        <div class="rally">
+          <div class="day"><b>1日目</b><div class="msg"><span class="me">23時 送信</span></div><div class="msg r"><small>2時間後</small><span class="her">返信</span></div></div>
+          <div class="day"><b>2日目</b><div class="msg"><span class="me">23時 送信</span></div><div class="msg r"><small>5分→2分→1分</small><span class="her">短いラリー</span></div></div>
+          <div class="day"><b>3日目</b><div class="msg"><span class="me">23時 返信</span></div></div>
+        </div>
+        <p class="note" style="margin:10px 0 0">日程が決まっていれば1日1〜2通で十分。間隔はあえてランダムに。</p>
+      </div>
+      <div class="panel">
+        <h3>直前ラインの読み方</h3>
+        <div class="signal">
+          <div class="g"><b>問題なし</b>すぐ、または1日以内に返信（前日なら翌日昼まで）</div>
+          <div class="r"><b>要注意</b>2日返信なし（前日分はアポ3時間前まで無返信）</div>
+        </div>
+        <p class="note" style="margin:10px 0 0">要注意なら別の予定を入れておく。直前にOKが来ても「連絡がなかったので予定を入れた」と一度断り、主導権を渡さない。</p>
+      </div>
+    </div>
+    <div class="groups" data-chunks="4"><div class="loading">データを読み込み中…</div></div>
+  </div>
+</section>
+
+<!-- ===== CH5 ===== -->
+<section class="chapter" id="ch5" style="--c:var(--c5)">
+  <div class="wrap">
+    <header class="ch-head">
+      <div class="ch-num">STEP<b>5</b></div>
+      <div>
+        <p class="ch-kicker">Chapter 5 · 20パターン · 原本 189p〜</p>
+        <h2>関係構築ステップ</h2>
+        <p class="ch-goal">アポ当日のトーク。最大のポイントは<b>こちらが一方的に話さないこと</b>。まず相手の話を聞いて情報を引き出し、議論ではなく共感し、そのうえで手持ちのトークを使う。</p>
+      </div>
+    </header>
+    <div class="panel">
+      <h3>話題には「重さ」の順番がある</h3>
+      <div class="depth"><div>日常の話</div><div>好みの話</div><div>恋愛の話</div><div>エッチに関する話</div><div>失恋・大恋愛の話</div><div>離別・裏切り・<br>両親の離婚の話</div></div>
+      <div class="depth-axis"><span>← 軽い（先に話す）</span><span>重い（後で話す）→</span></div>
+    </div>
+    <div class="quad mt">
+      <div><span class="role">聞く</span><b>引き出しトーク</b><p>身構えさせない「奇襲」的な聞き方で本音を聞く。二択やYES/NOで聞くと嘘をつかれにくい。</p><p><a class="ref" href="#p-5-1">5.1–5.5</a></p></div>
+      <div><span class="role">肯定する</span><b>共感トーク</b><p>意見が分かれる話題を振り、相手が選んだ側に乗る。2人の意見が合う話題を一緒に探す雰囲気で。</p><p><a class="ref" href="#p-5-6">5.6–5.10</a></p></div>
+      <div><span class="role">伝える</span><b>価値伝達トーク</b><p>自慢は逆効果。周りからの評価や相談の形で、積極的・モテる・器が大きいことを間接的に伝える。</p><p><a class="ref" href="#p-5-11">5.11–5.15</a></p></div>
+      <div><span class="role">言い当てる</span><b>コールドリーディング</b><p>誰にでも当てはまることを言い当て、前から気づいていた体で話す。具体的なエピソードは相手に話してもらう。</p><p><a class="ref" href="#p-5-16">5.16–5.20</a></p></div>
+    </div>
+    <div class="groups" data-chunks="5"><div class="loading">データを読み込み中…</div></div>
+  </div>
+</section>
+
+<!-- ===== CH6 ===== -->
+<section class="chapter" id="ch6" style="--c:var(--c6)">
+  <div class="wrap">
+    <header class="ch-head">
+      <div class="ch-num">STEP<b>6</b></div>
+      <div>
+        <p class="ch-kicker">Chapter 6 · 10パターン · 原本 215p〜</p>
+        <h2>性的誘惑ステップ</h2>
+        <p class="ch-goal">関係構築ができた相手と、<b>話題と接触を段階的に進めるステップ</b>。順番を飛ばすとセクハラになり、相手を強く不快にさせる。嫌がられたら、それは関係構築がまだ足りないというサイン。</p>
+      </div>
+    </header>
+    <div class="panel">
+      <h3>進め方は必ずこの順番で</h3>
+      <div class="esc">
+        <span style="--i:0">弱いシモネタで<br>様子を見る</span><span style="--i:1">過去の体験を<br>思い出す話題</span><span style="--i:2">手</span><span style="--i:3">腕</span><span style="--i:4">肩</span><span style="--i:5">頭</span><span style="--i:6">耳</span><span style="--i:7">首筋</span>
+      </div>
+      <div class="stopbox"><span class="oct">STOP</span><p><b>相手が話題を嫌がったら、すぐやめる。</b>手に触れることすら嫌がる状態で、腕をつかむ・肩を抱くなど先へ進むのは絶対にいけない。段階を踏み、相手の反応を見て、嫌がることはしない。<a class="ref" href="#p-6-1">6.1</a><a class="ref" href="#p-6-6">6.6</a></p></div>
+    </div>
+    <div class="groups" data-chunks="6"><div class="loading">データを読み込み中…</div></div>
+  </div>
+</section>
+
+<!-- ===== CH7 ===== -->
+<section class="chapter" id="ch7" style="--c:var(--c7)">
+  <div class="wrap">
+    <header class="ch-head">
+      <div class="ch-num">STEP<b>7</b></div>
+      <div>
+        <p class="ch-kicker">Chapter 7 · 40パターン · 原本 228p〜</p>
+        <h2>セッ○○クローズ・ステップ</h2>
+        <p class="ch-goal">この章は<b>構成と著者の注意事項だけ</b>を載せ、台本はカード化していません。</p>
+      </div>
+    </header>
+    <div class="withheld">
+      <div class="panel why">
+        <h3>台本を図解していない理由</h3>
+        <p>この章の中心は、相手が<b>「ダメ」「しない」「やめて」「ホテルは嫌」</b>と断ったあとも、言いくるめて行為を続けるための台本です。</p>
+        <p>断りの言葉を言い換えや理屈で崩して同意に持ち込む手順は、相手の意思に反した行為につながりやすいため、覚えやすい形に整理することはしていません。</p>
+        <div class="toc7">
+          <div><b>連れ出しトーク</b>7.1–7.10 · 10パターン<br><span class="note">店を出たあと、ホテル・自宅・カラオケなどの個室へ誘導する場面</span></div>
+          <div><b>グダ崩しトーク</b>7.11–7.40 · 30パターン<br><span class="note">個室で相手が断ったときの切り返し</span></div>
+        </div>
+      </div>
+      <div>
+        <div class="safety">
+          <h3>⚠ 著者自身がこの章に書いている注意</h3>
+          <ul>
+            <li>関係構築・性的誘惑のステップが不十分なまま、強引に触る・腕をつかんで連れ出す・無理やりキスするのは絶対にだめ。違法行為にあたる。</li>
+            <li>相手から明確なNOが出たら、必ず中断して会話に戻る。</li>
+            <li>強引な行為は犯罪。相手が自分から受け入れる状態でなければ進めない。</li>
+            <li>「本当にやめて」「本当に無理」と言われたら、すぐにやめて退く。</li>
+            <li>避妊は例外なく100%。</li>
+          </ul>
+        </div>
+        <div class="panel mt">
+          <h3>同意の目安</h3>
+          <ul class="consent">
+            <li><b>相手からはっきりした「いいよ」があるか</b>迷い・沈黙・話をそらす、はYESではない。</li>
+            <li><b>判断できる状態か</b>酔いすぎている相手とは進めない。</li>
+            <li><b>いつでも断れる空気か</b>店の前まで連れて行く・手を引くなど、断りにくくする状況を作らない。</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== BONUS ===== -->
+<section class="chapter" id="bonus" style="--c:var(--cx)">
+  <div class="wrap">
+    <header class="ch-head">
+      <div class="ch-num">特典</div>
+      <div>
+        <p class="ch-kicker">Bonus · 原本 271p〜</p>
+        <h2>著者が実際に使っている店（新宿エリア）</h2>
+        <p class="ch-goal">店選びの基準は<b>「安いけれどカジュアルで雰囲気がいい」</b>こと。高い店に連れて行っても成功率は変わらず、お金がかかるだけ。誘い方を「仕事帰りに軽く一杯」などにすれば、安い店でもむしろ自然になる。</p>
+      </div>
+    </header>
+    <div class="shops">
+      <div class="shop" style="--c:var(--c4)"><span class="type">隣り合わせ（横並び・カウンター）</span><b>da Vinci（ダヴィンチ）</b><p>バーカウンターの雰囲気がよく、あまり混まない。「雰囲気のいいバー」と誘ったときの定番。1軒目にも。</p><a href="https://www.hotpepper.jp/strJ001128611/" target="_blank" rel="noopener">hotpepper.jp/strJ001128611</a></div>
+      <div class="shop" style="--c:var(--c4)"><span class="type">隣り合わせ（L字・半個室）</span><b>花咲酒蔵 ウメ子の家 新宿東口店</b><p>「おいしい梅酒を飲みに行こう」で誘う店。L字型のカップルシート。LINE交換のときに梅酒が好きか聞いておくと誘いやすい。</p><a href="https://www.hotpepper.jp/strJ000718006/" target="_blank" rel="noopener">hotpepper.jp/strJ000718006</a></div>
+      <div class="shop" style="--c:var(--c2)"><span class="type">立ち飲み</span><b>セント・ジェームス</b><p>いつも賑やかで気軽に入れる。金土でも比較的空いていて、混んでいてもカウンターや出口付近で立ち飲みできる。</p><a href="https://r.gnavi.co.jp/2tvn6m5j0000/" target="_blank" rel="noopener">r.gnavi.co.jp/2tvn6m5j0000</a></div>
+      <div class="shop" style="--c:var(--c2)"><span class="type">立ち飲み</span><b>HUB 新宿歌舞伎町店／新宿区役所通り店／82 新宿三丁目店</b><p>雰囲気がよく、安く、気軽に入れるバー。2軒目の定番。混む曜日はセント・ジェームスに切り替える。</p><a href="https://www.pub-hub.com/index.php/shop/detail/14" target="_blank" rel="noopener">歌舞伎町店</a> · <a href="https://www.pub-hub.com/index.php/shop/detail/88" target="_blank" rel="noopener">区役所通り店</a> · <a href="https://www.pub-hub.com/index.php/shop/detail/44" target="_blank" rel="noopener">82 新宿三丁目店</a></div>
+      <div class="shop" style="--c:var(--c6)"><span class="type">落ち着いたバー</span><b>CANTiNA</b><p>落ち着いたロマンチックな雰囲気。まだ早いと感じたときに、ここで関係構築をもう一段深める。隣り合わせの席。</p><a href="http://bar-cantina.com/" target="_blank" rel="noopener">bar-cantina.com</a></div>
+    </div>
+    <p class="note mt">※ 金土・祝前日は混むので、予約できる店は予約するか直前に電話で確認。掲載情報はPDF作成当時のもの。行く前に公式ページで住所・営業時間を確認すること。</p>
+
+    <div class="panel mt">
+      <h3>おわりに：180日推奨プログラムの流れ</h3>
+      <div class="program"><span>読み込み</span><em>→</em><span>イメトレ</span><em>→</em><span>実践準備</span><em>→</em><span>本格実践</span><em>→</em><span>成果</span></div>
+      <p class="note" style="margin:10px 0 0">購入者限定マガジンで配布予定とされているプログラム。著者の外見の磨き方・ファッション・髪型なども、そちらで紹介するとしている。</p>
+    </div>
+  </div>
+</section>
+
+<p class="nohit wrap" id="nohit">該当するパターンがありません。別のキーワードで試してください。</p>
+</main>
+
+<footer>
+  <div class="wrap">
+    <p>出典：チバ『チバの全トーク・全ラインスクリプト集（200パターン）』（購入者向けPDF）を、購入者本人の復習用に要約・図解したもの。台詞は要旨に圧縮し、原文をそのまま書き写してはいません。</p>
+    <p>元のPDFは複製・譲渡・公開が禁止されています。このファイルも個人用として扱い、共有しないでください。</p>
+  </div>
+</footer>
+
+<script>
+window.DATA = {"3":{"chunk":"3","groups":[{"name":"TEL番・LINEゲットトーク","ids":"3.1–3.5","summary":"立ち止めできた相手からLINE（9割超）や番号を得る段階。この時点で一定の食い付きはあるため、取りこぼさず自然に聞く。強い好意で直球、軽くさり気なく、粘り切る等の型を相手のタイプに応じて使い分け。","patterns":[{"id":"3.1","title":"TEL番・LINEゲットトーク1","scene":"立ち止め後、連絡先に迷う相手の不安を下げる","cue":"ライン教えて？","flow":["会話の流れで「ライン教えて？」と依頼","相手が迷う反応","嫌ならブロックしてよいと伝える","2通無視なら二度と連絡しないと約束"],"points":["しつこくない男だと示し、LINEを渡すハードルを下げる","どれほど魅力的な男でも、LINEを教える時は相手にためらいが生じる。しつこい連絡やストーカー被害の経験者ほど強い","「しつこく連絡しない」とはっきり告げ、「ここまで」と具体的に線を引くと不安を大きく減らせる"],"branch":"反応あり→メンテナンスへ／なし→他のナンバークローズトークへ","caution":"","badge":"","tag":"迷われた時"},{"id":"3.2","title":"TEL番・LINEゲットトーク2","scene":"軽い質問でYESを取ってからLINEを聞く","cue":"連絡とりやすい時間って何時頃？","flow":["連絡しやすい時間帯を質問","相手が時間を答える（例: 夜11時）","その時間に送ると告げてLINEを依頼","画面を相手に向けて携帯を差し出す"],"points":["負担の小さい要求でまずYESを取り、要求を段階的に引き上げる","いきなりLINEを求めるより、連絡がつく時間を聞いた後に頼む方が成功率が大きく上がる"],"branch":"反応あり→メンテナンスへ／なし→他のナンバークローズトークへ","caution":"","badge":"オススメ","tag":"初手"},{"id":"3.3","title":"TEL番・LINEゲットトーク3","scene":"連絡先を渋られた際、口調を変えて切り返す","cue":"連絡先を教えて？","flow":["連絡先を頼み、渋られる","少しはっきりした口調で「俺のこと生理的に無理？」","すかさず「そこまでではない」と思っているはずと確認","頷いたら携帯を差し出す"],"points":["和やかな空気をわずかに崩し、強めの口調で問い詰める","立ち止めできた時点で「生理的に無理」の段階は通過済み","生理的に無理でないなら教えても問題ないはず、という理屈で迫る","相手の心理を読み、意外な強い口調で気持ちが一瞬沈んだ隙を突く"],"branch":"反応あり→メンテナンスへ／なし→他のナンバークローズトークへ","caution":"","badge":"高威力","tag":"渋られた時"},{"id":"3.4","title":"TEL番・LINEゲットトーク4","scene":"渋られたら一度の通話を求め、強気に押す","cue":"一度ライン通話させて！","flow":["連絡先を頼み、渋られる","一度だけ通話させてほしいと強く頼む","話して無理なら諦め、ブロックも可と添える","携帯を差し出す"],"points":["一度話さないと人柄は分からない、という姿勢で強気に出る","良い空気が続いていても連絡先交換は一つの区切り。グダが出たら一気に強気へ切り替え","その勢いが成功率を高める要因"],"branch":"反応あり→メンテナンスへ／なし→他のナンバークローズトークへ","caution":"","badge":"オススメ","tag":"渋られた時"},{"id":"3.5","title":"TEL番・LINEゲットトーク5","scene":"短時間で合うと感じた好意を示し、一気に押し切る","cue":"5分話せばわかるよ","flow":["連絡先を頼み、渋られる","相性は「5分話せばわかる」と返す","自分は合うと感じたと伝える","お願いして携帯を差し出す"],"points":["遠回しな好意を一言挟み、すぐ連絡先交換へ移る","短い会話でも合うと思えた、という形で好意を示す","好意を長々と語ると説得力が落ちるため、一度伝えたら即座にLINEを聞く"],"branch":"反応あり→メンテナンスへ／なし→他のナンバークローズトークへ","caution":"","badge":"オススメ","tag":"渋られた時"}]},{"name":"ブーメランフック・トーク","ids":"3.6–3.7","summary":"先にこちらのLINEや番号を相手に渡す「ブーメラン」をきっかけにして、改めて相手の連絡先を取りに行く型。立ち止め後のLINE・番号取得トークの6・7番目にあたる。","patterns":[{"id":"3.6","title":"ブーメランフック・トーク1","scene":"渋られたら先に自分のIDを渡し、関係を一歩進める","cue":"じゃあ、俺のを教えるから","flow":["渋られたら自分のIDを教えると提案","受け取るだけならと相手が入力","礼を言い、誘うのは男からにしたいと伝える","改めてIDを打ってと携帯を差し出す"],"points":["相手にこちらのIDを登録する作業を一度挟ませる","会話だけの段階より、IDを渡した後の方が関係は進んでいる","関係を少し進めてから再度聞くことで、LINE取得率が上がる"],"branch":"反応あり→メンテナンスへ／なし→他のナンバークローズトークへ","caution":"","badge":"","tag":"渋られた時"},{"id":"3.7","title":"ブーメランフック・トーク2","scene":"渋られたら自分の番号を登録させ、ワンコールへ","cue":"俺の番号の登録だけしてよ","flow":["渋られたら番号登録だけ頼み、携帯を出させる","携帯を預かり、こちらで番号を入力","礼を言い「ワンコールだけ」と頼む","発信直前の画面を見せる"],"points":["主導権を握ったまま、ワンコールだけ許してもらう","番号入力のため相手の携帯を一度預かり、入力後に発信してよいか聞く","主導権を手放さず保ち続けることが要"],"branch":"反応あり→メンテナンスへ／なし→他のナンバークローズトークへ","caution":"","badge":"","tag":"渋られた時"}]},{"name":"アポ率向上トーク","ids":"3.8–3.12","summary":"連絡先を得ても、アポに至らない・LINEが途切れる・連絡を無視されるといった問題は多い。それを防ぐための交換直後のトーク集。細かい作業だが、手にした連絡先を活かすため必ず習得する。","patterns":[{"id":"3.8","title":"アポ率向上トーク1","scene":"交換直後、通話の約束を取り付けて途切れを防ぐ","cue":"友達とはよくライン通話する人？","flow":["礼を言い、友達とLINE通話するか質問","相手が「結構する」と肯定","明日23時頃に電話すると予定を確定","出られなければ折り返しかメッセを依頼"],"points":["友達と通話するかを先に聞き、電話を断りにくくする","相手は話好きで親しい友達とは通話するもの。そこでYESを取ると電話の許可も得やすい","「No」の場合は「じゃあLINEにする」と切り替える"],"branch":"反応あり→メンテナンスへ／なし→他のナンバークローズトークへ","caution":"","badge":"","tag":"通話YES時"},{"id":"3.9","title":"アポ率向上トーク2","scene":"通話を断られたらLINEに切り替え、会話を延ばす","cue":"そっか、ならLINEするね","flow":["礼を言い、友達とLINE通話するか質問","相手は「あまりしない」と否定","LINEで送ると切り替え、夜11時頃を提示","了承後も解散せず、食い付きを上げるトークを続ける"],"points":["Noと返されたら会話を終えず、さらに話し込む","通話NGは電話嫌いや実家住まいの事情もあるが、あまり良い兆候ではない","メッセージを一度交わした後もすぐ別れず、食い付きを高めるトークで会話を延ばす","立ち止め・ナンバークローズ用トークを使い、時間の許す限り続けるとアポ率が大きく上がる"],"branch":"反応あり→再度ナンバークローズトークで食い付きUP→メンテナンスへ","caution":"","badge":"","tag":"通話NO時"},{"id":"3.10","title":"アポ率向上トーク3","scene":"連絡しやすい時間を約束させ、無視への罪悪感を作る","cue":"連絡とりやすい時間って何時頃？","flow":["礼を言い、連絡しやすい時間を質問","相手が答えに詰まる","仕事終わりから推測し「11時頃だよね？」と提示","その時間に連絡すると告げ「ちゃんと返して」と念押し"],"points":["連絡しやすい時間を聞き、詰まったらこちらから具体的な時刻を示す","時間を聞いておくと返信しないことへの罪悪感が増し、責任感の強い相手ほど約束したからと返してくれる","夜勤などを除き、夜11時頃はベッドでくつろぎながらLINEをしている人が多い"],"branch":"反応あり→メンテナンスへ／なし→他のナンバークローズトークへ","caution":"","badge":"","tag":"交換直後"},{"id":"3.11","title":"アポ率向上トーク4","scene":"退勤時刻から逆算して連絡時間を決める","cue":"いつも仕事終わるのって何時頃？","flow":["礼を言い、普段の退勤時刻を質問","住んでいる駅も聞く","帰宅時刻を推定し、連絡する時刻を指定","「ちゃんと返して」と念押し"],"points":["退勤時刻から逆算して、連絡が取りやすい時間を割り出す","一方的な無視が起きにくくなり、その時間帯に合わせてアポも組みやすい","返答が曖昧なら食い付き不足の可能性。どうしても繋がりたい相手ならその場で連れ出し（カフェ可）を打診","断られても立ち話の延長や同方向への同行で和みを続け、現場で粘る。即解散は死に番・死にLINE化しやすく復活困難"],"branch":"反応あり→メンテナンスへ／なし→他のナンバークローズトークへ","caution":"","badge":"","tag":"交換直後"},{"id":"3.12","title":"アポ率向上トーク5","scene":"交換後すぐ別れず、相手の行き先へ並んで歩く","cue":"途中まで行こ","flow":["礼を言い、もともと向かっていた先を確認","自分も同じ所へ向かう途中だったと合わせる","「途中まで行こ」と相手の進行方向へ歩き出す","並んで歩きながら会話を続ける"],"points":["最も避けるべき失敗は、連絡先交換後すぐ立ち去ること","交換後も並んで話し続けると関係が深まる。即離脱は声かけ数は稼げるがアポ率が落ちる","美女ナンパでは連絡先一つひとつを大事にし、時間をかけても交換後の会話を続ける","交換後10分ほど一緒に歩いて話すのが習慣。うまくいけばアポはほぼ確定、準即も逃さない"],"branch":"反応あり→他のナンバークローズトークへ／なし→立ち話のまま他のトークへ","caution":"","badge":"必須","tag":"交換直後"}]},{"name":"約束トーク","ids":"3.13–3.16","summary":"交換後にアポに至らない等の問題を防ぐため、通常はメンテナンス段階で決める「いつ・どこで・何を」を交換の場で決め切る。対面での会話は関係を深める貴重な機会なので、先送りせずその場で済ませる。","patterns":[{"id":"3.13","title":"約束トーク1","scene":"交換時に日時と場所まで決めてしまう","cue":"平日が都合いい人？","flow":["礼を言い、食事は平日が都合よいかYES/NOで質問","週末と返されたら来週か再来週の金・土の二択を提示","雰囲気の良い店を予約すると添える","金曜19時・待ち合わせ場所を確定し、忘れないようLINEすると告げる"],"points":["決めつけと疑問形を混ぜながら話を進める","「いつ空いてる？」のような開いた質問より、二択や「平日に会いたい人？」のYES/NO形式の方が肯定を得やすい"],"branch":"反応あり→他のナンバークローズトークへ／なし→立ち話のまま他のトークへ","caution":"","badge":"必須","tag":"交換直後"},{"id":"3.14","title":"約束トーク2","scene":"日程を先に決めつけ、強い好意で本気を示す","cue":"先に日程だけ決めさせて？","flow":["礼を言い、食事の日程だけ先に決めたいと切り出す","「来週金土どちらか20時に新宿」と候補を即提示","両日予定があってもキャンセルして行くと伝える","店は任せてと雰囲気の良い店を約束"],"points":["多くの情報を一息に伝え、その中に強い好意をさりげなく混ぜる","時間のかかる日程調整を省き、決まりそうな日を最初から決めつけで提示","「予定を取り消してでも行く」という強い価値伝達で本気度を示す"],"branch":"反応あり→他のナンバークローズトークへ／なし→立ち話のまま他のトークへ","caution":"","badge":"","tag":"交換直後"},{"id":"3.15","title":"約束トーク3","scene":"出会った時間と場所を再会の候補に使う","cue":"来週のこの時間に、ここで","flow":["礼を言い、食事の話を切り出す","来週の同じ時間・同じ場所での待ち合わせを冗談めかして提案","近くに良い店を知っていると添える","この時間なら来られるはずと理由づけ"],"points":["運命めいた要素を混ぜて日程候補を出す","声をかけた場所と時間は普段の通り道や空き時間であることが多く、規則的に働くOLは特にその傾向","OLならこれだけでアポ日が決まることが多く、後の日程調整が不要。相手もアポを楽しみにしやすい","自分の都合が悪くても一度決めて後で変える方が運命感を演出できる。刺されば強力な小技"],"branch":"反応あり→他のナンバークローズトークへ／なし→立ち話のまま他のトークへ","caution":"","badge":"","tag":"交換直後"},{"id":"3.16","title":"約束トーク4","scene":"先の日程を決めた後、冗談めかして翌日を打診","cue":"平日の夜とか都合いい人？","flow":["平日夜が都合よいか聞き、週末と返される","来週金・土の20時を提案し決定","もう一つ聞きたいことがあると前置き","冗談めかして「明日の20時はどう？」と打診"],"points":["まず先の日程を固めてから、直近の予定を打診する","食い付きやタイミング次第で、すぐ会ってもいいと思っている相手は多い","最初から明日を聞くとがっつく印象になるが、日程確定後に冗談として聞けば両方を満たせる","意外と成功率が高く、既存の予定を取り消して翌日会う相手もいる。印象を損なわないので積極的に使う"],"branch":"反応あり→他のナンバークローズトークへ／なし→立ち話のまま他のトークへ","caution":"","badge":"","tag":"交換直後"}]},{"name":"誘導トーク","ids":"3.17–3.20","summary":"連絡先交換を自然な流れで行えるよう会話を導くテクニック。立ち止め中のやり取りの途中で、不意を突いて交換を仕掛けるのが肝。","patterns":[{"id":"3.17","title":"誘導トーク1","scene":"会話の途中、不意打ちで携帯を差し出す","cue":"ご飯行こう","flow":["食事に誘い、今日時間があれば行きたかったと伝える","相手が謝ったら、ID入力画面の携帯を差し出す","戸惑われたら「ご飯食べるでしょ？」と返す","交換するのか問われたら、しないとご飯に行けないと笑う"],"points":["会話の途中で前触れなく携帯を差し出す","間を作ったり聞く空気を前面に出すと、相手に迷う時間を与えてしまう","迷う隙をなくすため交換は基本「奇襲」で。仕掛けたら怯まず押し切るのが最重要"],"branch":"反応あり→他のナンバークローズトークへ／なし→立ち話のまま他のトークへ","caution":"","badge":"","tag":"立ち話中"},{"id":"3.18","title":"誘導トーク2","scene":"疲れているかを聞き、飲みに行く口実を作る","cue":"なんか顔が疲れてるね","flow":["顔が疲れて見えると指摘し、疲れているか質問","相手が肯定","疲れが取れる酒を出す店を教えると告げる","ID入力画面を用意した携帯を差し出す"],"points":["「疲れている」でYESを取り、飲みに誘う理由へつなげる","疲れているか聞けば、多くの相手は肯定する","否定された場合は「もっと元気が出る酒の店がある」と理由づけを変える"],"branch":"反応あり→他のナンバークローズトークへ／なし→立ち話のまま他のトークへ","caution":"","badge":"","tag":"立ち話中"},{"id":"3.19","title":"誘導トーク3","scene":"大半に当てはまる問いでYESを取り、店へ誘う","cue":"飲めないけど好きって感じ？","flow":["酒は弱いけど好きなタイプかと質問し、肯定を得る","気軽に入れる雰囲気の良い店を知っているか聞く","相手が迷ったら、周辺で知っている店へ連れて行くと告げる","名前を呼び、絶対気に入るから一度行こうと誘う"],"points":["誰にでも当てはまりやすい問い（コールドリーディング）を使う","そのため大抵YESが取れ、会話を成立させやすい","逆に「よく飲む」と返されたら、それを理由に酒のうまい店へ誘う"],"branch":"反応あり→他のナンバークローズトークへ／なし→立ち話のまま他のトークへ","caution":"","badge":"","tag":"立ち話中"},{"id":"3.20","title":"誘導トーク4","scene":"店を知っているか問い、考えた隙にアポ提案","cue":"いいお店って知ってる？","flow":["声かけ地域かアポ地域の雰囲気の良い店を知っているか質問","相手が考え込む","間を置かず「俺が教える」と引き取る","おすすめの店へ一緒に行こうと案内を申し出る"],"points":["一度質問して考えさせ、その瞬間に一気にアポを持ちかける","女子会などの機会がない限り、相手は店選びにあまり詳しくない","考えている隙に断定的かつ強めに提案すると、相手の迷いを断つきっかけになる"],"branch":"反応あり→他のナンバークローズトークへ／なし→立ち話のまま他のトークへ","caution":"","badge":"","tag":"立ち話中"}]},{"name":"彼氏グダ＆その他グダ崩しトーク","ids":"3.21–3.30","summary":"連絡先交換時に出るグダを崩すトーク集。1つのグダに1つで返すのでなく、続けざまに来るグダへ複数の切り返しで撃ち合う意識で臨む。噛んだり考え込むと効果が落ちるため、まず全トークを読み込み暗記する。","patterns":[{"id":"3.21","title":"彼氏グダ＆その他グダ崩しトーク1","scene":"食事の誘いを彼氏を理由に断られた時","cue":"彼氏いない子には興味ないよ","flow":["食事に誘い、彼氏がいると断られる","間を置かず「彼氏いない子には興味ない」と返す","堂々と当然のような態度を貫く"],"points":["「彼氏持ち＝ダメ」という印象を瞬時に打ち消す","最重要は即座に、堂々と、当たり前のように言うこと","全く気にしていない態度が、相手の従来の価値観を揺さぶるきっかけになる","こちらが遠慮するのはNG。価値観を変えるほど堂々と明確に話す"],"branch":"反応あり→他のナンバークローズトークへ／なし→立ち話のまま他のトークへ","caution":"","badge":"","tag":"彼氏グダ"},{"id":"3.22","title":"彼氏グダ＆その他グダ崩しトーク2","scene":"彼氏いると言われたら自己アピール扱いで返す","cue":"ん？聞いてないよ（笑）","flow":["連絡先を頼み、彼氏がいると断られる","「聞いてないよ」「自己アピール？」と笑って返す","相手が驚いた隙に携帯を差し出す"],"points":["彼氏の話を持ち出す相手を「つまらない人」扱いし、こちらが上だと強く示す","対等だった立場から一気に攻めて上に立つ。勢いに驚いた瞬間に連絡先交換を仕掛ける","「彼氏がいても大したことではない」という前提を自分に作り、声色や表情にも反映させる"],"branch":"反応あり→他のナンバークローズトークへ／なし→立ち話で別のグダ崩しへ","caution":"","badge":"","tag":"彼氏グダ"},{"id":"3.23","title":"彼氏グダ＆その他グダ崩しトーク3","scene":"彼氏持ちの不安を消し、日程決めへ進める","cue":"ここにいなければ問題なくない？","flow":["食事に誘い、彼氏がいると言われる","今ここにいないなら問題ないと返す","恋愛には口出ししないと安心させる","彼氏とのデート曜日を避けて日を決めようと携帯を差し出す"],"points":["彼氏との仲は邪魔しないと明言する","熱愛中のカップルは意外に少なく、多くは不満を抱えている","面倒事を起こさないと伝えることで相手の不安を取り除ける。彼氏持ちを口説く時は必ず押さえる"],"branch":"反応あり→他のナンバークローズトークへ／なし→立ち話で別のグダ崩しへ","caution":"","badge":"必須","tag":"彼氏グダ"},{"id":"3.24","title":"彼氏グダ＆その他グダ崩しトーク4","scene":"彼氏持ちを魅力の証として肯定して返す","cue":"可愛い子には彼氏いるよね","flow":["連絡先を頼み、彼氏がいると謝られる","「可愛い子には彼氏いるよね」と即答","そのまま携帯を差し出す"],"points":["「彼氏がいる＝魅力的」という前提を相手と共有する","全く怯まず、むしろ喜ぶような態度で話す。普通の男にはできないため、強い自信と器の大きさが伝わる","おどおど言うと効果半減。間を置かず反射的に言えるよう練習しておく"],"branch":"反応あり→他のナンバークローズトークへ／なし→立ち話で別のグダ崩しへ","caution":"","badge":"","tag":"彼氏グダ"},{"id":"3.25","title":"彼氏グダ＆その他グダ崩しトーク5","scene":"彼氏の座は狙っていないと示し、友達枠で迫る","cue":"彼氏のポジション狙ってないよ","flow":["連絡先を頼み、彼氏がいると言われる","彼氏の座は狙っていないと笑って返す","友達なら問題ないはずと添える"],"points":["彼氏狙いでないことをすぐに伝える","彼氏持ちの多くは関係が壊れるのを恐れるため、壊す気はないと早めに示す","「友達が増えるのは問題ない」という正論が、相手が自分を納得させる言い訳にもなる"],"branch":"反応あり→他のナンバークローズトークへ／なし→立ち話で別のグダ崩しへ","caution":"","badge":"","tag":"彼氏グダ"},{"id":"3.26","title":"彼氏グダ＆その他グダ崩しトーク6","scene":"彼氏が複数いる前提で笑いに変える","cue":"おお、何人？","flow":["連絡先を頼み、彼氏がいると言われる","「何人？」と聞き返す","相手が笑ったら「5人目くらいなら許容」と返す"],"points":["彼氏が複数いる前提で会話を進める","複数いるほど可愛く魅力的な相手、という設定で、さも当然のように話す","直後に「俺も複数いるからちょうどいい」と続けると、さらに笑いを取れる"],"branch":"反応あり→他のナンバークローズトークへ／なし→立ち話で別のグダ崩しへ","caution":"","badge":"","tag":"彼氏グダ"},{"id":"3.27","title":"彼氏グダ＆その他グダ崩しトーク7","scene":"自分も恋人持ちと返し、互いに好都合と示す","cue":"お、俺もだよ","flow":["連絡先を頼み、彼氏がいると言われる","「俺もだよ」と返す","互いに都合がいいねと笑う"],"points":["恋人持ち同士だから好都合、という前提で話を進める","既婚者同士の不倫が多いように、彼氏持ちが彼女持ちの男と浮気する例も多い","互いの恋人に干渉しない姿勢を見せ、交換を渋る気持ちを崩す糸口にする"],"branch":"反応あり→他のナンバークローズトークへ／なし→立ち話で別のグダ崩しへ","caution":"","badge":"","tag":"彼氏グダ"},{"id":"3.28","title":"彼氏グダ＆その他グダ崩しトーク8","scene":"一度だけ話す機会を求め、断る理由を消す","cue":"でも一回だけ話しようよ","flow":["連絡先を頼み、彼氏がいると言われる","「別にいいよ」と受け流す","一度だけ話そうと頼み、合わなければ諦めると添える"],"points":["彼氏以上の相手である可能性を感じさせる","一度だけの機会を求め、駄目なら諦めて邪魔しないと伝えて断る理由を潰す","頼む時は態度は上から目線、言葉はお願い調にするのが成功のコツ"],"branch":"反応あり→他のナンバークローズトークへ／なし→立ち話で別のグダ崩しへ","caution":"逆の形（腰の低い態度で言葉だけ高圧的）はNG。絶対に避ける","badge":"","tag":"彼氏グダ"},{"id":"3.29","title":"彼氏グダ＆その他グダ崩しトーク9","scene":"自分の方が良い男だと言い切り圧倒する","cue":"大丈夫俺のほうがいい男だから","flow":["連絡先を頼み、彼氏がいると言われる","「俺のほうがいい男」と断言","次に飲めば分かると告げ、携帯を差し出す"],"points":["圧倒的な自信と行動力を見せる","彼氏がいても問題なく、比べればこちらが上、という設定で話す","普通の人には言えないため相手は面食らう。その隙に携帯を出すか別のトークでアポ決めまで一気に進む"],"branch":"反応あり→他のナンバークローズトークへ／なし→立ち話で別のグダ崩しへ","caution":"","badge":"","tag":"彼氏グダ"},{"id":"3.30","title":"彼氏グダ＆その他グダ崩しトーク10","scene":"彼氏の器を問い、強引さで押し切る","cue":"ご飯くらい問題ないでしょ","flow":["連絡先を頼み、彼氏がいると言われる","食事くらい問題ないと返す","食事だけで嫉妬する器の小さい彼氏ではないはずと問う","携帯を差し出す"],"points":["彼氏の器を量りにかけ、強引さを前面に出して攻める","相手は強引な男に弱い。「他の男に嫉妬する彼氏」と「臆せず誘う男」を比べさせる","この対比を相手の頭に描かせられれば、連絡先交換からアポまで高確率で進む"],"branch":"反応あり→他のナンバークローズトークへ／なし→立ち話で別のグダ崩しへ","caution":"","badge":"","tag":"彼氏グダ"}]}],"principles":["連絡先を渋られたら怯まず強気に、間を置かず携帯を差し出す","小さなYESを積み重ねてから本題の要求へ段階的に進める","しつこくない・邪魔しないと示し、教えるハードルや不安を下げる","交換後すぐ別れず、会話を続けて食い付きを上げる","連絡時間やアポ日程は交換時にその場で決めてしまう","彼氏グダには動じず堂々と、当然のように切り返す"]},"4":{"chunk":"4","groups":[{"name":"ファーストコール・スクリプト","ids":"4.1–4.5","summary":"連絡先入手後の通話（主にLINE通話）で日程を決める台本。前段で通話可否と繋がりやすい時間を確認済みが前提。22〜23時に1回発信し、出なければ別の相手へ回して折り返しを待つ。顔が見えずミスしやすいため10分以内、日程が決まれば即終話。","patterns":[{"id":"4.1","title":"ファーストコール・スクリプト1","scene":"約束の時間に電話し、日程を手帳に書かせる","cue":"「ちゃんと出てくれたね」","flow":["出てくれた礼と、約束どおりの時間に掛けたことを伝える","家での様子を軽く聞き、未定だった食事の日程の話へ。「いま手帳ある？」で予定表を出させる","週末希望を踏まえ翌週の土日を打診→相手が金曜を提示し、19時・駅の目印前で確定","翌日休みか確認し、名前入りで「デート」と冗談めかして記入させる"],"points":["通話の目的は日程調整。口頭だけでは忘れられやすいので、まず手帳を手元に出させる","日付を実際に書き込ませることでドタキャン率を下げる","手帳がなければスマホの予定アプリやGoogleカレンダーでも可","「書いといて（笑）」と冗談っぽく言い、重くしすぎない"],"branch":"","caution":"","badge":"","tag":"22〜23時発信"},{"id":"4.2","title":"ファーストコール・スクリプト2","scene":"日程確定後、好印象のまま電話を切る","cue":"「人待たせてるから」","flow":["金曜の待ち合わせ場所と、翌日が休みかを再確認","雰囲気が良く相手に似合う店だと伝え「来れば分かる」と期待させる","人を待たせていると切り上げ、近くなったら連絡すると告げて終話"],"points":["人を待たせている設定は、早く切る口実と忙しい人物像の演出を兼ねる","暇な時に何の理由もなく切るのは印象が悪い","自宅でもベランダや騒がしい通りに出て「これから人と会う」体で話し、区切りの良いところで切る","細かい技だが効果は大きく、積極的に使う"],"branch":"","caution":"","badge":"","tag":"切り際"},{"id":"4.3","title":"ファーストコール・スクリプト3","scene":"通話冒頭の笑いで相手の緊張をほぐす","cue":"「やっと出たなー」","flow":["「ずいぶん掛けたよ」と大げさに言う","「いい女はなかなか出ない」設定で笑いと好意を伝える","「1回だけでしょ」と突っ込まれても「数分おきに掛けた」と押し通す（実際は1回）","そのまま飲みの日程の本題へ"],"points":["冒頭に笑いと好意を混ぜたトークで、緊張している相手の心をほぐす","その後すぐ日程調整に入り、手帳や予定アプリに書き込んでもらう","書かせたら好印象のまま即終話。長電話は利点が少なく、会った時の印象づくりに力を注ぐ"],"branch":"","caution":"","badge":"","tag":"冒頭ツカミ"},{"id":"4.4","title":"ファーストコール・スクリプト4","scene":"週末が埋まっている相手と平日で日程を決める","cue":"「手帳ある？」","flow":["手帳かアプリを出させ、来週か再来週の土日を打診","全部埋まり→来週の月〜木で都合の良い曜日を聞く","水曜に決定し「仕事を調整する」と伝え、手帳に書かせて20時・駅の目印前で約束"],"points":["週末NGなら平日に切り替え、月〜木で最も都合の良い曜日を仮決めさせる","こちらが無理な曜日でもいったん仮決めし、後から変更をかければよい","やりとりで相手の都合の良い時期が分かり、リスケや仕事の調整がしやすくなる","通話が成立したら、こちらがNGの日でも必ず仮日程を決めておく習慣をつける","通話中に予定アプリを開かせるなら、ハンズフリーのスピーカー通話にしてもらうと確実"],"branch":"","caution":"","badge":"","tag":"週末NG時"},{"id":"4.5","title":"ファーストコール・スクリプト5","scene":"日程が先になった時、直近の空きも探る","cue":"「明日って空いてる？」","flow":["土日が2週先まで埋まり→3週後を打診し、金曜20時で決定","書き込む直前に「ちょっと待って」と止める","冗談めかして明日の予定を聞き→明後日ならOKを引き出す"],"points":["日程が先になったら仮決めした上で、それより手前で会えないか確認する","社会人は週末が先まで埋まっていても、意外と直近が空いていることがある","取りこぼしを防ぐため、少し冗談めかして直近の都合を聞く"],"branch":"","caution":"","badge":"","tag":"日程が先の時"}]},{"name":"ファーストライン・スクリプト","ids":"4.6–4.8","summary":"連絡先交換後に最初に送るメッセージ。優先度は対面＞電話＞LINEで、なるべく上位へ移すのが基本。ただ電話できない時や深夜など文字が向く場面も多い。凝った文面より、簡潔で分かりやすいことが何より重要。","patterns":[{"id":"4.6","title":"ファーストライン・スクリプト1","scene":"交換30分後、時間を割いてくれた礼を送る","cue":"「さっきは忙しいとこありがとう」","flow":["連絡先交換から30分ほど後に送信","忙しい中の時間への礼＋「友達には会えた？」と様子を聞く"],"points":["まず感謝の気持ちを伝えるのが要点","「忙しいのに」を添えると、なぜ時間を割いたのかと相手自身が疑問を抱く","やりとりの度に「返すのは好意があるから？」と相手が自ら理由づけする契機になる。初回LINEには必ず入れる"],"branch":"返信あり→セカンドラインへ／3日返信なし→復活ラインへ","caution":"","badge":"","tag":"交換30分後"},{"id":"4.7","title":"ファーストライン・スクリプト2","scene":"交換2時間後、疲れていた相手を気遣う","cue":"「さっきは疲れてたのにありがとう」","flow":["前段で「疲れてそうな顔してる」と伝えておく","交換から2時間ほど後に、礼＋「家には帰れた？」を送る"],"points":["文面はシンプルに。顔文字・スタンプはほぼ使わず、使っても(^^)など3種程度","顔文字選びに悩むと女々しく映る。会っている時は楽しげに、LINEでは淡々とを意識"],"branch":"返信あり→セカンドラインへ／3日返信なし→復活ラインへ","caution":"","badge":"","tag":"交換2時間後"},{"id":"4.8","title":"ファーストライン・スクリプト3","scene":"交換翌日、別れた後の様子を聞く","cue":"「お疲れ様！昨日はありがとね」","flow":["交換から1日後に送信","労い＋LINEを教えてくれた礼","別れ際の状況に合わせ「家ついた？」「飲み会行けた？」等で確認"],"points":["交換後は1日以内に初回メッセージを。相手はナマモノで、時間を置いて育つのはアポの後なので早めに送る","本当に忙しい時は、1日後の22〜23時頃に送る","夜は相手が暇だったり寂しかったりしやすいので、メッセージはなるべく夜にまとめる"],"branch":"返信あり→セカンドラインへ／3日返信なし→復活ラインへ","caution":"","badge":"","tag":"交換1日後"}]},{"name":"セカンドライン・スクリプト","ids":"4.9–4.11","summary":"初回LINEに返信が来た後に送る2通目。狙いはアポ日程の調整で、成否は連絡先交換時に仮日程を決めておけるかにかかる。仮日程がある場合と、決まっていない場合の調整パターンがある。","patterns":[{"id":"4.9","title":"セカンドライン・スクリプト1","scene":"返信直後に仮日程を確認し、記入させる","cue":"「お、良かった！」","flow":["相手の近況報告に「良かった！」と短く反応","来週の食事に触れ、手帳やアプリに書いたかを笑い混じりで確認"],"points":["LINEはだらだら続きがちだが雑談は省き、すぐアポの話題に移る","日程を復唱させてもドタキャンは起こりうるため、手帳・アプリへの記入まで約束させる","連絡先交換の段階でも「手帳に書いてな」と伝えておくのが要点"],"branch":"返信あり→セカンドラインへ／3日返信なし→復活ラインへ","caution":"","badge":"","tag":"記入確認"},{"id":"4.10","title":"セカンドライン・スクリプト2","scene":"日程確定済みの相手に淡々と念押しする","cue":"「来週は例のお店連れてくよ」","flow":["帰宅報告に「良かった！」と返す","来週は例の店へ連れていくと告げる","「X日で変更あれば連絡して」と日付を念押し"],"points":["LINEは誤解を招きやすく読み返されるため小さなミスが命取り。アポ以外の話題はほぼ振らず淡々と","日程が決まっていれば即返信は不要。1日1〜2通で十分","例: 23時に1通送り、相手の返信次第で時に短いラリー、翌日また23時に返すというランダム対応","後に聞くと、少ない頻度がもどかしく気になり、その1通が楽しみだったと言われる"],"branch":"返信あり→セカンドラインへ／3日返信なし→復活ラインへ","caution":"","badge":"","tag":"1日1〜2通"},{"id":"4.11","title":"セカンドライン・スクリプト3","scene":"2通目で電話の約束を確定させる","cue":"「明日の23時頃電話大丈夫？」","flow":["合流報告に「良かった」と返す","例の店へ連れていくと伝え、翌日23時頃の通話可否を聞く","OKなら「連絡するね！」で締める"],"points":["やりとりを続けるより、どこかで電話した方がアポ率は確実に上がる","連絡先交換時に通話の承諾を得ておき、2通目でそれを確定させる","掛ける前の「今いい？」確認は不要。22〜0時の都合の良い時に掛け、10分以内でアポの話に絞る"],"branch":"","caution":"","badge":"","tag":"電話へ移行"}]},{"name":"日程調整ライン","ids":"4.12–4.14","summary":"仮日程が決まっていない相手と文字上でアポ日程を詰める台本。本来は対面＞電話＞LINEが基本で、LINEでの調整はあまり望ましくない。それが難しい時に使い、慣れるまでは台本どおりに使って感覚を掴む。","patterns":[{"id":"4.12","title":"日程調整ライン1","scene":"複数の候補日を挙げて1日を選ばせる","cue":"「x,y,z日のどれか空けれる？」","flow":["返信に「良かった！」と応じ、食事を楽しみにしていると伝える","3つの候補日を提示","「早めに言えば1日なら調整できる」と添える"],"points":["候補を多めに出し、「どれか1日なら行ける」と伝える","こちらが暇だと見せるのは絶対に避ける","「早めに教えて」と添えて返信を促す"],"branch":"","caution":"","badge":"","tag":"候補提示"},{"id":"4.13","title":"日程調整ライン2","scene":"「軽く」と時間を区切り、誘いに乗りやすくする","cue":"「軽くお酒飲みに行こ」","flow":["来週か再来週の土曜夜に空きがあるか聞く","「飲み会の後でもいい」と負担を下げる","「軽く」と時間を限定して誘う"],"points":["朝まで付き合わされるかは相手の不安要素。事前に時間の制限を示して払拭する","実際に楽しければ「軽く」の縛りは意味を持たなくなるので、遠慮なく使ってよい"],"branch":"","caution":"","badge":"","tag":"時間制限"},{"id":"4.14","title":"日程調整ライン3","scene":"候補が全滅した時に再提案する","cue":"「都合いい日はある？」","flow":["3つの候補日を出すが、どれも難しいと返される","「忙しそうだね」と受け、相手の都合を聞きつつ別の候補3日も提示","n日でOK→20時・駅の目印前を指定し、場所が分かるか確認"],"points":["相手の都合を聞くだけでは不十分。こちらの候補も追加で多めに出す","「いつなら空いてる？」は優柔不断な相手には不向き。LINEでは候補を出す側に立ち主導権を握り続ける"],"branch":"決まらない→1日置いて電話か、先の日程で仮決めし直前に変更","caution":"","badge":"","tag":"難航時"}]},{"name":"直前ライン","ids":"4.15–4.16","summary":"日程確定後、アポの3日前頃から送るメッセージ。返信の様子でアポ成立かドタキャンかをある程度見極められる。反応が悪ければドタキャン前提で別のアポやナンパの予定を組み、時間と気持ちの損失を抑える。","patterns":[{"id":"4.15","title":"直前ライン1","scene":"アポ3日前に予定変更がないか確認する","cue":"「今日も1日お疲れ！」","flow":["労いの後、3日後の予定に変更がないか尋ねる","自分は今のところ問題ないと添える","返信の速さでアポが成立しそうかを判断"],"points":["問題なし: 即返信か1日以内の返信。問題あり: 2日経っても返信なし","問題ありなら再度メッセージと電話で対応し、当日まで連絡がなければ他の予定を優先","直前に「OK」が来ても一度断る。失礼で軽く見られている証拠なので強気に出て、切られたらこちらも切る"],"branch":"1日以内に返信→問題なし／2日無反応→再度LINE・電話","caution":"","badge":"","tag":"3日前"},{"id":"4.16","title":"直前ライン2","scene":"前日に必ず送る、到着時間の確認","cue":"「明日楽しみにしてるよー」","flow":["アポ前日に送信","楽しみだと伝え、着く時間が分かったら連絡をもらう"],"points":["問題なし: 即返信か翌日昼までの返信。問題あり: アポ3時間前までに返信なし","直前まで無反応なら他の予定を優先。配慮に欠ける相手に合わせるより、別の相手に声をかける方が成長につながる","直前にOKが来ても「連絡がないので別の予定を入れた」と送り一度断る","強気の姿勢がアポを優位に進める最大の鍵。ここで主導権を握られるとアポもほぼ失敗する"],"branch":"翌日昼までに返信→問題なし／3時間前まで無反応→他を優先","caution":"","badge":"","tag":"前日"}]},{"name":"復活ライン","ids":"4.17–4.20","summary":"初回・2通目のLINEや電話に2日以上反応がない相手へ送るメッセージ。関心は下がっているが、相手の気持ちは移ろいやすく、その波にうまく乗れば関係を立て直せる。よく使う定番を4種紹介。","patterns":[{"id":"4.17","title":"復活ライン1","scene":"2日無反応の相手に写真付きで送る","cue":"「○○に似ててラインしてみた笑」","flow":["「おひさー！」＋相手に似ていたから送ったと一言","2通目で相手に似た犬・猫・キャラクターなどの写真を送る"],"points":["自分に似ていると前置きされた写真は、つい開きたくなる心理を突く","1通目を文字、2通目を写真にすると、トーク画面に写真送付のサムネイルが出てほぼ既読にさせられる"],"branch":"","caution":"","badge":"","tag":"2日返信なし"},{"id":"4.18","title":"復活ライン2","scene":"長く無反応の相手に「見かけた」と送る","cue":"「昨日○○にいた！？」","flow":["1週間以上返信がない状態で送る","地名を入れ、昨日そこにいたかを尋ねる（例: 新宿）","相手から「久しぶり、どうしたの？」と返信が来る"],"points":["偶然見かけた設定のLINEは、返信を引き出しやすい","心当たりがなくても相手はドキッとするらしく、復活ラインの中でも返信率はトップクラス"],"branch":"","caution":"","badge":"返信率◎","tag":"1週間返信なし"},{"id":"4.19","title":"復活ライン3","scene":"「見かけた」から近況報告を口実にアポへ","cue":"「いま○○にいる？」","flow":["1週間以上無反応の相手に、今その地名にいるか聞く","否定されても「本人いたけど！」と押し、声をかけかけたと伝えて久しぶりの挨拶","仕事の曜日を確認→週末に食事しながら近況報告しようと誘う"],"points":["本人を目の前で見かけて送った体で興味を引き、近況報告を口実にアポへ誘導","「いろいろ聞きたい」と、相手の話を聞く姿勢を見せる","相手は日々話のネタを抱え、誰かに話したいと思っている","一度連絡先を交換した仲なので再会の見込みは十分。その後スムーズに日程を決める"],"branch":"週末OK→日程調整ラインへ","caution":"","badge":"","tag":"1週間返信なし"},{"id":"4.20","title":"復活ライン4","scene":"生存確認で返信を引き出し、恋愛話へつなぐ","cue":"「生きてる？」","flow":["1週間以上無反応の相手に「生きてる？」と送る","返信が来たらすぐ「恋してる？」とネタを重ねる","その後、似た人や似た動物を見た設定で会話をつなぎアポへ"],"points":["生存確認はウケやすく、高確率で返信がもらえる定番","「良かった」等で返すだけだと再び無視されやすいので、続けてネタを振る","恋愛事情を聞く姿勢を示し、似た人・動物を見かけた設定でアポまで持ち込む"],"branch":"","caution":"","badge":"多用","tag":"1週間返信なし"}]}],"principles":["連絡手段の優先度は対面＞電話＞LINE。なるべく上位の手段へ移す","電話もLINEも目的は日程調整。雑談は省き、手帳や予定アプリに書かせてドタキャンを防ぐ","通話は夜22〜23時頃に10分以内。要件が済んだら好印象のうちに切る","LINEは顔文字を控えて淡々と短く。日程が決まっていれば返信は1日1〜2通で十分","候補日はこちらから多めに出して主導権を握り、直前の無反応には強気で対応する","反応が途絶えても、写真・目撃・生存確認などの設定で関係を復活させられる"]},"5":{"chunk":"5","groups":[{"name":"引き出しトーク","ids":"5.1–5.5","summary":"アポ成立後に関係を深めるための質問集。一方的に話さず、まず相手の話を聞いて情報を引き出してから手持ちのトークを出すのが準即の要。軽い話題から重い体験まで、相手のタイプに応じて使い分け。","patterns":[{"id":"5.1","title":"引き出しトーク1","scene":"乾杯直後、休日の過ごし方や好みを探る","cue":"インドア派かアウトドア派？","flow":["乾杯し、来てくれたことに礼","日程調整の話から普段の活動ぶりに触れる","「インドア派かアウトドア派？」と二択で質問","答えに「じゃあ何してるの？」と一段深掘り","聞いた後はこちらの休日も軽く明かす"],"points":["軽い二択で休日の過ごし方を探る。直接「休日何してる？」と聞くと身構えられ本音が出にくい","本音は不意を突く聞き方で引き出す。この段階なら嘘をつく相手はまずいない","どちらの答えでも一言で深掘りでき、普段の行動を自然に聞ける","こちらの休日は無難に返す程度でよい（昼は仕事、夜は旧友と会う等）"],"branch":"どちらの答えでも→「じゃあ何してるの？」で深掘り","caution":"","badge":"","tag":"休日の過ごし方"},{"id":"5.2","title":"引き出しトーク2","scene":"休日の話の流れで理想のデートを聞く","cue":"家でゴロゴロ？ひもの女？","flow":["相手の「家でゴロゴロ」を茶化していじる","恋人がいる時の過ごし方へ話をずらす","「理想のデート教えてよ！」と軽く聞く"],"points":["考えさせる難しい問い（理想のデート）を、さりげない流れで聞き出す","お見合いのような改まった聞き方は堅苦しく、本音は出てこない","友人に尋ねる感覚で興味を示すと、相手は過去のデートを思い出しながら楽しく語る"],"branch":"","caution":"","badge":"","tag":"理想のデート"},{"id":"5.3","title":"引き出しトーク3","scene":"乾杯直後でも交際人数を楽しく聞き出す","cue":"交際人数は？（笑）","flow":["「定番だけど」と前置きし交際人数をふる","相手が照れたら選択肢つきで聞き直す","「俺は5人、そっちは？」と先に開示","「5人以上？4人以下？」の二択で答えさせる"],"points":["お互い最も気になる交際人数も、ふざけた楽しい空気なら乾杯直後に聞いて問題なし","アポで必ず触れる話題で、頻繁に使う定番","選択肢を示して聞くのがコツ。慣れると反応だけで人数の見当がつく"],"branch":"","caution":"","badge":"多用","tag":"交際人数"},{"id":"5.4","title":"引き出しトーク4","scene":"じゃれ合いながら好みのタイプと元彼像を探る","cue":"どんなタイプが好み？","flow":["「俺みたいな人以外で」と笑いを添えて好みを聞く","「優しい人」と返されたら「俺のこと呼んだ？」とボケる","笑いの流れで元彼が優しかったかを聞く"],"points":["本当の狙いは好みのタイプと歴代彼氏の性格。茶化して聞くとじゃれ合う形で情報が次々出る","成否は楽しい雰囲気をどれだけ作れるか次第。ここを決して忘れない"],"branch":"","caution":"","badge":"","tag":"好みのタイプ"},{"id":"5.5","title":"引き出しトーク5","scene":"交際期間の長さから恋愛傾向を見極める","cue":"3年以上付き合ったことある？","flow":["「3年以上同じ人と付き合った？」とYES/NOで聞く","答えに間があれば「なぜ今時間がかかった？」と突っ込む","「復縁まで計算してただろ」と笑いに変える"],"points":["基準を3年と決めて二択で聞く。「最長何年？」と具体的に聞くと嘘をつかれやすい","3年以上の長期交際型も、別れた後に遊び人化しやすい傾向","1年以上続いた経験が皆無なら、おおむねチャラいか恋愛経験がかなり少ないかのどちらか","得た情報はその後のトークやギラつきの組み立てに活用"],"branch":"","caution":"","badge":"","tag":"交際期間"}]},{"name":"共感トーク","ids":"5.6–5.10","summary":"アポで仲を深めるための共感の話題集。話題には重さの順があり、日常→好み→恋愛→性→大恋愛・失恋→別離や裏切り・親の離婚と段階を踏む。序盤の日常・好み・恋愛は議論せず全面肯定で聞き入る。","patterns":[{"id":"5.6","title":"共感トーク1","scene":"意見が割れる恋愛ネタで相手側に乗り盛り上げる","cue":"浮気疑ったらケータイ見る？","flow":["彼氏の浮気を疑った時に携帯を見るか質問","相手が「見られない」と答える","「俺もそう」と同調し、越えちゃいけない壁がある感覚を共有","相手が「分かる！」と乗ってくる"],"points":["賛否が分かれやすい話題を出し、相手が選んだ側に賛成して乗る。かなり盛り上がる","自分も一度女性の携帯を見た経験を積んでおくと、この手の話を盛り上げるネタになる（賛否あり）","二人の意見が合う話題を一緒に探す空気で進めると、距離が縮まるのを実感できる"],"branch":"","caution":"","badge":"","tag":"賛否分かれる話題"},{"id":"5.7","title":"共感トーク2","scene":"男女とも気になる「酔った告白」で意見を交換","cue":"酔った男に好きと言われたら？","flow":["「酔った男に好きと言われたら？」と質問","「微妙」に同調しつつ「でも嬉しくない？」と返す","本音か気になるという相手に共感","逆に女の子が酔って言う好きは本心かと切り返す"],"points":["関心の高い話題を問いかけ、驚きや意見を分かち合う","酔った時の言葉は本音か、という男女とも興味があり答えが割れる話題だけで10分ほど会話が続く","扱いやすいのでそのまま試す価値あり"],"branch":"","caution":"","badge":"オススメ","tag":"賛否分かれる話題"},{"id":"5.8","title":"共感トーク3","scene":"LINEのあるある失敗談で共感を引き出す","cue":"LINE来ない時、何して発散？","flow":["好きな人からLINEが来ない時の発散法を聞く","「過去のLINEを眺める」に「俺もやる」と同調","眺めている最中に返信が来て即既読がつく失敗談を披露","相手も「私もある」と共感し盛り上がる"],"points":["誰もが経験する男女間の失敗談を題材にして共感を引き出す","LINE等メッセージアプリの失敗は特に共感されやすい","他に、通話ボタンの誤タップや、似たアイコンで別人に誤送信なども使いやすいネタ"],"branch":"","caution":"","badge":"","tag":"あるある失敗談"},{"id":"5.9","title":"共感トーク4","scene":"フェチの話で相手の好みを先回りして当てる","cue":"何フェチ？","flow":["唐突に「何フェチ？」と聞く","相手が驚いたら「血管とか好きそう」と先に言い当てる","「好き」の答えに「やっぱ？」と返して共感"],"points":["相手が好みがちなポイントを先に出して共感を得る","男性が気づきにくい血管・指・喉仏などに色気を感じる相手は多く、大抵このパターン","先回りして言うことで、相手を理解し共感できる人だと伝わる"],"branch":"","caution":"","badge":"","tag":"先回り提示"},{"id":"5.10","title":"共感トーク5","scene":"モテる相手が隠したい経験を見抜き共感を共有","cue":"男あしらうの上手そう","flow":["「男あしらうの上手そう」と切り出す","否定されたら「嘘つかなくていいよ」と笑って返す","「いい意味で」と添え、傷つけない配慮をしているはずと認める","「でも確実に切るでしょ」と核心を突く"],"points":["必ず経験があるのに取り繕いたくなる話題を、うまく突く","ある程度可愛い相手は多くの男に言い寄られ、あしらってきた経験があるが普通は口にしない","それを分かっている態度を示すと、暗黙の了解として互いに共感し合える"],"branch":"","caution":"","badge":"","tag":"暗黙の了解"}]},{"name":"価値伝達トーク","ids":"5.11–5.15","summary":"こちらが価値ある男だと相手に感じさせる話法。最重要は遠回しに伝えること。金持ち・話し上手・モテると直接言っても無意味で、言い換えて間接的に思わせると相手は本気で価値を認める。","patterns":[{"id":"5.11","title":"価値伝達トーク1","scene":"周囲の評価を借りて積極性と行動力を印象づける","cue":"友達にどんな子って言われる？","flow":["友達からどんな人と言われるか相手に聞く","相手の答えに「分かる」と同調","聞き返されたら「難しい」と少し考えてから答える","「積極的、行動力があると言われる」と返す"],"points":["ナンパからアポまで来た時点で、上位1%級の積極性はすでに相手に伝わっている","そこへ周りからも言われるとさりげなく添え、積極的で行動派の印象を固める","後でギラついた時に「積極的だから」と正当化でき、グダ崩しが有利に進む","後のステップを有利にするため、関係構築では必ず使う"],"branch":"","caution":"","badge":"必須","tag":"積極性"},{"id":"5.12","title":"価値伝達トーク2","scene":"周りの男に警戒される男だと相談形式で示す","cue":"女の子の意見を聞きたい","flow":["「女の子の意見を聞きたい」と相談を持ちかける","女友達と会うと知らない番号や公衆電話から連絡が来ると話す","彼氏持ちの女友達とお茶した後、その彼氏から詰問が来た話を追加","どう思うか聞き、相手に「狙ってると思われてる」と言わせる"],"points":["周囲の男から、モテるがゆえに危ない男と見られていることを伝える","女友達と話すだけでカップルや浮気を疑われる、という設定で相談する","相手は他の女性に選ばれる男や男性陣に一目置かれる男に弱い","そうした人物像の話をさりげなく挟むと、無意識に価値ある男と認識される"],"branch":"","caution":"","badge":"","tag":"周囲の警戒"},{"id":"5.13","title":"価値伝達トーク3","scene":"振り方の相談で言い寄られている状況をにおわせる","cue":"傷つけない振り方って？","flow":["傷つけずに脈なしと伝える方法を相手に相談","戸惑われたら「傷つけない振り方？」と言い換える","一言助言をもらったらすぐ話題を変える"],"points":["女の子を振らざるを得ない状況にいることを遠回しに伝える","裏を返せば、女性から言い寄られて困っているというメッセージになる","深掘りせず一言アドバイスをもらったら即話題転換するほうが効果的"],"branch":"","caution":"","badge":"","tag":"被アプローチ"},{"id":"5.14","title":"価値伝達トーク4","scene":"彼氏の愚痴に、自分なら一枚上手に対処すると示す","cue":"俺ならこうする","flow":["相手が彼氏に怒鳴られた話をする","「結構怒るんだね」と受け止める","自分ならまず怒りを抑え、嫌だった点と今後の要望だけを伝えると語る","感情は出さないと添え、あくまで自分ならと締める"],"points":["彼氏の愚痴には「俺ならこうする」と、一枚上手の対応の話を返す","怒る彼氏の話なら、怒る前に気持ちを静め、嫌だった点と望むことだけ伝えると示す","これだけで十分な価値伝達になる"],"branch":"","caution":"さりげなさが肝心。アピールが過ぎると逆効果","badge":"","tag":"彼氏の愚痴"},{"id":"5.15","title":"価値伝達トーク5","scene":"長所を問い、外見より中身を見る男だと示す","cue":"見た目以外の長所って何？","flow":["「見た目以外の長所って何？」と聞く","相手が答えに詰まる"],"points":["外見より内面を大事にする人だと遠回しにアピール","自分で言わず、必ず質問の形で間接的に伝える","外見磨きに全力を注ぐ相手の出端をくじくのに有効。美人ほど刺さるので高スト値の相手には必ず使う"],"branch":"","caution":"","badge":"美女に必須","tag":"内面重視"}]},{"name":"コールドリーディング・トーク","ids":"5.16–5.20","summary":"コールドリーディングで情報引き出し・共感・理解者アピール・価値伝達を一度に成立させる技。受けた側は手品のように驚くが、仕掛けの中身はごく単純。最もよく使う型を紹介。","patterns":[{"id":"5.16","title":"コールドリーディング・トーク1","scene":"裏切られた経験を言い当て、話を聞く流れへ","cue":"裏切られたこと、あるでしょ？","flow":["信じた人に裏切られたことがあると断定して聞く","認めたら「やっぱり、そんなオーラ出てた」と返す","「分かるよ。聞かせて？」と話を促す"],"points":["前から薄々気づいていた体で会話を進めるのが最大の要","否定されても「強がらなくていい」と一押し。大抵当たり、内心ドキッとしている","無理に話させなくてよい。話題を変えても効果は続く"],"branch":"認めた→話を聞く／否定→「強がらなくていい」と一押し","caution":"","badge":"","tag":"裏切り経験"},{"id":"5.17","title":"コールドリーディング・トーク2","scene":"どうでもいい男に言い寄られがちだと見抜く","cue":"どうでもいい男に好かれがち？","flow":["気になる人ではなく、どうでもいい男に言い寄られがちだと指摘","「なんで分かるの」と驚かれる","「少し話せば分かる、なめないで」と強気に返す","なぜ分かったかを自由に語る"],"points":["当たったら、なぜ分かったのかを強気にどんどん語る","ほぼ100%当たる型。一度認めさせればあとは独壇場","根拠が些細なきっかけほど、相手はこちらの能力と理解者であることを無意識に認める"],"branch":"","caution":"","badge":"的中率◎","tag":"言い寄られ"},{"id":"5.18","title":"コールドリーディング・トーク3","scene":"内面重視の人だと言い当て、後のグダ崩しの布石に","cue":"内面も見て恋愛する人だよね","flow":["「内面も見て恋愛する人だよね」と断定","理由を聞かれたら「話せば分かる」と返す","過去の相手も中身を見てきたのだろうと付け加える"],"points":["内面をまったく見ずに恋愛する人はいないので、ほぼ誰にでも刺さる","「中身を見てくれる人」という前提を作っておくと、後のグダ崩しで大いに効く","このステップで必ず使い、後への布石にする"],"branch":"","caution":"","badge":"必須","tag":"グダ崩し布石"},{"id":"5.19","title":"コールドリーディング・トーク4","scene":"元彼の裏切りを会話から見抜いた体で言い当てる","cue":"彼氏に裏切られたことあるでしょ","flow":["信じていた元彼に裏切られた経験があると断定","認めたら「そんな相が出てた」と返す","「話して？」と打ち明けを促す"],"points":["これまでの会話からこの事実に気づいた、という設定をしっかり作って話を組む","交際して別れた経験がある相手は、ほぼ何らかの裏切りを経験している","一気に関係構築が完成し、次のステップへの布石になる"],"branch":"","caution":"","badge":"","tag":"裏切り経験"},{"id":"5.20","title":"コールドリーディング・トーク5","scene":"認められようと頑張る性格を言い当て、具体例は相手に語らせる","cue":"認められようと頑張るタイプ？","flow":["相手に認められようとつい頑張るタイプだと指摘","相手が認める","「分かるよ。例えばどんな？」と具体例を促す","相槌を打ちながら自由に話させる"],"points":["具体的なエピソードは相手に話させる","この指摘はほぼ100%当たるが、その先の具体的な話は外しやすいので相手に任せる","相手は自分が話すだけで、聞き手に理解されていると感じる","適切なタイミングの相槌で、距離を着実に縮める"],"branch":"","caution":"","badge":"的中率◎","tag":"頑張り屋"}]}],"principles":["一方的に話さず、まず聞いて引き出してから手持ちのトークを出す","聞きにくい話題ほど茶化した楽しい空気と二択で聞き、本音を引き出す","話題は日常→好み→恋愛→性→重い体験の順に段階を踏む","共感では議論せず、相手の意見に乗って全面肯定","自分の価値は直接誇らず、相談や質問の形で間接的に伝える","コールドリーディングは前から気づいていた設定で言い当て、具体は相手に語らせる"]},"6":{"chunk":"6","groups":[{"name":"性的興奮導入トーク","ids":"6.1–6.5","summary":"関係構築を終えた相手に過去の体験を想像・回想させ、接触を受け入れる気分へ導く段階。省くと後の連れ出し・ギラツキが難航。必ず軽い下ネタで反応を見てから進め、順序を誤ると相手が強く不快に。嫌がれば即中止（関係構築が未完のサイン）。","patterns":[{"id":"6.1","title":"性的興奮導入トーク1","scene":"関係が深まった相手を、接触を受け入れる気分へ導く","cue":"実は秘め事結構あるでしょ？","flow":["見た目とのギャップを突く「実は秘め事結構あるでしょ？」","「一個質問していい？」と前置きし、自分も答えると約束","これまでで最も興奮した体験を笑いながら質問","先に答えるのを渋る相手に、まず思い出すよう促し、自分も今選んでいると伝える"],"points":["核心は相手に想像させること。最も手軽で効く方法が過去の体験の回想","「一番」を決めさせると比べるために多くの記憶をたどり、回想が一気に進む"],"branch":"","caution":"軽い下ネタで様子見してから進む。順序を誤るとセクハラ同然で相手が不快に。嫌がれば即中止（関係構築が未完の証拠）","badge":"","tag":"体験の回想"},{"id":"6.2","title":"性的興奮導入トーク2","scene":"際どい経験を思い出させ、後の展開への布石にする","cue":"ぶっちゃけさ","flow":["「ぶっちゃけさ」と切り出して注意を引く","出会った当日に持ち帰られた経験の有無を質問","「即答しなくていい」と添え、自分の胸に聞かせる"],"points":["即日の関係経験を問い、際どい過去の体験を思い出させる","肯定に近い反応が得られれば、後のグダ崩しで優位に立てる","答えを断られても回想自体は済んでおり、別の際どい話題へ移りやすい"],"branch":"肯定→後のグダ崩しが有利／回答拒否→別の際どい話題へ","caution":"","badge":"","tag":"経験の質問"},{"id":"6.3","title":"性的興奮導入トーク3","scene":"恋人との幸せな記憶を語らせ、追体験させる","cue":"彼氏と一番幸せだった瞬間は？","flow":["恋人との一番幸せだった瞬間を質問","「旅行の時かな？」と答えを誘導","自分は旅先で夜を共に過ごす時が一番と打ち明ける","相手の共感を引き出す"],"points":["幸せな瞬間＝親密な体験を思い返させ、追体験させるのが狙い","脳は過去の記憶と現在を区別できず、良い記憶の回想中は今も気分が高まる。積極的に思い出させる"],"branch":"","caution":"","badge":"","tag":"追体験"},{"id":"6.4","title":"性的興奮導入トーク4","scene":"男友達の話を題材に、相手の意見を聞く形で回想へ","cue":"この前男と話したんだけどさ","flow":["男友達との会話で一晩10回という強者がいたと話す","「女の子って耐えられるの？」と相手の見解を求める","答えを受けて「最高回数って何回？」と本人に振る"],"points":["男友達との会話で湧いた疑問として、相手の意見をヒアリングする設定","最高回数を考える過程で必ず過去を回想させられる。この話題を起点に掘り下げていく"],"branch":"","caution":"","badge":"","tag":"意見を聞く"},{"id":"6.5","title":"性的興奮導入トーク5","scene":"意見を聞く体裁で核心を突き、相手の経験を探る","cue":"これはほんとに知りたいんだけど","flow":["「ほんとに知りたい」と前置きし、行為中に演技した経験の有無を質問","照れる反応に「その反応、あるでしょ？」と踏み込む","「誰でもある」との答えに、満足を得た経験はある人だと分かったと笑って締める"],"points":["意見を聞く形を取りつつ、核心に触れる問いを投げる","満足を得た経験のない相手は多く、その場合はギラツキ時に「これまでにない体験」の設定が有効","経験がある相手には導入トークを続け、追体験で気分をさらに高める"],"branch":"経験なし→ギラツキで未体験の設定へ／あり→導入トーク継続","caution":"","badge":"","tag":"核心の質問"}]},{"name":"手話（接触）トーク","ids":"6.6–6.10","summary":"導入トークで高まった相手と、自然な口実で接触へ進む段階。手→腕→肩→頭→耳→首筋→敏感な部位の順に少しずつ進めるのが鉄則。下ネタ段階が未了なら接触厳禁、手すら嫌がるのに先へ進むと即退場。反応を見て嫌がることはしない。","patterns":[{"id":"6.6","title":"手話（接触）トーク1","scene":"自然な話題から、最初の段階である手に触れる","cue":"指長くない！？","flow":["相手の指が長い（短い）と驚いてみせる","「特に中指」と具体的に指摘し「ちょっと貸して」","自分の手と相手の手を合わせて比べる"],"points":["相手は自分の体が人と違う点に強い関心を持つ","「特徴的な指かも」という設定だと確かめたくなり、提案に乗りやすい","比べ方は手のひら同士を合わせる方法と、中指を相手の中指の付け根に当てて測る方法の2通り"],"branch":"","caution":"下ネタ段階が未了なら接触厳禁。手すら嫌がるのに腕・肩・胸へ進むのは厳禁（強い嫌悪で即退場）。段階を踏み反応を確認","badge":"","tag":"手への接触"},{"id":"6.7","title":"手話（接触）トーク2","scene":"ピアスの確認を口実に、耳まわりに触れる","cue":"（耳をじっと見つめる）","flow":["「ん？」と耳をじっと見つめ、相手に「どうしたの？」と言わせる","反対側の耳を見せるよう頼む","髪をかき分けて耳を観察","「軟骨にもピアス入ってるのかな」と理由を明かす"],"points":["ピアス穴の有無を確かめる口実が、耳に触れる最も簡単で成功しやすい方法","穴はないと言われても「隠してるでしょ」と冗談めかして確認する"],"branch":"","caution":"","badge":"成功しやすい","tag":"耳への接触"},{"id":"6.8","title":"手話（接触）トーク3","scene":"握手で人柄が分かるという設定で手に触れる","cue":"ちょっと握手してみて？","flow":["握手を求め、自分から手を差し出す","握って「なるほどね」とだけ言い手を離す","気になる相手に「大体わかった」と告げる","関係構築段階のコールドリーディングで言い当てへ"],"points":["握手で相手が分かるという設定で、体の接触を図る","続けてコールドリーディングで言い当て、感心させつつ接触の入り口にする"],"branch":"握手後→関係構築のコールドリーディングへ","caution":"","badge":"","tag":"握手"},{"id":"6.9","title":"手話（接触）トーク4","scene":"立ち飲みバー等で隣り合い、さりげなく手を当てる","cue":"（手を軽く相手の手に当てる）","flow":["隣同士で話しながら、自分の手を軽く相手の手に触れさせる","相手は気付かないふりで会話を続ける","話の合間に、再び手を軽く当てる"],"points":["気付かないふりをして、意図的に何度か手を当てていく","後で相手に聞くと、故意か偶然か分からず強く気になったという声が毎回出る","手をつなぐ前に仕掛けると気分をより高められる。得意技として身に付けたい"],"branch":"","caution":"","badge":"定番","tag":"手の接触"},{"id":"6.10","title":"手話（接触）トーク5","scene":"店を出た後、相手の好みを聞いて手をつなぐ","cue":"手のつなぎ方、どっちが好き？","flow":["店を出たタイミングで「ねえ」と声をかける","貝殻つなぎと普通つなぎのどちらが好みか質問","答えに「ん」とだけ返し、その方法で手をつなぐ"],"points":["相手を喜ばせたいという設定で先に好みを聞き、それを尊重する形でつなぐ","手をつなげると、次段階の連れ出しで大きく有利になる"],"branch":"手つなぎ成功→次のクローズ段階の連れ出しへ","caution":"","badge":"","tag":"手つなぎ"}]}],"principles":["軽い下ネタで反応を確かめてから段階を上げ、順序を飛ばさない","嫌がる様子があれば即中止。関係構築が不十分なサインとみなす","気分を高める核心は、相手に過去の体験を想像・回想させること","質問は相手の意見を聞く形にし、即答を求めず思い出す時間を与える","接触は手から始め、指比べ・ピアス・握手などの設定で段階を踏む","相手の好みを先に聞き、それを尊重する形で次の一歩へ進む"]},"1a":{"chunk":"1a","groups":[{"name":"待ち合わせトーク","ids":"1.1–1.5","summary":"待ち合わせ中の相手は意外と暇を持て余しており、女友達・彼氏・家族の誰を待っていても会話からLINE獲得まで狙える。駅改札付近に立つ相手へ声を掛け、反応を引き出して会話が始まれば成功。次は立ち止め→ナンバークローズへ。","patterns":[{"id":"1.1","title":"待ち合わせトーク1","scene":"駅改札付近で待ち合わせ中、ケータイをいじっている相手","cue":"取り込み中？","flow":["「取り込み中？」と大きめの声で切り出す","顔を上げたら、ケータイ操作の勢いと真剣な表情をいじる","相手が笑って否定すれば会話成立"],"points":["第一声は大きめの声で姿を見せる。ケータイに集中している相手は、声が小さいとこちらに目を向けない","近づく姿を見られないよう、視界の外から声掛け。接近に気付かれると警戒される。周囲を見回す相手には一度素通りし、向きを変えて声を掛ける","同じ場所で何度もやらない。失敗を見られた相手は攻略困難。待ち合わせの人は約30分で入れ替わるため、複数の場所を時間差で巡回","申し訳なさそうに聞かない。「すみません」とへりくだるとアンケート風になり効果激減。気になったから聞いた、と堂々と"],"branch":"反応あり→立ち止めへ／なし→ガンシカ崩しへ","caution":"","badge":"","tag":"ケータイ操作中"},{"id":"1.2","title":"待ち合わせトーク2","scene":"待ち合わせ中の相手に、こちらの存在を気付かれた時","cue":"声かけられると思ったでしょ","flow":["一度目が合う","笑顔を見せ、少し間を取る","「声かけられると思ったでしょ」と切り出す","相手が笑えば会話成立"],"points":["目が合ったら視線を外さず即声掛け。チラチラ見るしぐさは自信のなさの表れになる","ナンパは本来不意打ちだが、待ち合わせでは先に気付かれることもある。その時は気付かれたこと自体を話題にし、率直かつ堂々と"],"branch":"反応あり→立ち止めへ／なし→ガンシカ崩しへ","caution":"","badge":"","tag":"目が合った時"},{"id":"1.3","title":"待ち合わせトーク3","scene":"待ち合わせ中の、おしゃれで少し派手めな相手","cue":"お、これから合コン？","flow":["「これから合コン？」と問いかける","髪・メイク・ネイルの気合いを根拠に合コンと決め付ける","服やアクセを指差すジェスチャーを添える","肯定でも否定でも返答が来れば次へ"],"points":["髪・メイク・服・ネイルを具体的に指摘。おしゃれは人に見てほしくてするもの。気付いて意見してくれたことを好意的に受け取り、反応が良くなる","わずかでも反応が得られれば、次のトークへ展開"],"branch":"反応あり→立ち止めへ／なし→ガンシカ崩しへ","caution":"","badge":"","tag":"派手めの相手"},{"id":"1.4","title":"待ち合わせトーク4","scene":"声掛け直後に、いきなり「彼氏がいる」と断られた時","cue":"お、待ち合わせ？","flow":["「お、待ち合わせ？」と声掛け","「彼氏いるんで」と返される","「だよね。気合の入れ方で分かる」と同調し自分も同じと返す","怯んだ様子を一切見せず会話を続行"],"points":["怯まず話し続ける。彼氏の存在を気にせず淡々と続ければ、番号交換から後日の準即も十分可能","彼氏発言に動じないこと自体が、ほかに声を掛けてくる男との明確な差別化になる"],"branch":"反応あり→立ち止めへ／なし→ガンシカ崩しへ","caution":"","badge":"","tag":"彼氏グダ"},{"id":"1.5","title":"待ち合わせトーク5","scene":"待ち合わせ中の相手。演技力は要るが、刺されば高確率で番号交換・準即まで狙える","cue":"お待たせ！","flow":["「お待たせ！ごめんね」と待ち人のふりで声を掛ける","急いで来た仕草・息遣いをやや大げさに演じる","人違いと言われても「うん」と軽く受け流す","「ちなみに俺も待ち合わせ」と明かす","話しかけた理由の説明へ移る"],"points":["理由の例：自分も待ち合わせだったがドタキャンされ、帰る途中で見かけた。君みたいな子が相手ならと思い、何もせず帰れば絶対後悔すると感じた。今日はいいので今度食事に","人違いはわざとで、真正面から話しかけるのが照れくさかったからだと伝える","理想の相手に話しかける好機を見送る方が男らしくないと思った、と伝える","最初はふざけた調子、徐々に真剣さを増す組み立てで、反応率・成功率が上がる"],"branch":"人違いと否定された後→立ち止め要領で話しかけた理由を説明","caution":"","badge":"要演技力","tag":"人違い演技"}]},{"name":"ファースト・トーク","ids":"1.6–1.10","summary":"最初の一言のパターン集。最重要はこちらの存在に気付かせること。奇抜な言葉や大笑い狙いより、無難で定番の一言の方が反応は良い。反応を引き出して立ち止めへ繋ぐのが目的で、相手に合わせて仕掛け、反応に応じて二手目を合わせる。","patterns":[{"id":"1.6","title":"ファースト・トーク1","scene":"街中の相手への定番の第一声。まず存在に気付かせる","cue":"お、買い物帰り？","flow":["「お、買い物帰り？」と声掛け","顔を上げたら「これから？終わったとこ？」と二択で続ける","反応が出たら立ち止めへ"],"points":["今気付いた風に声を掛け、狙っていた感を消す。冒頭の「おっ」で、偶然見つけた雰囲気が出る","第一印象は最後まで響く。声掛け・立ち止めでは影響しないが、番号交換・メンテ・口説きの各段階で最初の声掛けの印象が効いてくる","真剣交際や結婚に発展する出会いにもなるため、最初の印象と意図は重要。体目的の気配を出さないよう偶然を装う"],"branch":"反応あり→立ち止めへ／なし→ガンシカ崩しへ","caution":"","badge":"","tag":"買い物帰り"},{"id":"1.7","title":"ファースト・トーク2","scene":"仕事帰りらしい相手。YES/NOで答えられ、返しも準備しやすい","cue":"お、仕事帰り？","flow":["「お、仕事帰り？」と声掛け","顔を上げたら「顔ちょっと疲れてる」と根拠を添える","足取りの重さ・負のオーラなどにアレンジ可"],"points":["「なぜ仕事帰りと思ったか」の根拠を用意。疲れた顔・重い足取りなど理由を一言足すだけで反応率が大きく変わる","元気に歩いている相手には「仕事でいいことあった？」など前向きな展開に切り替えるのも有効"],"branch":"反応あり→立ち止めへ／なし→ガンシカ崩しへ","caution":"","badge":"万能","tag":"仕事帰り"},{"id":"1.8","title":"ファースト・トーク3","scene":"何帰りか判断できない相手向け。返し待ち型で次の一手を準備","cue":"帰るとこ？","flow":["「帰るとこ？」と声掛け","「仕事？それとも学校？」と候補をすぐ畳み掛ける","「足取り軽いね。いいことあった？」と添える","相手が実際の用事を答えれば会話成立"],"points":["すぐ候補を挙げて決め付ける。YES/NO型でも答えの幅が広く即答しにくいため、よくある答えをこちらから示すのが反応のカギ","当たれば好反応、外れても「じゃあ何帰り？」と追撃できる","やや早口でどんどん投げる。言葉のキャッチボールを待たず畳み掛け、少しでも反応が出た所から広げていく"],"branch":"反応あり→立ち止めへ／なし→ガンシカ崩しへ","caution":"","badge":"汎用性◎","tag":"帰り道全般"},{"id":"1.9","title":"ファースト・トーク4","scene":"誰にでも使え、高い反応が得られる髪型ネタの一言","cue":"お、美容室帰り？","flow":["「お、美容室帰り？」と声掛け","「その髪型タイプ」と褒め、切りたてと決め付ける","根元の色落ち（プリン）が目立てば、外れたといじる流れへ転換"],"points":["髪型の話題は高確率で反応を得られる。相手は毎日何度も自分の髪を気にしているため、指摘されると反応しやすい","経験上この傾向は幅広く、飛び抜けた美人でもそうでない相手でも、髪の話題は反応が良い","第一声は反応を引き出すことがすべて。なるべく好反応が見込める話題を選ぶ"],"branch":"反応あり→立ち止めへ／なし→ガンシカ崩しへ","caution":"","badge":"オススメ","tag":"髪型ネタ"},{"id":"1.10","title":"ファースト・トーク5","scene":"服装が決まった相手。誰でもほぼ「NO」が返るので返しを準備","cue":"お、撮影帰り？","flow":["「お、撮影帰り？」と声掛け","服装を褒め「モデル？どのパーツ？」と畳み掛ける","「違います（笑）」と否定が返る","用意した切り返しで続ける"],"points":["相手をしっかり見ていると伝える。誰にでも同じ声掛けをしていると感じさせるのは嫌われる。特徴を指摘し、あなただからと間接的に示す"],"branch":"反応あり→立ち止めへ／なし→ガンシカ崩しへ","caution":"","badge":"","tag":"NO狙い"}]},{"name":"シチュエーション・トーク","ids":"1.11–1.15","summary":"第一声の中で最も自然な出会いを作れる型。鍵は観察と状況の活用。声掛け前に相手の動きをよく見て、小さな出来事や突っ込みどころを拾って話を組み立てる。自然な反応が得られたら即座に立ち止めへ移行。","patterns":[{"id":"1.11","title":"シチュエーション・トーク1","scene":"相手がつまずいた・よろけた瞬間。偶然の出会いを自然に演出","cue":"おお、大丈夫？","flow":["相手がつまずく・足がもつれるのを見る","すぐに「おお、大丈夫？」と声を掛ける","「今倒れそうになった」と状況を伝える","相手が無事と答えれば会話成立"],"points":["たまたま居合わせた体を作る。よろけた瞬間すぐ声掛けし、心配したからという自然な理由を自分でも信じ込んで堂々と","うまく決まれば最初の印象と意図が大きく好転し、続く立ち止めトークにも好影響。できる限り自然に演出する"],"branch":"反応あり→立ち止めへ／なし→ガンシカ崩しへ","caution":"","badge":"自然さ◎","tag":"つまずき"},{"id":"1.12","title":"シチュエーション・トーク2","scene":"話しかけたい相手はいるがネタがない時。人混みを利用","cue":"あ、ごめん","flow":["人混みで相手の隣を歩く","混雑を口実に、ぶつかる寸前まで一瞬だけ寄る","「あ、ごめん」「ぶつけた？」と気遣う","少し間を置き、ファースト／ファッション系へ切り替え"],"points":["体より物を当てそうにする。腕が実際に当たると触られたと嫌悪されがち。バッグ同士が当たりかけて気遣いの声を掛ける形が有効","すぐ服装・髪型の話題へ移る。謝るだけでは関係は即終わる。ぶつかりかけた相手が美人で惹かれた、という流れで別トーク→立ち止めへ"],"branch":"反応あり→ファースト/ファッション系へ／なし→ガンシカ崩しへ","caution":"実際にぶつかる・体当たりは厳禁。通行人への接触や故意の進路妨害は迷惑防止条例等に該当しうる。ぶつかりかけて軽く謝る程度に留める","badge":"","tag":"人混み"},{"id":"1.13","title":"シチュエーション・トーク3","scene":"信号待ちで大型スクリーンを眺める相手。周囲の状況をネタにする型","cue":"食い入るように見てるね","flow":["信号待ちで相手の隣に立つ","スクリーンを指し「食い入るように見てるね」","映っている人物を挙げ「あのバンドのファン？」と聞く","相手が笑って否定すれば会話成立"],"points":["スクリーン利用時は突っ込むネタを事前に決める。信号待ちの相手は大抵画面を見上げ、広告のバンドや芸能人が映っていることが多い","単に好きか聞くより、相手が好みでなさそうな人物を「ファンなの？」と決め付け、少し引いてみせる方が反応が出る","相手は笑って否定したくなるため、好反応と感情の揺さぶりが生まれる"],"branch":"反応あり→立ち止めへ／なし→ガンシカ崩しへ","caution":"","badge":"","tag":"大型スクリーン"},{"id":"1.14","title":"シチュエーション・トーク4","scene":"信号待ち中、救急車など目を引くものが通った時","cue":"何かあったのかな","flow":["信号待ちで相手の隣に立つ","救急車を指し「何かあったのかな」とつぶやく","「ほら、あれ」と再度指差して注意を向けさせる","相手を見て間を置き、ファースト／ファッション系へ"],"points":["ネタを多く仕入れるほど幅が広がる。派手な車・街宣車・宣伝カー・観光バスなども十分使える","きっかけさえ作れれば目的達成。話を引っ張らず、すぐ別のトークへ移る"],"branch":"反応あり→ファースト/ファッション系へ／なし→ガンシカ崩しへ","caution":"","badge":"","tag":"通過する車両"},{"id":"1.15","title":"シチュエーション・トーク5","scene":"相手がキャッチ・スカウト・ナンパに声を掛けられた直後","cue":"いま大丈夫だった？","flow":["相手がキャッチに話しかけられるのを見る","直後に後ろから追い越し、横から「いま大丈夫だった？」","「あれ、知り合い？」と確認する","違うと言われたら、危なそうで身構えていたと伝え安堵を示す","ファースト／ファッション系へ切り替え"],"points":["タイミングを見極める。相手が断ってから4〜5歩目あたりで即座に声掛け","街で声を掛けられた直後は一瞬心が開くが、数秒で自分の世界に閉じる。閉じる前の開いた状態を狙う","勘違いを演出し善意を前面に。危険に見えた相手を勇気を出して助けに入ったら、実はただのキャッチだった、という筋書き","後で電車男みたいな事をしたと笑い話にし、狙ったナンパではないと間接的に示す"],"branch":"反応あり→ファースト/ファッション系へ／なし→ガンシカ崩しへ","caution":"","badge":"","tag":"キャッチ直後"}]}],"principles":["声掛けの目的は反応を引き出して会話を始めること。成功したら立ち止めへ繋ぐ","反応が取れなければガンシカ崩しトークへ切り替える","偶然を装い、狙っていた・体目的と思わせない。最初の印象と意図は最後まで影響する","遠慮せず堂々と。気付かれた場面や彼氏グダでも怯まない","髪型・服装・周囲の状況を観察して具体的に指摘し、あなただから声を掛けたと伝える","決め付けや候補提示で答えやすくし、次の切り返しを用意しておく"]},"1b":{"chunk":"1b","groups":[{"name":"ファッション・トーク","ids":"1.16–1.25","summary":"髪型・メイク・アクセサリー・服・バッグ・靴に一言ツッコむ声掛け。第一声の中でも特に反応を得やすい話題で、細部まで指摘できるほど効果大。立ち止め後のツッコミやアポでの関係構築にも効き、服装の知識も身につく必修トーク。","patterns":[{"id":"1.16","title":"ファッション・トーク1","scene":"髪型が派手な相手へ。ファッションへのツッコミで反応を引き出す","cue":"お、いい髪型してるね","flow":["「お、いい髪型してるね」と第一声","相手が「え？」と反応","「その髪型めっちゃタイプ」と重ね、良い美容院通いを指摘"],"points":["ファッションへの褒めは遠慮不要。髪型や服のセンス褒めは間接的で嫌みがなく、何度使っても問題ない","通常は序盤の褒めや好意の出しすぎを控えるが、ファッショントークはその例外"],"branch":"反応あり→立ち止めへ／なし→ガンシカ崩しへ","caution":"顔やスタイルを褒めるのは下心が透けるため声掛けではNG","badge":"","tag":"髪型"},{"id":"1.17","title":"ファッション・トーク2","scene":"全体に派手めな服装の相手へ。表参道・銀座・恵比寿で多用","cue":"お、セレブっぽい！","flow":["「お、セレブっぽい！」と声掛け","相手「え？」→服に合わせジャケット等を挙げ再度セレブ感を伝える","「セレブ男子とのデート帰り？」と設定を振る"],"points":["服装を褒めてから、そこから感じた人物像を伝える。疑問形より言い切る方が反応を得やすい"],"branch":"反応あり→立ち止めへ／なし→ガンシカ崩しへ","caution":"","badge":"多用","tag":"派手な服装"},{"id":"1.18","title":"ファッション・トーク3","scene":"大きいバッグの相手へ。都会のターミナル駅で多用","cue":"お、旅行帰り？","flow":["「お、旅行帰り？」と声掛け","相手「え？」→バッグの大きさから「一泊くらい？」と推測","反応があれば、元気そうなら旅行前・疲れて見えれば帰りと推測を追加"],"points":["旅行者だと決めつけた設定で話を進める。勝手に話が広がるのを止めようと相手が反応してくる","疑問形が多くても、質問そのものが何かの設定になっていることが反応を得るコツ"],"branch":"反応あり→立ち止めへ／なし→ガンシカ崩しへ","caution":"","badge":"多用","tag":"大きいバッグ"},{"id":"1.19","title":"ファッション・トーク4","scene":"すっきりしたスーツ姿のOLへ。丸の内・銀座で多用","cue":"お、スーツかっこいいね","flow":["「お、スーツかっこいいね」と声掛け","相手「え？」→着こなしを改めて褒める","「商談帰り？」と状況を振る"],"points":["今気づいたように自然に服装を褒める。素敵なスーツ姿が目に入り思わず声を掛けた、という筋書きにする","ただ服を褒めただけという気持ちで臨むと、自分も肩の力を抜いて話を進められる"],"branch":"反応あり→立ち止めへ／なし→ガンシカ崩しへ","caution":"","badge":"多用","tag":"スーツのOL"},{"id":"1.20","title":"ファッション・トーク5","scene":"服装に特徴がない・見つからない相手へ。春夏の時期に使う","cue":"お、爽やかな格好してるね！","flow":["「お、爽やかな格好してるね！」と声掛け","相手「え？」→「いいね。春っぽい！」と季節感で褒める（夏なら夏）"],"points":["特徴のない相手には無理に突っ込まず、具体的な点はぼかす","「なんとなく春っぽい」「何だか爽やか」程度の曖昧で前向きな言葉を伝えるのがコツ"],"branch":"反応あり→立ち止めへ／なし→ガンシカ崩しへ","caution":"","badge":"汎用性◎","tag":"特徴なし・春夏"},{"id":"1.21","title":"ファッション・トーク6","scene":"ヒールの高い相手へ。六本木・渋谷の夜によく使う","cue":"うお、ヒールたっか！","flow":["「うお、ヒールたっか！」と驚いてみせる","相手が笑う→「歩き方ペンギンみたい」と軽くいじる"],"points":["驚きを素直に、大げさに表現する。見たことない高さだという感想を少しふざけて演出すると高確率で反応が来る"],"branch":"反応あり→立ち止めへ／なし→ガンシカ崩しへ","caution":"","badge":"多用","tag":"高いヒール"},{"id":"1.22","title":"ファッション・トーク7","scene":"派手めな学生やおしゃれ好きな私服OLに刺さる声掛け","cue":"おおー。すごい良いファッション","flow":["「すごい良いファッション」と強めに褒める","相手「え？」→「一番目立ってるよ！」と周囲と比べて称賛","「センスいいね！」で締める"],"points":["ファッションを強く褒めた後は、切り返しを素早くする","少しでも反応が出たら即座に次のステップへ移るのが、流れを途切れさせないコツ"],"branch":"反応あり→立ち止めへ／なし→ガンシカ崩しへ","caution":"同じ点をだらだら褒め続けるのは厳禁","badge":"","tag":"派手め学生・OL"},{"id":"1.23","title":"ファッション・トーク8","scene":"シュシュや髪留めの相手へ。派手めの街でも仕事帰りの街でも頻用","cue":"お、髪型いい","flow":["「お、髪型いい」と声掛け","相手「え？」→「髪留め。センスいいね」と具体的に指摘"],"points":["髪留めが地味でも、巻き方や髪型そのものを褒める","誰もが留め方にこだわりや癖を持つが、一目で気づく人は少ない。第一声で指摘すると驚かれ好反応につながる"],"branch":"反応あり→立ち止めへ／なし→ガンシカ崩しへ","caution":"","badge":"オススメ","tag":"髪留め"},{"id":"1.24","title":"ファッション・トーク9","scene":"派手めメイクの相手へ。アパレル・美容系に特に刺さる","cue":"お、キメてるね！","flow":["「お、キメてるね！」と声掛け","相手「え？」→メイクに加え服装もおしゃれと褒める","自分が女でもその装いにすると全面肯定","「デート帰り？」と振る"],"points":["メイク褒めは単独で使わず、ファッション褒めと組み合わせる","褒めに加え、自分も女ならそうしたいという全体的な肯定を示すと、前向きな反応の確率が上がる"],"branch":"反応あり→立ち止めへ／なし→ガンシカ崩しへ","caution":"メイクを褒めすぎると逆効果になる場合がある","badge":"","tag":"派手めメイク"},{"id":"1.25","title":"ファッション・トーク10","scene":"ロリ系・可愛い系の服装の相手へ。前向きな言葉を重ねて反応を得る","cue":"お、愛され系だね","flow":["「お、愛され系だね」と声掛け","相手「え？」→服装を挙げ「素直に可愛いわ」と褒める"],"points":["第一声は全部聞き取られるとは限らないため、前向きな言葉を3つほど続けて投げる","3つのうち2つが届き、その中の1つが響けばステップを進めるには十分"],"branch":"反応あり→立ち止めへ／なし→ガンシカ崩しへ","caution":"","badge":"","tag":"可愛い系の服"}]},{"name":"運命トーク","ids":"1.26–1.28","summary":"運命的な出会いを演出し、好意を率直に伝える声掛け。どんな相手にも使え、NGなら早めに拒まれるが、刺さればアポ・準即・キープ・交際・結婚まで深く響く。長続きした関係の多くもこの要素入り。拒絶の痛手も得る幸福も大きい。本命・結婚相手を求める人向け。","patterns":[{"id":"1.26","title":"運命トーク1","scene":"どんな相手にも使える。すれ違った後に引き返し、運命的な出会いを演出","cue":"あの！","flow":["少し真剣な表情で「あの！」と呼び止め、間を置く","相手が驚いてこちらを見る","「引き返して来てしまって」と切り出す","照れながら「さっきすれ違ったんですよ」→だから戻ったと重ねる","迷いつつ「すごくタイプなんだと思って」と好意を告げる"],"points":["「自分でも分からない」設定で演出する。すれ違いざまにドキッとし、訳も分からず声を掛けたという筋書き","続けて、好意か運命か分からないが呼び止めたのは事実なので、それを確かめたいという流れにつなげる","「これは運命」と言い切らない。断定は胡散臭く、ありえないという顔をされがち","「もしかして？」と余白を残すと、運命かもしれない可能性を相手も感じる。組み立ての最大の核心で、この考え方を理解したうえで使う"],"branch":"反応あり→立ち止めへ／なし→ガンシカ崩しへ","caution":"","badge":"","tag":"すれ違い後"},{"id":"1.27","title":"運命トーク2","scene":"状況トークの要素を交え、目が合った偶然で運命トーク1の説得力を増す","cue":"（目を合わせ、引き返す）","flow":["すれ違う際、目が合うまで相手を見続ける","すれ違った瞬間に振り返り、走って追う","少し息を切らし真剣な顔で「あの！」と呼び、間を置く","「引き返して来てしまって」→「さっき目が合いましたよね」","相手が「あ」と気づいたら、だから引き返して来たと伝える"],"points":["目が合ったという偶然を前面に出す。見知らぬ男女が街で偶然目を合わせたという、運命めいた展開の土台になる","相手が気づいていなくても「合った」と主張し続ける。「無意識に俺を見ていた」という展開に広げられるため"],"branch":"反応あり→立ち止めへ／なし→ガンシカ崩しへ","caution":"","badge":"","tag":"目が合った後"},{"id":"1.28","title":"運命トーク3","scene":"運命トーク2の発展形。交差点の信号待ちを利用して呼び止める","cue":"（信号待ちで振り向く）","flow":["狙った相手を交差点まで追い、信号待ちで斜め前に立つ","自然に振り向いて目を合わせ、「あ」と驚いた顔に変える","「あの！」と呼び、相手が驚いてこちらを見る","「ちょっと止まって」と身振りで制止し、信号が変わっても留める","言葉を遮り「自分でも分からないんだけど」→再び「ちょっと止まって」"],"points":["とにかく驚いた様子を見せ、まず相手の足を止める。緊急事態のような表情と、止めなければという空気を全開にする","よほど急いでいる相手でなければこれだけで立ち止めでき、この段階の目標は達成。以降は立ち止めでの運命トークへ"],"branch":"反応あり→立ち止めの運命トークへ／なし→ガンシカ崩しへ","caution":"","badge":"","tag":"交差点・信号待ち"}]},{"name":"（応用）ケータイトーク","ids":"1.29–1.30","summary":"本屋・車内・ホームなど声を出しにくい場で理想の相手を見つけた時、スマホのメモに文を打って見せる手法。小声で話せる状況・善意とツッコミの文面・すぐ話せる場所へ移れることが揃うと最も成功。路上で全無視する堅い相手にも届く。","patterns":[{"id":"1.29","title":"（応用）ケータイトーク1","scene":"本屋など声を出せない場で、スマホのメモを見せて接触する","cue":"（スマホのメモを見せる）","flow":["メモに「肩にゴミついてる」と打ち、画面を見せる","気づかなければ目の前で手を振る→相手が顔と画面を見る","相手が肩を確かめたら小声で「あ、取れた」","すかさず打ち込み「凄いでかいホコリだった（笑）」と見せる","間を空けず小声で「少し話せる？」と通路へ誘導→運命トークへ"],"points":["反応が取れたらすぐ「伝えたいことがある」空気を作り、その場を離れる","本屋のような会話に不向きな場所では展開に限界がある。最大の要は話せる場所へすかさず移動を促すこと","移動後のトークは運命トークとの相性がよい"],"branch":"移動後→運命トークへ展開","caution":"","badge":"多用","tag":"本屋など"},{"id":"1.30","title":"（応用）ケータイトーク2","scene":"駅のホームやエレベーターなど話しにくい場で、直球の好意をメモで伝える","cue":"（好意のメモを見せる）","flow":["メモに「ごめん、おもいっきりタイプです」と打つ","照れた表情を作ってから画面を見せる（気づかなければ手を振る）","相手が驚いてこちらを見たら、すぐ小声で「少し話せる？」","駅ならホーム中ほど、エレベーターなら開扉時に一緒に出る→運命トークへ"],"points":["どんな場面でも好機を逃さない心構えを持つ。応用編かつ上級者向けの技","美女ナンパを続けると、声掛けモード外や声を掛けにくい場面でも美女に出会う。そこでも必ずものにする意識を持つ","相手も対応に慣れておらずほぼ驚かれる。路上の声掛けを全て断る相手にも刺さり得るのが最大の利点（後から実感する）","日常的な技ではなく、緊急用の技として身につけるのが最も推奨される"],"branch":"誘導後→運命トークへ展開","caution":"失敗時の痛手が大きく、多少のメンタルの強さが要る","badge":"上級者向け","tag":"駅・エレベーター"}]}],"principles":["第一声に相手が反応したらすぐ立ち止めへ。反応がなければガンシカ崩しへ切り替える","髪型・服・小物などファッションへの褒めは間接的で嫌みがなく遠慮なく使える。顔や体型の褒めは避ける","推測や人物像は言い切りや決めつけの設定で伝えると、相手がそれを止めようと反応しやすい","褒めは引き延ばさず、反応を得たら素早く次のステップへ移る","運命トークは「自分でも分からない」余白を残し、断定しないことで説得力を保つ","声を出せない場ではスマホのメモで接触し、反応が出たらすぐ話せる場所へ移動して運命トークへ"]},"2a":{"chunk":"2a","groups":[{"name":"立ち止めトーク","ids":"2.1–2.5","summary":"声掛け直後に相手の足を止める段階。止められたから会話が進むという考え方が土台で、言葉の巧さよりジェスチャーなど体の動きで止めるほうが結果につながる。止まれば理由トーク、止まらなければガンシカ崩し＆切り返しへ。","patterns":[{"id":"2.1","title":"立ち止めトーク1","scene":"声掛け直後、低い依頼から段階的に足を止める","cue":"一瞬こっち見て！","flow":["「一瞬こっち見て！」で視線をもらう","お礼を言い「一瞬立ち止まって！」と続ける","相手の斜め前へ出て、腕で止まってのジェスチャー"],"points":["視線を向けるだけの小さな依頼は大半が応じる。まず軽いYESを取る","軽い依頼を受け入れさせた後だと、重い依頼も通りやすくなる心理を利用","ボクシングのワン・ツーのように間を空けず2つの依頼を畳みかける"],"branch":"止まった→理由トークへ／止まらない→ガンシカ崩し＆切り返しへ","caution":"接触や真正面での進路妨害はトラブルのもと。斜め前に出て相手が避ける余地を残す","badge":"","tag":"段階依頼"},{"id":"2.2","title":"立ち止めトーク2","scene":"声掛け直後、強い意思表示で止める型。タイミングが合えばピタッと止まる","cue":"一瞬だけ一旦止まって！","flow":["相手を追い越し、斜め前に出てジェスチャー","「一瞬だけ一旦止まって！」と強く伝える","かわされたら怯まず即座に切り返しへ"],"points":["声の調子・大きさ・身振りを総動員し、止まってほしい意思をはっきり示す","前段の声掛けで掴めていれば高い確率で止まる","止まらなくてもひるまず、すぐ切り返しトークへ移る"],"branch":"止まった→理由トークへ／止まらない→ガンシカ崩し＆切り返しへ","caution":"真正面に立ちふさがるのは進路妨害になるのでNG","badge":"","tag":"強い意思表示"},{"id":"2.3","title":"立ち止めトーク3","scene":"具体的な指示と所要時間を示し、反応率を上げて止める","cue":"ちょっと足止めて","flow":["追い越してジェスチャーしつつ「ちょっと足止めて」","「え、足？」と聞き返される","「1分で済むから！」と時間を明示"],"points":["並行トークはキャッチボールより、言葉をぶつけ合うイメージ。指示も時間も具体的な言葉にする","「足を止めて」「1分」のような具体語を使うと立ち止め率が上がる"],"branch":"止まった→理由トークへ／止まらない→ガンシカ崩し＆切り返しへ","caution":"","badge":"","tag":"具体指示"},{"id":"2.4","title":"立ち止めトーク4","scene":"相手の戸惑いに乗じ、危ないと伝えて一気に止める","cue":"危ない、足元！","flow":["「あ、ちょっと！」で注意を引く","戸惑ったところで「危ない、足元！」","斜め前に出て、歩道や道の端へ誘導"],"points":["段差があった・前を見ず転びそうだった、という設定をつくる","何もないと言われても「え、危なかったよ！」と堂々と返す"],"branch":"止まった→理由トークへ／止まらない→ガンシカ崩し＆切り返しへ","caution":"相手の体に触れるのは厳禁。伝えるのはあくまで身振りのみ","badge":"","tag":"混乱利用"},{"id":"2.5","title":"立ち止めトーク5","scene":"人混みや障害物を活かす応用技。人の多い場所向け","cue":"あ、ちょっと","flow":["周囲が混雑し、相手がこちらを向いた瞬間を狙う","「あ、ちょっと」と前に出て、腕で囲って守る身振り","人とぶつかりそうだった体で脇道へ誘導"],"points":["人との衝突から守ってあげた、という設定をつくる","実際は危なくなくても、こちらを見た瞬間を使い、前の人とぶつかりかけた体で脇道へ導く","ぶつかりそうだったと説明すれば、疑われることはほぼない","人の多い場所なら繰り返し使える"],"branch":"止まった→理由トークへ／止まらない→ガンシカ崩し＆切り返しへ","caution":"相手に直接触れるのは絶対NG。腕で囲むのはジェスチャーのみ","badge":"人混みで多用","tag":"状況利用"}]},{"name":"理由トーク","ids":"2.6–2.10","summary":"立ち止め後に声を掛けたわけを伝える段階で、以降の全ステップに響く要所。暇だったという軽い理由から、タイプ・運命といった好意を前面に出すものまで幅があり、それぞれ長所短所がある。扱いやすくバランスの良い5型を必ず押さえる。","patterns":[{"id":"2.6","title":"理由トーク1","scene":"立ち止め後、自分でも驚きつつ「タイプ」と好意を直接伝える","cue":"話しかけた理由を言わせて","flow":["急に止めたことを詫び、理由を言わせてと切り出す","声掛け時の話題(例:髪型)に触れ、良いと思ったのは本当と伝える","なぜここまで必死なのか自分でもわからないと告白","自分でも信じられないと照れつつ「君のことタイプだ」と言い切る"],"points":["奇跡のような状況に自分も驚き、迷いながらも好意を伝える、という設定で話す","好意を直接伝えるときは、伝える側もこの状況に驚いている空気を出すのが最重要","街で好みの人と出会い声を掛けられるのは、多くの人にとって奇跡のような出来事という認識","その認識に合わせ、自分も信じられないと示しつつ好意を前面に出すと出会いの物語に現実味が出る"],"branch":"反応良し→ナンバークローズへ／悪い→グダ崩しへ","caution":"","badge":"","tag":"好意直球"},{"id":"2.7","title":"理由トーク2","scene":"運命的な出会いを演出する型の中では比較的軽め","cue":"ドタキャン食らってさ","flow":["予定がドタキャンになり、少し人恋しかったと話す","帰ろうとした矢先に相手の様子が目に入った話(例:何もない道でつまずく)","「これもしかして運命」と一瞬思い、頑張ったと笑って伝える"],"points":["表=時間が空いた、裏=タイプかもと思った、の2つを同時に伝える","時間が空いただけではナンパの理由にはなっても「なぜ私に？」の答えにならない","建前と本音の2段構えで話に真実味が出て、納得されやすくなる","理由トークの説得力を支える背骨となる要点なので必ず押さえる"],"branch":"反応良し→ナンバークローズへ／悪い→グダ崩しへ","caution":"","badge":"","tag":"表裏の理由"},{"id":"2.8","title":"理由トーク3","scene":"理由トークで最も軽い型。仕事が早く終わった体で話す","cue":"たまたま仕事が早く終わって","flow":["仕事が早く終わり時間ができたと切り出す","食事に行こうと友達に連絡するところだったと続ける","相手の様子を笑いに変える(例:おしゃれなヒールで転びかけ)"],"points":["「いつも暇」とは言わない。暇人アピールは自分の価値を下げるよくある失敗","実際に暇でも、忙しい人という印象を与えたほうがうまくいく"],"branch":"反応良し→ナンバークローズへ／悪い→グダ崩しへ","caution":"","badge":"最もライト","tag":"軽い理由"},{"id":"2.9","title":"理由トーク4","scene":"率直かつ軽く好意を伝える、汎用性の高い型","cue":"ほんと、ピンときた","flow":["仕事が早く終わり、買い物でぶらついていたと話す","「ピンときた」と軽く告げる","聞き返されたら「ビビビときた」と冗談めかす","本当にそれが理由、自分でも声を掛けたことに驚いたと締める"],"points":["理由に迷ったら「ピンときた」で乗り切れることが多い。相手が好む言葉らしい","説明のつかない運命的な出会いを軽い言葉に乗せ、重くならずに好意を伝えられる","軽い言葉なので、後のアポや関係構築の段階でも繰り返し使える"],"branch":"反応良し→ナンバークローズへ／悪い→グダ崩しへ","caution":"","badge":"汎用性◎","tag":"ピンときた"},{"id":"2.10","title":"理由トーク5","scene":"楽しげに歩く相手へ、雰囲気を間接的に褒めて理由にする","cue":"吸い寄せられた","flow":["用事がなくなり時間ができたと切り出す","買い物に向かう途中、楽しそうに(にやけて)歩く人を見たと話す","前向きなオーラに「吸い寄せられた」と伝える","人を引き寄せるタイプなのかと冗談で問いかける"],"points":["前向きな雰囲気に惹かれたと伝え、間接的な褒めを理由として使う","笑顔や腕を振るなど、楽しげに歩く相手に声を掛ける時向け","本人は自分の歩く様子を知らないので教える形で話し、それが自分を引き寄せたと伝える","応用:疲れていそう・心配になったなど、ネガティブな様子を理由にする形もある"],"branch":"反応良し→ナンバークローズへ／悪い→グダ崩しへ","caution":"","badge":"最もライト","tag":"間接褒め"}]},{"name":"開示トーク","ids":"2.11–2.15","summary":"声掛け・立ち止めの後に自分の情報を伝え、相手を安心させる段階。会社員・30代前半・都内在住などを早口でぶつけるように投げると、混乱中の相手の中で人物像が立体的になる。否定的な語はなるべく避け、前向きな言葉で固めるのがコツ。","patterns":[{"id":"2.11","title":"開示トーク1","scene":"会話に割り込む形で職業や職場を早口で伝える","cue":"○○系のサラリーマン","flow":["さっきまで仕事仲間と飲んでいたと話す","業界(金融・マスコミ等)の会社員で職場が近いと伝える","聞き返されたら「真面目でしょ？」と流して続ける"],"points":["会話に唐突に差し込んでよい。口に出せば伝わるので多少脈絡がなくても問題なし","一言で早口にさらっと言えるよう、事前にトークを用意しておく"],"branch":"反応良し→理由トークへ／悪い→グダ崩しへ","caution":"","badge":"","tag":"割り込み開示"},{"id":"2.12","title":"開示トーク2","scene":"勤務地・業界・年代を一息で伝え、相手にも質問を返す","cue":"30代だよ！そっちは？","flow":["勤務地・業界・年代を一息でまとめて言う","「そっちは？」と相手に話を振る"],"points":["開示はテンポと速さが命。会話の切れ目で素早く言えるよう前もって練習","社名は不要。会社の所在地や駅名を添えると相手の安心感がより高まる"],"branch":"反応良し→理由トークへ／悪い→グダ崩しへ","caution":"","badge":"","tag":"一息開示"},{"id":"2.13","title":"開示トーク3","scene":"相手の返答に合わせ小分けに開示。前向きな語で構成","cue":"お、マジ？俺も","flow":["相手の「仕事帰り」に乗り、自分も仕事終わりと返す","近くに住んでいてこのまま帰るところと添える","相づちを受けて業界を明かし「真面目そうでしょ」"],"points":["相手が反応したら、さらに短い開示を追加で差し込む","一気に言う型と、反応に応じて細切れに挟む型の両方を用意するとテンポが良くなる"],"branch":"反応良し→理由トークへ／悪い→グダ崩しへ","caution":"","badge":"","tag":"細切れ開示"},{"id":"2.14","title":"開示トーク4","scene":"怪しいスカウトや営業ではないと先に伝え、不安を消す","cue":"スカウトとかキャッチじゃないよ","flow":["相手の相づちを受け、怪しいスカウトやキャッチではないと明言","住む駅から会社の駅まで毎日電車で通う会社員だと伝える"],"points":["見た目がチャラい自覚があるなら、スカウトやキャッチでないと先に伝えておく","声掛け直後の相手は不安を多く抱えがち。自分から開示して先回りで不安を消す"],"branch":"反応良し→理由トークへ／悪い→グダ崩しへ","caution":"","badge":"","tag":"不安つぶし"},{"id":"2.15","title":"開示トーク5","scene":"職業・年齢・居住地を伝え、冗談で相手の素性も聞く","cue":"そっちはキャバ？","flow":["会社員で何歳か、どこに住んでいるかを伝える","「そっちはキャバ？」と冗談めかして聞く","相手が笑って否定し、会話が転がる"],"points":["相手は男性の年齢を知りたがるので、早い段階でさらっと年齢を告げると安心感が増す","年齢の話を長引かせる必要はなく、すぐ別の話題をテンポよく挟む"],"branch":"反応良し→理由トークへ／悪い→グダ崩しへ","caution":"","badge":"","tag":"年齢開示"}]},{"name":"後悔トーク","ids":"2.16–2.18","summary":"声を掛けた理由を、今行かなければ後悔するという形で伝える段階。理由トークより自信と男らしさが出る強い好意表現で、本命の美女に思い切って使うと、普段ナンパになびかない相手も落とせる奥の手。","patterns":[{"id":"2.16","title":"後悔トーク1","scene":"本命の美女に使う奥の手。強い好意を短く伝える","cue":"一生後悔する","flow":["「正直、ピンときて」と切り出す","声を掛けなければ一生後悔すると思ったと伝える","だから思い切って声を掛けたと言い切る"],"points":["1語ごとの威力が強いので、後悔したくなくて声を掛けた、という一点をはっきり伝えれば足りる","早口や多弁は言葉の力を弱める。ファーストトークや開示とは逆に口数を絞る","なるべく簡潔に、真剣な表情で力強く伝える"],"branch":"反応良し→ナンバークローズへ／悪い→グダ崩しへ","caution":"","badge":"奥の手","tag":"強い好意"},{"id":"2.17","title":"後悔トーク2","scene":"今話さなければ二度と会えない、という希少性で反応を引き出す","cue":"二度と会えないのかな","flow":["すれ違った時、ここで話さなければ二度と会えないと思ったと話す","相手の相づちを待つ","「それは絶対嫌だな」と感じたと気持ちを込めて伝える"],"points":["「それは絶対嫌」の部分に感情をしっかり乗せ、心の動きを相手に伝える","そこまで気持ちが揺れたと示すことで説得力が増す"],"branch":"反応良し→ナンバークローズへ／悪い→グダ崩しへ","caution":"","badge":"","tag":"希少性"},{"id":"2.18","title":"後悔トーク3","scene":"後悔する理由をぼかした、軽く使える型","cue":"後悔したくなかったんだよ","flow":["「後悔したくなかったんだよ」と切り出す","戸惑う相手に、理由はわからないが直感でそう思ったと続ける"],"points":["何に後悔するのかをぼかすことで、軽いトークとして使える","直感だった・理由はない、などの言い回しを添える","相手の目を見て堂々と話すのが要点"],"branch":"反応良し→ナンバークローズへ／悪い→グダ崩しへ","caution":"","badge":"","tag":"理由ぼかし"}]},{"name":"誠実トーク","ids":"2.19–2.20","summary":"声を掛けた理由を伝える際、後悔トークに正直な気持ちの告白を重ねる段階。最大のコツは好意を包み隠さず伝えること。心から惹かれた相手にこそ気持ちが乗って刺さる。","patterns":[{"id":"2.19","title":"誠実トーク1","scene":"後悔トークに正直な好意の告白を重ねる。本命向け","cue":"止まってくれてありがとね","flow":["止まってくれた礼を言い、理由を話すと前置き","絶対後悔すると思ったと伝える","すれ違った瞬間「あ、いいな」と思ったと正直に明かす","だからこのまま逃したくなかったと締める"],"points":["シンプルな言葉を堂々とはっきり。コツは好意を丸ごと、正直な気持ちごと伝えること","言葉の重みは真剣さ次第。しっかり立ち止めて背筋を伸ばし、目を見て話す","あまり好みでない相手には不向き。気持ちが入らず弱々しい展開になる","本気で惹かれた相手ほど気持ちが乗って刺さる。台詞は暗記。波に乗ると連続でLINE獲得も"],"branch":"反応良し→ナンバークローズへ／悪い→グダ崩しへ","caution":"","badge":"本命向け","tag":"好意全開"},{"id":"2.20","title":"誠実トーク2","scene":"3つのフレーズを間を取りつつ、目を見て真剣に伝える","cue":"正直に言わせて。","flow":["「正直に言わせて」と前置き","すれ違って好みだと思ったが、声を掛けるのは無理と思っていた","体が勝手に動いた、自分でも驚いていると明かす","それほどタイプなのだと正直に伝える"],"points":["相手の目を見ることで真剣さを伝える","3フレーズの間に少しためを作り、言葉を選んで話している印象を与える"],"branch":"反応良し→ナンバークローズへ／悪い→グダ崩しへ","caution":"","badge":"","tag":"間を取る"}]}],"principles":["立ち止めは話術より身振りが先。止められたから会話が進むと考える","足止めは斜め前から。体への接触と真正面での進路妨害は避ける","理由は建前と本音の2段で。好意は自分も驚いている体で伝える","開示は短く早口で、なるべく前向きな言葉を投げて安心させる","後悔・誠実系は口数を絞り、目を見て真剣に言い切る","各トークの後は反応で分岐。悪ければ切り返しやグダ崩しへ"]},"2b":{"chunk":"2b","groups":[{"name":"ガンシカ（無視・早足）崩し","ids":"2.21–2.30","summary":"声掛け後の無視や途中で反応が落ちた時、立ち止め失敗時にも使う切り返し。笑いを入れるのが効果的で、一度クスッとさせれば立ち止め・理由・後悔・誠実系が通りやすい。勝負は手数、20パターンを覚えてテンポ良く返す","patterns":[{"id":"2.21","title":"ガンシカ崩し＆切り返しトーク1","scene":"声掛けの無視・反応低下・立ち止め失敗時に笑いで崩す","cue":"あ、怒ってる？","flow":["無視されたら「あ、怒ってる？」と声をかける","歩き続ける相手に「君こんな顔してる」と前置きし、こちらを見させる","ちらっと見たら両人差し指で目尻を吊り上げて見せる","笑ったら「気をつけて（笑）」と軽く締める"],"points":["無視は笑いで崩す。質問型の第一声が無視されたら同じ型は効きにくく、刺さる型も人それぞれ。反応が鈍ければ即別タイプへ","「君の顔がこう」と前置きすると高確率で振り向く。笑わせたらすぐ立ち止め・理由トークへつなぐのがコツ"],"branch":"反応良→立ち止めステップへ／悪→別のガンシカ崩しへ","caution":"","badge":"","tag":"無視"},{"id":"2.22","title":"ガンシカ崩し＆切り返しトーク2","scene":"早足で逃げようとする相手の動きを指摘して崩す","cue":"え、競歩？（笑）","flow":["早足になった相手を追い、「え、競歩？（笑）」","追い抜きながら「負けないよ（笑）」","相手が笑えば次の展開へ"],"points":["相手を観察し、「このまま逃げよう」という心理と動きを見抜いて指摘する","指摘された相手はギクッとし、ガードが少し緩む。その隙に立ち止めか別の崩しトークを重ねる"],"branch":"反応良→立ち止めステップへ／悪→別のガンシカ崩しへ","caution":"","badge":"","tag":"早足"},{"id":"2.23","title":"ガンシカ崩し＆切り返しトーク3","scene":"無視の裏にある「怪しい」という警戒を笑いに変える","cue":"え、無視？怪しい？","flow":["無視されたら「え、無視？怪しい？」と相手の警戒を代弁","「ちょっとしか怪しくない」と認めつつ止まるよう頼む","相手が笑えば立ち止めへ"],"points":["一度怪しいと思われたら、否定を重ねるほど逆効果","怪しさを否定せずいったん認め、「ちょっとだけ」と笑いに変えてガードを一瞬ゆるめる"],"branch":"反応良→立ち止めステップへ／悪→別のガンシカ崩しへ","caution":"","badge":"","tag":"無視"},{"id":"2.24","title":"ガンシカ崩し＆切り返しトーク4","scene":"早足の相手が抱く「勧誘では」という不安を先回りで消す","cue":"待って、変な勧誘じゃないから！","flow":["早足になった相手を呼び止める","「変な勧誘じゃない」と先に否定する","反応次第で立ち止めへ"],"points":["無視する相手の心理は「危険な目に遭いたくない」が大半。その不安の原因を消す","勧誘を疑う相手が多いため、こちらから先に違うと伝えて一時的に不安を消す"],"branch":"反応良→立ち止めステップへ／悪→別のガンシカ崩しへ","caution":"","badge":"","tag":"早足"},{"id":"2.25","title":"ガンシカ崩し＆切り返しトーク5","scene":"キャッチの多いターミナル駅などで標準装備にして必ず使う","cue":"キャッチとかスカウトじゃない","flow":["相手が早足になる","「キャッチとかスカウトじゃない」と告げる","「じゃあ何？」と考えた隙に立ち止めを重ねる"],"points":["繁華街の相手はキャッチ・スカウトへの警戒が当たり前になっている","具体的な不安を否定すると「では何者？」と一瞬考えさせられる。その間に立ち止めを仕掛ける連携が強力"],"branch":"反応良→立ち止めステップへ／悪→別のガンシカ崩しへ","caution":"","badge":"繁華街で必須","tag":"早足"},{"id":"2.26","title":"ガンシカ崩し＆切り返しトーク6","scene":"早足の相手に、はしゃいだ楽しげな空気を見せて崩す","cue":"おお、俊敏だね（笑）","flow":["早足になった相手に「おお、俊敏だね（笑）」","「負けないけど！」と大げさに追い越し、笑顔ではしゃぐ","相手が「なんなの（笑）」と反応したら次へ"],"points":["子ども同士がじゃれ合うような空気を作り、無視を崩す","こちらの楽しげな様子が相手にも伝わって共感を生み、警戒心が下がる"],"branch":"反応良→立ち止めステップへ／悪→別のガンシカ崩しへ","caution":"","badge":"","tag":"早足"},{"id":"2.27","title":"ガンシカ崩し＆切り返しトーク7","scene":"「用事」の一言で疑問を生み、早足の相手の足を止める","cue":"え、もしかして用事ある？","flow":["早足になった相手に「もしかして用事ある？」","続けて「俺も用事ある」と言い、少し止まるよう頼む","疑問が浮かんだ瞬間に立ち止め・他トークへ"],"points":["最初の問いで、相手に自分の予定を思い浮かべさせる","「俺も用事がある」と返すと「何の用？」と一瞬疑問が浮かぶ","その瞬間に立ち止め等を重ね、思考を揺らしてこちらのペースへ引き込む"],"branch":"反応良→立ち止めステップへ／悪→別のガンシカ崩しへ","caution":"","badge":"","tag":"早足"},{"id":"2.28","title":"ガンシカ崩し＆切り返しトーク8","scene":"小さな反応を拾うため、ハードルの低いお願いをする","cue":"あ、シカトした？","flow":["無視されたら「あ、シカトした？」","「せめて俺の顔だけ見て」と頼み、「両親が泣くから」と笑いを添える","笑ってこちらを見たら立ち止めへ"],"points":["わずかな反応でも取れればそこから広げられるので、まず小さな反応を狙う","「顔を見る」だけの依頼は負担が非常に小さく、応じてもらえる確率が高い。これを突破口にする"],"branch":"反応良→立ち止めステップへ／悪→別のガンシカ崩しへ","caution":"","badge":"","tag":"無視"},{"id":"2.29","title":"ガンシカ崩し＆切り返しトーク9","scene":"何度か崩した後さらに粘る場面で、時間を区切って不安を消す","cue":"あ、シカト？","flow":["無視されたら「あ、シカト？」","追い越して「1分だけ話し聞いて？」と時間を限定","「経ったら絶対消える」と大げさに念押しして笑いを取る"],"points":["粘る時は具体的な時間を示し、「ずっと付きまとわれるかも」という不安を消す","一度止まってもらえれば、1分の約束はほぼ問われない","「30秒」「10秒」と短くする応用も有効"],"branch":"反応良→立ち止めステップへ／悪→別のガンシカ崩しへ","caution":"","badge":"粘り用","tag":"無視"},{"id":"2.30","title":"ガンシカ崩し＆切り返しトーク10","scene":"早足の相手がちらっと見た瞬間、表情と仕草で笑わせる","cue":"（追い抜いて笑顔で手を振る）","flow":["早足になった相手を追いかける","追い抜き、顔を覗き込んで笑顔で手を振る","相手が笑ったら次のトークへ"],"points":["警戒中の相手がちらっと見た瞬間が好機。面白い表情と身振りで笑いを誘う","警戒していた相手とのギャップで笑いが生まれガードが緩む。その隙に次のトークを確実に当てる"],"branch":"反応良→立ち止めステップへ／悪→別のガンシカ崩しへ","caution":"","badge":"","tag":"早足"}]},{"name":"返答への切り返し","ids":"2.31–2.50","summary":"第一声への相手の返答はほぼ決まっているので、各返答への返しを準備しておけば反射的に切り返せる。毎回考える負担が減り、その分を服装や表情の観察に回せる。慣れるほど自然になり成功率が上がる","patterns":[{"id":"2.31","title":"ガンシカ崩し＆切り返しトーク11","scene":"「チャライ」と言われた時、否定語を前向きな言葉に変えて返す","cue":"チャラくないよ、積極的なだけ！","flow":["相手から「チャライ」と言われる","「積極的なだけ！」と前向きに言い換える","反応次第で立ち止めへ"],"points":["会話中「チャライ」はよく言われる。「チャライ＝積極的」とイメージを置き換えるために使う","並行トーク中の相手は状況処理で手一杯。言葉を次々ポジティブに変換すると、こちらの印象全体が好転し応じやすくなる","否定的な言葉が出たら、必ず前向きな言葉に変えて返す"],"branch":"反応良→立ち止めステップへ／悪→別の崩し・切り返しへ","caution":"","badge":"","tag":"チャライ"},{"id":"2.32","title":"ガンシカ崩し＆切り返しトーク12","scene":"服装は堅いのに言動がチャラい時の「チャライ」への返し","cue":"見た目で判断しないで！","flow":["相手から「チャライ」と言われる","間を置かず「見た目で判断しないで！」と返す","笑い・驚きが出たらすぐ次の行動へ"],"points":["最大の肝はテンポ。即答で使う","唐突な正論に相手はたいてい笑うか驚く。その瞬間にすぐ次のアクションを起こす"],"branch":"反応良→立ち止めステップへ／悪→別のガンシカ崩しへ","caution":"","badge":"","tag":"チャライ"},{"id":"2.33","title":"ガンシカ崩し＆切り返しトーク13","scene":"「チャライ」に真顔で返し、ギャップで笑わせる","cue":"ちょっとしかチャラくないから！","flow":["相手から「チャライ」と言われる","即答で、真顔のまま「ちょっとしかチャラくない」と返す","笑いが出た隙に次へ"],"points":["真剣な顔で、大事な話をするような調子で即答するのがコツ","表情と内容のギャップが笑いを呼び、一瞬の隙を生む"],"branch":"反応良→立ち止めステップへ／悪→別のガンシカ崩しへ","caution":"","badge":"","tag":"チャライ"},{"id":"2.34","title":"ガンシカ崩し＆切り返しトーク14","scene":"「忙しい・時間がない」をいったん受け入れて次の要求へ","cue":"分かった、今日は帰って大丈夫！","flow":["相手から「忙しいので」","「今日は帰って大丈夫！」とまず受け入れる","すぐ「でもその前に30秒だけ！」と次の要求を出す"],"points":["相手の言葉を突っぱねると、拒絶の応酬になってしまう","まず受け入れ、それから次の要求を出す。この順番を必ず守る"],"branch":"反応良→立ち止めステップへ／悪→別のガンシカ崩しへ","caution":"","badge":"","tag":"忙しい"},{"id":"2.35","title":"ガンシカ崩し＆切り返しトーク15","scene":"「忙しい」に同調し、手短に済ませる前提を作る","cue":"うん、俺も忙しいんだ","flow":["相手から「忙しいので」","「俺も忙しいんだ」と同調する","「時間は取らせない」と続けて次の要求へ"],"points":["拒否せず、「自分も同じ」という気持ちを示す","「お互い忙しい→だから手早く済ませよう」という設定を作って話を進める"],"branch":"反応良→立ち止めステップへ／悪→別のガンシカ崩しへ","caution":"","badge":"","tag":"忙しい"},{"id":"2.36","title":"ガンシカ崩し＆切り返しトーク16","scene":"「忙しい」に、簡単な一言で具体性を示し不安を消す","cue":"1分立ち話で大丈夫！","flow":["相手から「忙しいので」","「分かった」と受け、「1分立ち話で大丈夫」と提示","「それ以上はない」と上限を明言する"],"points":["「1分」「立ち話」「それ以上なし」の3点をまとめて出し、具体性とハードルの低さで不安を消す","立ち止めトークを使う時にも頻繁に混ぜ込む"],"branch":"反応良→立ち止めステップへ／悪→別のガンシカ崩しへ","caution":"","badge":"オススメ","tag":"忙しい"},{"id":"2.37","title":"ガンシカ崩し＆切り返しトーク17","scene":"「忙しい」に同調と短い提案を即座に重ね、考える隙を与えない","cue":"俺も用事あるから","flow":["相手から「忙しいので」","「俺も用事ある」と同調し、即「ちょっと止まって！」と提案","反応次第で立ち止めへ"],"points":["同調と具体的な提案を間髪入れずに出し、考える余地を与えない","状況が飲み込めていない相手に、前向きな同調と負担を下げた提案をぶつけると、高確率で立ち止めにつながる"],"branch":"反応良→立ち止めステップへ／悪→別のガンシカ崩しへ","caution":"","badge":"オススメ","tag":"忙しい"},{"id":"2.38","title":"ガンシカ崩し＆切り返しトーク18","scene":"「帰るところ」に同調し、一緒に帰る提案へつなぐ","cue":"お、奇遇、俺も帰るとこ","flow":["相手から「帰るところなので」","「奇遇、俺も帰るとこ」と同じ状況を共有","「途中まで一緒に帰ろう」と提案する"],"points":["同調→共有→提案の3段を一瞬で組み立てて出す","帰ることを肯定し、自分も同じだと示したうえで途中まで一緒にと誘う","慣れて即座に返せるほど、良い反応を引き出しやすくなる"],"branch":"反応良→立ち止めステップへ／悪→別のガンシカ崩しへ","caution":"","badge":"多用","tag":"帰る"},{"id":"2.39","title":"ガンシカ崩し＆切り返しトーク19","scene":"「帰る」に同調直後、無関係な話で戸惑わせて止める","cue":"じゃあ一緒に帰ろう","flow":["相手から「帰るところなので」","「じゃあ一緒に帰ろう」と同調する","「こっち側歩くの好き」と脈絡のない宣言をする","「一旦止まって」と回り込み、手振りで立ち止めへ移る"],"points":["同調のすぐ後に全く無関係な話題を出し、ガードを下げる","状況が読めず戸惑う相手は、「一旦止まって」の要求を受け入れやすくなる"],"branch":"反応良→立ち止めステップへ／悪→別の崩し・切り返しへ","caution":"","badge":"","tag":"帰る"},{"id":"2.40","title":"ガンシカ崩し＆切り返しトーク20","scene":"「大丈夫」の断りを前向きに曲解し、引かない姿勢を見せる","cue":"大丈夫？OKってこと！？","flow":["相手から「大丈夫です」","即座に「OKってこと！？」と前向きに受け取る","注意がこちらに向いたら立ち止めへ"],"points":["引き下がらない強い意志を示す","瞬時に前向きな解釈で返し、へりくだらないことで「何者？」と思わせ、注意を一度こちらへ向ける","返しが速いほど効果が上がる"],"branch":"反応良→立ち止めステップへ／悪→別の崩し・切り返しへ","caution":"","badge":"","tag":"大丈夫・結構"},{"id":"2.41","title":"ガンシカ崩し＆切り返しトーク21","scene":"「大丈夫」の断りに疑問と提案の2連打で返す","cue":"え、何が大丈夫？","flow":["相手から「大丈夫です」","「何が大丈夫？」と意図とずれた疑問を投げる","すぐ「ちょっと立ち話しよ」と提案する"],"points":["「疑問」と「提案」をワン・ツーで繰り出す","「大丈夫」は相手の決まり文句で中身は深く考えていない。ずれた疑問の直後に提案するとガードが一瞬崩れ、他の立ち止めトークも効きやすい"],"branch":"反応良→立ち止めステップへ／悪→別の崩し・切り返しへ","caution":"","badge":"","tag":"大丈夫・結構"},{"id":"2.42","title":"ガンシカ崩し＆切り返しトーク22","scene":"「結構」の断りに間接的な好意を挟み、心の隙を作る","cue":"好意がないと声かけないから","flow":["相手から「結構です」","「好意がないと声かけない」と間接的に好意を伝える","「そんなこと言わないで！」と笑い交じりに返し反応を引き出す"],"points":["さらりと間接的に好意を伝え、「断るあなたが悪者」という構図も挟んで心に隙を作り、反応を引き出す","わずかでも反応があれば、すかさず次のトークへ"],"branch":"反応良→立ち止めステップへ／悪→別の崩し・切り返しへ","caution":"","badge":"","tag":"大丈夫・結構"},{"id":"2.43","title":"ガンシカ崩し＆切り返しトーク23","scene":"「待ち合わせ・人と会う」に同調し、一緒に待つ提案をする","cue":"お、俺もだから一緒に待とう","flow":["相手から「待ち合わせなので」","「俺もだから一緒に待とう」と同調して提案","「来るまでヒマじゃなくなる」ともっともらしい理由を添える"],"points":["テンポよく流れるように返しつつ、一般的な正論を混ぜ込む","筋が通っていなくても、もっともらしく聞こえる空気を作れる"],"branch":"反応良→立ち止めステップへ／悪→別の崩し・切り返しへ","caution":"","badge":"","tag":"待ち合わせ"},{"id":"2.44","title":"ガンシカ崩し＆切り返しトーク24","scene":"待ち合わせ中の相手に、すぐ去ると約束して要求を通す","cue":"お、すぐ来るの？","flow":["相手から「待ち合わせなので」","「すぐ来るの？」と確認→大抵「すぐ来ます」と返る","「俺もすぐ消える」と返し、「その前に…」と次の要求へ"],"points":["しつこくしないと伝えながら、要求も通す","「すぐ来る」と答えさせた流れを逆手に取り、すぐ去る約束で次の要求を通しやすくする"],"branch":"反応良→立ち止めステップへ／悪→別の崩し・切り返しへ","caution":"","badge":"","tag":"待ち合わせ"},{"id":"2.45","title":"ガンシカ崩し＆切り返しトーク25","scene":"きつい「無理」に、諦める前に一度粘りと笑いで返す","cue":"無理が無理！","flow":["相手から「無理！」","「無理が無理！」と言葉を返す","「マジで無理」には「マジ無理がマジで無理！」と重ねて笑いへ"],"points":["粘りと笑いのやり取りで興味を引く","繁華街の相手はナンパを反射的に断ることが多い。粘りに笑いを混ぜて続けると「何者？」と興味が湧き、見る・止まるなどの反応が得られる"],"branch":"反応良→立ち止めステップへ／悪→別の崩し・切り返しへ","caution":"1〜2パターンで駄目なら必ず引く。続けるとトラブルのもと","badge":"","tag":"無理"},{"id":"2.46","title":"ガンシカ崩し＆切り返しトーク26","scene":"きつい「無理」に、諦める前に一度ありえない要求の笑いで粘る","cue":"無理じゃない！","flow":["相手から「無理！」","「無理じゃない！」と即否定","「マジで無理」には「4時間だけ立ち話も無理？」とおどける","「なんでそうなるの（笑）」と笑いが出れば次へ"],"points":["粘りの中に強めの笑いを入れる","拒否された直後、「4時間だけ立ち話」と笑える要求を出し、警戒心とガードを緩める"],"branch":"反応良→立ち止めステップへ／悪→別の崩し・切り返しへ","caution":"目安は1〜2パターンまで。超えたら粘らず切り上げ次へ","badge":"","tag":"無理"},{"id":"2.47","title":"ガンシカ崩し＆切り返しトーク27","scene":"きつい「無理」に、無茶なお茶の誘いで笑わせて粘る","cue":"無理じゃない！","flow":["相手から「無理！」","「無理じゃない！」と返す","「マジで無理」には「40杯だけお茶も無理？」と無茶を言う"],"points":["粘りの中に強めの笑いを挟む","「40杯だけお茶」という無茶で笑える要求で少し笑わせ、ガードを下げる"],"branch":"反応良→立ち止めステップへ／悪→別の崩し・切り返しへ","caution":"","badge":"","tag":"無理"},{"id":"2.48","title":"ガンシカ崩し＆切り返しトーク28","scene":"きつい「無理」に、いい人アピールと疑問で興味を引く","cue":"何で？こんなにいい人なのに？","flow":["相手から「無理！」","「こんなにいい人なのに？」といい人をアピール","「証明するから止まって！？」と続ける","「何を？」と興味が湧いた所で立ち止め・切り返しへ"],"points":["いい人だと訴え、「証明する」→「何を？」と疑問を持たせる流れで攻める","「証明する」と言われると、無視するつもりの相手も少し興味を持つことが多い。その時に立ち止めか切り返しを仕掛ける"],"branch":"反応良→立ち止めステップへ／悪→別の崩し・切り返しへ","caution":"","badge":"","tag":"無理"},{"id":"2.49","title":"ガンシカ崩し＆切り返しトーク29","scene":"きつい「無理」に、しつこさを職業のせいにして笑いを取る","cue":"しつこい？","flow":["相手から「無理！」","「しつこい？」と自分から聞く→「しつこい！」","「○○は意外としつこいからね」と職業などのせいにして笑わせる"],"points":["しつこさの理由を職業などに押し付け、さらっと笑いを取る","自己開示の要素も入るので効率が良い。そこから話をどんどんつなげる"],"branch":"反応良→立ち止めステップへ／悪→別の崩し・切り返しへ","caution":"","badge":"","tag":"無理"},{"id":"2.50","title":"ガンシカ崩し＆切り返しトーク30","scene":"きつい「無理」に、拒絶返し→好意の落差で揺さぶる","cue":"俺も無理っていう人無理","flow":["相手から「無理！」","「俺も無理っていう人無理（笑）」と拒絶を返す","相手が笑ったら「でもタイプだから止まって！」"],"points":["こちらからきつめの拒絶を出した直後に好意的な言葉を伝え、揺さぶる","拒絶と前向きな言葉の落差で相手の感情が揺れる。そのタイミングで他のトークや立ち止めを仕掛ける"],"branch":"反応良→立ち止めステップへ／悪→別の崩し・切り返しへ","caution":"","badge":"","tag":"無理"}]}],"principles":["無視や拒否には同じ型を繰り返さず、反応を見て別タイプへ即切り替える手数勝負","笑いで一度でも反応を取れれば、立ち止め・理由トークなどが通りやすくなる","相手の言葉は突っぱねず、いったん受け入れ・同調してから次の要求を出す","勧誘・キャッチ・付きまといへの不安を先回りで消し、時間を具体的に区切る","否定的な言葉は前向きな言葉に変換し、即答のテンポで返す","反応が出た瞬間に立ち止めへ。きつい拒絶は1〜2パターン粘って駄目なら引く"]}};
+(function(){
+  var D = window.DATA || {};
+  var esc = function(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});};
+  var pid = function(id){return 'p-'+String(id).replace(/\./g,'-');};
+
+  function cueHtml(c){
+    c = String(c||'').trim();
+    if(!c) return '';
+    var isAct = /^[（(]/.test(c) && !/「/.test(c);
+    if(isAct) return '<div class="cue act">'+esc(c.replace(/^[（(]|[）)]$/g,''))+'</div>';
+    if(!/「/.test(c)) c = '「'+c+'」';
+    return '<div class="cue">'+esc(c)+'</div>';
+  }
+
+  function card(p){
+    var h = '<article class="card" id="'+pid(p.id)+'">';
+    h += '<div class="c-head"><span class="pid">'+esc(p.id)+'</span><h4>'+esc(p.title)+'</h4>';
+    if(p.badge) h += '<span class="badge">'+esc(p.badge)+'</span>';
+    if(p.tag) h += '<span class="tag">'+esc(p.tag)+'</span>';
+    h += '</div>';
+    if(p.scene) h += '<p class="scene">'+esc(p.scene)+'</p>';
+    h += cueHtml(p.cue);
+    if(p.flow && p.flow.length){ h += '<ol class="flow">'+p.flow.map(function(f){return '<li>'+esc(f)+'</li>';}).join('')+'</ol>'; }
+    if(p.points && p.points.length){ h += '<ul class="points"><li class="ph">POINT</li>'+p.points.map(function(f){return '<li>'+esc(f)+'</li>';}).join('')+'</ul>'; }
+    if(p.branch) h += '<p class="branch">'+esc(p.branch)+'</p>';
+    if(p.caution) h += '<p class="caution">'+esc(p.caution)+'</p>';
+    h += '</article>';
+    return h;
+  }
+
+  document.querySelectorAll('.groups').forEach(function(box){
+    var keys = box.getAttribute('data-chunks').split(/\s+/);
+    var out = '', nav = '', prin = [];
+    keys.forEach(function(k){
+      var ch = D[k];
+      if(!ch){ out += '<div class="loading">データ（'+esc(k)+'）が見つかりません</div>'; return; }
+      (ch.groups||[]).forEach(function(g, gi){
+        var gid = 'g-'+k+'-'+gi;
+        var n = (g.patterns||[]).length;
+        nav += '<a href="#'+gid+'">'+esc(g.name)+'<span>'+n+'</span></a>';
+        out += '<section class="group" id="'+gid+'"><div class="group-head"><h3>'+esc(g.name)+'</h3><span class="range">'+esc(g.ids)+' · '+n+'パターン</span></div>';
+        if(g.summary) out += '<p class="group-sum">'+esc(g.summary)+'</p>';
+        out += '<div class="cards">'+(g.patterns||[]).map(card).join('')+'</div></section>';
+      });
+      (ch.principles||[]).forEach(function(x){ if(prin.indexOf(x)<0) prin.push(x); });
+    });
+    var head = '<nav class="groupnav" aria-label="この章のグループ">'+nav+'</nav>';
+    if(prin.length) head += '<details class="chprin"><summary>この章で繰り返し出てくるポイント（'+prin.length+'）</summary><ul>'+prin.map(function(x){return '<li>'+esc(x)+'</li>';}).join('')+'</ul></details>';
+    box.innerHTML = head + out;
+  });
+
+  // search
+  var q = document.getElementById('q'), hit = document.getElementById('hit'), nohit = document.getElementById('nohit');
+  var cards = Array.prototype.slice.call(document.querySelectorAll('.card'));
+  cards.forEach(function(c){ c._t = c.textContent.toLowerCase(); });
+  var statics = Array.prototype.slice.call(document.querySelectorAll('#howto, #map, #principles, .chapter .ch-head ~ .grid-2, .chapter .ch-head ~ .grid-3, .chapter .ch-head ~ .panel, .chapter .ch-head ~ .quad, .chapter .ch-head ~ .withheld, .chapter .ch-head ~ .shops, .chapter .ch-head ~ p.note, .groupnav, details.chprin, .hero'));
+  function run(){
+    var v = q.value.trim().toLowerCase();
+    var terms = v.split(/\s+/).filter(Boolean);
+    var n = 0;
+    cards.forEach(function(c){
+      var ok = !terms.length || terms.every(function(t){return c._t.indexOf(t)>=0;});
+      c.classList.toggle('hidden', !ok); if(ok) n++;
+    });
+    document.querySelectorAll('.group').forEach(function(g){ g.classList.toggle('hidden', !!terms.length && !g.querySelector('.card:not(.hidden)')); });
+    document.querySelectorAll('.chapter').forEach(function(s){ s.classList.toggle('hidden', !!terms.length && !s.querySelector('.card:not(.hidden)')); });
+    statics.forEach(function(s){ s.classList.toggle('hidden', !!terms.length); });
+    hit.textContent = terms.length ? n+'件' : '';
+    nohit.style.display = (terms.length && !n) ? 'block' : 'none';
+  }
+  q.addEventListener('input', run);
+
+  // compact
+  var cb = document.getElementById('compact');
+  function setCompact(on){ document.body.classList.toggle('compact', on); cb.setAttribute('aria-pressed', on?'true':'false'); try{localStorage.setItem('tk-compact', on?'1':'0');}catch(e){} }
+  cb.addEventListener('click', function(){ setCompact(!document.body.classList.contains('compact')); });
+  try{ if(localStorage.getItem('tk-compact')==='1') setCompact(true); }catch(e){}
+
+  // theme
+  var root = document.documentElement, tb = document.getElementById('theme');
+  try{ var t = localStorage.getItem('tk-theme'); if(t) root.setAttribute('data-theme', t); }catch(e){}
+  tb.addEventListener('click', function(){
+    var cur = root.getAttribute('data-theme') || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    var nx = cur === 'dark' ? 'light' : 'dark';
+    root.setAttribute('data-theme', nx);
+    try{ localStorage.setItem('tk-theme', nx); }catch(e){}
+  });
+
+  if(location.hash){ var el = document.getElementById(location.hash.slice(1)); if(el) setTimeout(function(){ el.scrollIntoView(); }, 50); }
+})();
+</script>
+</body>
+</html>
