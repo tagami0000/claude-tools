@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex, nofollow">
 <title>200トークスクリプト図解</title>
+<script>try{var t=localStorage.getItem('tk-theme');if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t);}catch(e){}</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet">
@@ -409,6 +410,21 @@ body.compact .cards{grid-template-columns:repeat(auto-fill,minmax(250px,1fr))}
 
 footer{border-top:1px solid var(--line);padding:30px 0 60px;color:var(--ink-3);font-size:12.5px}
 footer p{margin:4px 0}
+footer a{color:var(--ink-2);font-weight:700}
+
+:root[data-theme="dark"] .navlinks a i,:root[data-theme="dark"] details.chprin summary::before{color:#141311}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .navlinks a i,:root:not([data-theme="light"]) details.chprin summary::before{color:#141311}}
+
+/* ===== back to hub ===== */
+.back{flex:none;text-decoration:none;font-size:12.5px;font-weight:700;color:var(--ink-2);padding:5px 12px;border-radius:999px;border:1px solid var(--line);background:var(--surface);white-space:nowrap}
+.back:hover{color:var(--ink);border-color:var(--line-2)}
+@media (max-width:860px){
+  html{scroll-padding-top:112px}
+  .back{width:34px;height:34px;padding:0;display:grid;place-items:center;font-size:15px}
+  .back-label{display:none}
+}
+.backlink{display:block;width:fit-content;margin:0 0 14px;font-size:12.5px;font-weight:700;color:var(--ink-2);text-decoration:none}
+.backlink:hover{text-decoration:underline}
 
 @media print{
   .topbar,.tools{display:none}
@@ -422,6 +438,7 @@ footer p{margin:4px 0}
 
 <div class="topbar">
   <div class="wrap">
+    <a class="back" href="index.html" title="恋愛まとめへ戻る" aria-label="恋愛まとめへ戻る">←<span class="back-label"> 恋愛まとめ</span></a>
     <div class="brand">200トーク図解</div>
     <nav class="navlinks" aria-label="章">
       <a href="#map">全体像</a>
@@ -449,6 +466,7 @@ footer p{margin:4px 0}
 <main>
 <header class="hero">
   <div class="wrap">
+    <a class="backlink" href="index.html">← 恋愛まとめへ戻る</a>
     <span class="kicker">PDF 277ページ → 図解 1ページ</span>
     <h1>チバの全トーク・全ラインスクリプト集<br><span>200パターン 図解</span></h1>
     <p class="lead">路上の声掛けからアポ後まで、7つのステップに並んだトークとLINEの台本を、<b>「どの場面で」「何を言い」「なぜ効くか」</b>の3点で1枚ずつのカードに整理しました。</p>
@@ -874,6 +892,7 @@ footer p{margin:4px 0}
   <div class="wrap">
     <p>出典：チバ『チバの全トーク・全ラインスクリプト集（200パターン）』（購入者向けPDF）を、購入者本人の復習用に要約・図解したもの。台詞は要旨に圧縮し、原文をそのまま書き写してはいません。</p>
     <p>元のPDFは複製・譲渡・公開が禁止されています。このファイルも個人用として扱い、共有しないでください。</p>
+    <p><a href="index.html">← 恋愛まとめへ戻る</a></p>
   </div>
 </footer>
 

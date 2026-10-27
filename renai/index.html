@@ -1,0 +1,580 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>恋愛まとめ</title>
+<script>try{var t=localStorage.getItem('tk-theme');if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t);}catch(e){}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f6f4f0; --surface:#ffffff; --surface-2:#f0ece6; --ink:#1c1a17; --ink-2:#55504a; --ink-3:#8b857d;
+  --line:#e2ddd5; --line-2:#cfc8bd; --shadow:0 1px 2px rgba(30,25,20,.05),0 6px 20px rgba(30,25,20,.06);
+  --warn:#c92a2a; --warn-s:#fff1f1;
+  --c1:#d9480f; --c2:#d97706; --c3:#2b8a3e; --c4:#0b7285; --c5:#1971c2; --c6:#6741d9; --c7:#a61e4d; --cx:#5c5f66;
+  --c:var(--cx);
+  --radius:14px;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#141311; --surface:#1d1b19; --surface-2:#262320; --ink:#f1ede7; --ink-2:#bdb6ad; --ink-3:#8c857c;
+    --line:#34302b; --line-2:#48423b; --shadow:0 1px 2px rgba(0,0,0,.3),0 6px 20px rgba(0,0,0,.25);
+    --warn:#ff8787; --warn-s:#3a1d1d;
+    --c1:#ff8a50; --c2:#fbbf24; --c3:#69db7c; --c4:#3bc9db; --c5:#74c0fc; --c6:#b197fc; --c7:#f783ac; --cx:#adb5bd;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#141311; --surface:#1d1b19; --surface-2:#262320; --ink:#f1ede7; --ink-2:#bdb6ad; --ink-3:#8c857c;
+  --line:#34302b; --line-2:#48423b; --shadow:0 1px 2px rgba(0,0,0,.3),0 6px 20px rgba(0,0,0,.25);
+  --warn:#ff8787; --warn-s:#3a1d1d;
+  --c1:#ff8a50; --c2:#fbbf24; --c3:#69db7c; --c4:#3bc9db; --c5:#74c0fc; --c6:#b197fc; --c7:#f783ac; --cx:#adb5bd;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html{scroll-behavior:smooth;scroll-padding-top:72px}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Noto Sans JP","Hiragino Sans","Hiragino Kaku Gothic ProN","Yu Gothic UI","Meiryo",system-ui,sans-serif;font-size:15px;line-height:1.75;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+a{color:inherit}
+b,strong{font-weight:700}
+.wrap{max-width:1200px;margin:0 auto;padding:0 16px}
+code,pre{font-family:ui-monospace,"Cascadia Code",Consolas,"Courier New",monospace}
+
+/* ===== top bar ===== */
+.topbar{position:sticky;top:0;z-index:20;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.topbar .wrap{display:flex;align-items:center;gap:10px;height:56px}
+.brand{font-weight:900;font-size:14px;white-space:nowrap;letter-spacing:.02em;text-decoration:none}
+.navlinks{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;flex:1;min-width:0;mask-image:linear-gradient(90deg,#000 92%,transparent)}
+.navlinks::-webkit-scrollbar{display:none}
+.navlinks a{flex:none;text-decoration:none;font-size:12.5px;font-weight:700;padding:5px 10px;border-radius:999px;color:var(--ink-2);border:1px solid transparent}
+.navlinks a:hover{background:var(--surface);border-color:var(--line)}
+.tools{display:flex;gap:6px;align-items:center}
+.search{position:relative}
+.search input{width:220px;height:34px;border-radius:999px;border:1px solid var(--line-2);background:var(--surface);color:var(--ink);padding:0 12px 0 32px;font:inherit;font-size:13px}
+.search input:focus{outline:2px solid color-mix(in srgb,var(--c5) 50%,transparent);outline-offset:1px}
+.search svg{position:absolute;left:10px;top:9px;width:16px;height:16px;color:var(--ink-3)}
+.btn{height:34px;border-radius:999px;border:1px solid var(--line-2);background:var(--surface);color:var(--ink);font:inherit;font-size:12.5px;font-weight:700;padding:0 12px;cursor:pointer;white-space:nowrap}
+.icon-btn{width:34px;padding:0;display:grid;place-items:center}
+.icon-btn svg{width:16px;height:16px}
+.hitcount{font-size:12px;color:var(--ink-3);white-space:nowrap}
+@media (max-width:860px){
+  html{scroll-padding-top:112px}
+  .topbar .wrap{flex-wrap:wrap;height:auto;padding-top:8px;padding-bottom:8px;row-gap:6px}
+  .navlinks{order:3;flex-basis:100%}
+  .tools{flex:1;min-width:0}
+  .search{flex:1;min-width:0}
+  .search input{width:100%}
+}
+
+/* ===== hero ===== */
+.hero{padding:44px 0 20px}
+.crumb{margin:0 0 14px;font-size:12.5px;color:var(--ink-3)}
+.crumb a{color:var(--ink-2);font-weight:700;text-decoration:none}
+.crumb a:hover{text-decoration:underline}
+.kicker{display:inline-block;font-size:12px;font-weight:700;letter-spacing:.08em;color:var(--ink-2);background:var(--surface);border:1px solid var(--line);padding:4px 12px;border-radius:999px}
+.hero h1{font-size:clamp(28px,5vw,48px);line-height:1.25;font-weight:900;margin:16px 0 12px;letter-spacing:-.01em}
+.hero h1 span{background:linear-gradient(90deg,var(--c7),var(--c1) 30%,var(--c2) 55%,var(--c5) 80%,var(--c6));-webkit-background-clip:text;background-clip:text;color:transparent}
+.hero .lead{font-size:16px;color:var(--ink-2);max-width:760px;margin:0}
+.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:26px}
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:14px 16px}
+.stat b{display:block;font-size:30px;line-height:1.1;font-weight:900}
+.stat b.sm{font-size:21px;line-height:1.45}
+.stat span{font-size:12.5px;color:var(--ink-2)}
+@media (max-width:640px){.stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+/* ===== generic blocks ===== */
+section.block{padding:36px 0}
+.sec-title{display:flex;align-items:baseline;gap:12px;margin:0 0 6px;flex-wrap:wrap}
+.sec-title h2{font-size:24px;font-weight:900;margin:0}
+.sec-title small{color:var(--ink-3);font-weight:700;font-size:12px;letter-spacing:.06em}
+.sec-lead{color:var(--ink-2);margin:0 0 20px}
+.grid-2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+@media (max-width:760px){.grid-2{grid-template-columns:1fr}}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:18px 20px;box-shadow:var(--shadow)}
+.panel h3{margin:0 0 10px;font-size:16px;font-weight:900;display:flex;align-items:center;gap:8px}
+.panel h3::before{content:"";flex:none;width:6px;height:18px;border-radius:3px;background:var(--c)}
+.safety{border:1.5px solid color-mix(in srgb,var(--warn) 55%,var(--line));background:var(--warn-s);border-radius:var(--radius);padding:18px 20px}
+.safety h3{margin:0 0 10px;font-size:16px;font-weight:900;color:var(--warn)}
+ul.list{margin:0;padding-left:1.2em}
+ul.list li{margin:6px 0;font-size:14px}
+ul.list li b{color:var(--ink)}
+.note{font-size:13px;color:var(--ink-2)}
+
+/* ===== categories ===== */
+.flow,.side{list-style:none;margin:0;padding:0;display:grid;gap:22px}
+.flow{grid-template-columns:repeat(4,minmax(0,1fr))}
+.side{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.flow li,.side li{position:relative;min-width:0}
+.flow li:not(:last-child)::after{content:"";position:absolute;right:-16px;top:50%;width:10px;height:10px;border-top:2.5px solid var(--line-2);border-right:2.5px solid var(--line-2);transform:translateY(-50%) rotate(45deg)}
+.side-label{font-size:12px;font-weight:700;color:var(--ink-3);letter-spacing:.06em;margin:20px 0 8px}
+.cat{display:flex;flex-direction:column;align-items:flex-start;gap:4px;width:100%;height:100%;text-align:left;font:inherit;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-top:4px solid var(--c);border-radius:12px;padding:12px 14px 14px;cursor:pointer;box-shadow:var(--shadow);transition:transform .15s,background-color .15s}
+.cat:hover{transform:translateY(-2px)}
+.cat:focus-visible{outline:2px solid var(--c);outline-offset:2px}
+.cat[aria-pressed="true"]{background:color-mix(in srgb,var(--c) 13%,var(--surface));border-color:color-mix(in srgb,var(--c) 60%,var(--line));border-top-color:var(--c)}
+.cat-step{font-size:11px;font-weight:900;letter-spacing:.12em;color:var(--c)}
+.cat-name{font-size:17px;font-weight:900;line-height:1.4;display:flex;align-items:center;gap:6px}
+.cat-desc{font-size:12.5px;color:var(--ink-2);line-height:1.6}
+.cat-count{margin-top:auto;padding-top:6px;font-size:12px;color:var(--ink-3)}
+.cat-count b{color:var(--ink);font-size:15px;font-weight:900;margin:0 1px}
+.side .cat{border-top-width:1px;border-left:4px solid var(--c)}
+.side .cat[aria-pressed="true"]{border-left-color:var(--c)}
+@media (max-width:860px){.flow{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.flow li::after{display:none}}
+@media (max-width:520px){.flow,.side{grid-template-columns:1fr}}
+
+/* ===== cross-document results ===== */
+#results{padding-top:0}
+.results{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:16px 18px 6px;box-shadow:var(--shadow)}
+.results-head{display:flex;align-items:center;gap:6px 12px;flex-wrap:wrap;margin-bottom:6px}
+.results-head h2{font-size:18px;font-weight:900;margin:0;line-height:1.5}
+.results-head .count{font-size:12.5px;color:var(--ink-3)}
+.results-head .btn{margin-left:auto}
+.hits{list-style:none;margin:0;padding:0}
+.hit{border-top:1px solid var(--line);padding:12px 0}
+.hit:first-child{border-top:0}
+.hit-main{display:flex;align-items:center;gap:4px 10px;flex-wrap:wrap;text-decoration:none}
+.hit-main b{font-size:15px}
+.hit-main:hover b{text-decoration:underline}
+.dot{flex:none;width:10px;height:10px;border-radius:50%;background:var(--c)}
+.pill{font-size:11.5px;font-weight:700;color:var(--c);background:color-mix(in srgb,var(--c) 12%,var(--surface));padding:1px 9px;border-radius:999px;white-space:nowrap}
+.hit-doc{font-size:12px;color:var(--ink-3)}
+.hit-groups{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;padding-left:20px}
+.hit-groups a{font-size:12px;font-weight:700;text-decoration:none;padding:3px 10px;border-radius:999px;background:var(--surface-2);border:1px solid var(--line);color:var(--ink-2);line-height:1.6}
+.hit-groups a:hover{border-color:var(--c);color:var(--ink)}
+.hit-groups a.on{background:color-mix(in srgb,var(--c) 15%,var(--surface));border-color:color-mix(in srgb,var(--c) 55%,var(--line));color:var(--ink)}
+.hit-empty{padding:12px 0;color:var(--ink-2);font-size:14px}
+
+/* ===== document cards ===== */
+.docgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,460px),1fr));gap:16px}
+.doc{display:flex;flex-direction:column;gap:10px;min-width:0;background:var(--surface);border:1px solid var(--line);border-top:5px solid var(--c);border-radius:var(--radius);padding:18px;box-shadow:var(--shadow)}
+.doc-top{display:flex;align-items:center;gap:6px 10px;flex-wrap:wrap;font-size:12px;color:var(--ink-3)}
+.doc h3{margin:0;font-size:20px;font-weight:900;line-height:1.4}
+.doc h3 a{text-decoration:none}
+.doc h3 a:hover{text-decoration:underline}
+.doc-src{margin:0;font-size:12.5px;color:var(--ink-2)}
+.doc-meta{display:flex;flex-wrap:wrap;gap:8px}
+.doc-meta span{font-size:12px;color:var(--ink-2);background:var(--surface-2);border:1px solid var(--line);border-radius:10px;padding:3px 10px}
+.doc-meta b{font-size:16px;font-weight:900;color:var(--ink);margin-right:2px}
+.doc-desc{margin:0;font-size:14px;color:var(--ink-2)}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.cchip{font:inherit;font-size:12px;font-weight:700;line-height:1.6;padding:2px 10px;border-radius:999px;border:1px solid color-mix(in srgb,var(--c) 45%,var(--line));background:color-mix(in srgb,var(--c) 10%,var(--surface));color:var(--ink);cursor:pointer}
+.cchip:hover{background:color-mix(in srgb,var(--c) 20%,var(--surface))}
+.tags{display:flex;flex-wrap:wrap;gap:4px 10px;font-size:12px;color:var(--ink-3)}
+details.secs{border-top:1px dashed var(--line-2);padding-top:8px}
+details.secs summary{cursor:pointer;list-style:none;display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;color:var(--ink-2);padding:2px 0}
+details.secs summary::-webkit-details-marker{display:none}
+details.secs summary::before{content:"+";flex:none;display:grid;place-items:center;width:20px;height:20px;border-radius:6px;background:var(--c);color:var(--surface);font-weight:900}
+details.secs[open] summary::before{content:"−"}
+details.secs summary .n{font-size:11.5px;color:var(--ink-3);font-weight:700}
+.secs ol{list-style:none;margin:8px 0 0;padding:0;display:grid;gap:2px}
+.secs li a{display:flex;align-items:center;gap:8px;text-decoration:none;font-size:13.5px;line-height:1.5;padding:6px 8px;border-radius:8px}
+.secs li a:hover{background:var(--surface-2)}
+.secs li small{margin-left:auto;padding-left:8px;color:var(--ink-3);font-size:12px;white-space:nowrap}
+.secs li.dim{opacity:.4}
+.secs li.on a{background:color-mix(in srgb,var(--c) 13%,var(--surface))}
+.doc-foot{margin-top:auto;padding-top:4px;display:flex;justify-content:flex-end}
+.open{display:inline-flex;align-items:center;gap:6px;height:36px;padding:0 18px;border-radius:999px;background:var(--ink);color:var(--bg);text-decoration:none;font-weight:700;font-size:13px}
+.open:hover{opacity:.88}
+.slot{display:flex;flex-direction:column;justify-content:center;gap:6px;min-height:200px;border:2px dashed var(--line-2);border-radius:var(--radius);padding:20px;color:var(--ink-3);font-size:13.5px}
+.slot b{color:var(--ink-2);font-size:16px;font-weight:900}
+.slot a{color:var(--ink-2);font-weight:700}
+.nohit{display:none;margin:8px 0 0;padding:18px;border:1px dashed var(--line-2);border-radius:var(--radius);color:var(--ink-2);text-align:center}
+
+/* ===== how to add ===== */
+details.add{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:0 20px;box-shadow:var(--shadow)}
+details.add>summary{cursor:pointer;list-style:none;display:flex;align-items:center;gap:10px;padding:16px 0;font-weight:900;font-size:16px}
+details.add>summary::-webkit-details-marker{display:none}
+details.add>summary::before{content:"+";flex:none;display:grid;place-items:center;width:22px;height:22px;border-radius:7px;background:var(--ink);color:var(--bg);font-weight:900}
+details.add[open]>summary::before{content:"−"}
+details.add>summary small{font-size:12px;font-weight:700;color:var(--ink-3)}
+.add-body{padding:0 0 18px}
+ol.steps{counter-reset:s;margin:0 0 14px;padding:0}
+ol.steps li{list-style:none;position:relative;padding:10px 12px 10px 48px;background:var(--surface-2);border:1px solid var(--line);border-radius:12px;margin-bottom:8px;font-size:14px}
+ol.steps li::before{counter-increment:s;content:counter(s);position:absolute;left:12px;top:10px;width:24px;height:24px;border-radius:7px;background:var(--ink);color:var(--bg);display:grid;place-items:center;font-weight:900;font-size:12.5px}
+ol.steps li span{display:block;font-size:12.5px;color:var(--ink-2)}
+code{font-size:.9em;background:var(--surface-2);border:1px solid var(--line);padding:0 6px;border-radius:6px}
+ol.steps li code{background:var(--surface)}
+pre{margin:0;background:var(--surface-2);border:1px solid var(--line);border-radius:10px;padding:12px 14px;overflow-x:auto;font-size:12.5px;line-height:1.6;color:var(--ink)}
+
+footer{border-top:1px solid var(--line);padding:30px 0 60px;color:var(--ink-3);font-size:12.5px}
+footer p{margin:4px 0}
+footer a{color:var(--ink-2);font-weight:700}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="wrap">
+    <a class="brand" href="#top">恋愛まとめ</a>
+    <nav class="navlinks" aria-label="ページ内">
+      <a href="#flow">分類から探す</a>
+      <a href="#docs">資料一覧</a>
+      <a href="#rules">約束ごと</a>
+      <a href="#add">資料の足し方</a>
+    </nav>
+    <div class="tools">
+      <label class="search">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <input id="q" type="search" placeholder="資料・章を検索（例: LINE、彼氏）" aria-label="資料と章を検索" autocomplete="off">
+      </label>
+      <span class="hitcount" id="hit" aria-live="polite"></span>
+      <button class="btn icon-btn" id="theme" type="button" title="ライト／ダーク切替" aria-label="ライト／ダーク切替"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg></button>
+    </div>
+  </div>
+</div>
+
+<main id="top">
+<header class="hero">
+  <div class="wrap">
+    <p class="crumb"><a href="../index.html">Claude Tools 工房</a> ／ 恋愛まとめ</p>
+    <span class="kicker">恋愛・ナンパ資料のハブ</span>
+    <h1>恋愛まとめ<br><span>資料ハブ</span></h1>
+    <p class="lead">購入したPDFや資料を図解・要約したページの入口です。<b>出会いから関係が深まるまでの流れ</b>で分類してあるので、分類を押すか検索すると、資料をまたいで該当する章へ直接飛べます。</p>
+    <div class="stats" id="stats"></div>
+  </div>
+</header>
+
+<section class="block" id="flow">
+  <div class="wrap">
+    <div class="sec-title"><h2>分類から探す</h2><small>BY TOPIC</small></div>
+    <p class="sec-lead">左から順に、関係が進む流れです。押すとその分類の章を資料横断で一覧にします（もう一度押すと解除）。</p>
+    <ol class="flow" id="cats-flow"></ol>
+    <p class="side-label">流れ全体に関わるもの</p>
+    <ul class="side" id="cats-side"></ul>
+  </div>
+</section>
+
+<section class="block" id="results" hidden>
+  <div class="wrap">
+    <div class="results">
+      <div class="results-head">
+        <h2 id="res-title"></h2>
+        <span class="count" id="res-count"></span>
+        <button class="btn" id="clear" type="button">絞り込みを解除</button>
+      </div>
+      <ul class="hits" id="hits"></ul>
+    </div>
+  </div>
+</section>
+
+<section class="block" id="docs">
+  <div class="wrap">
+    <div class="sec-title"><h2>資料一覧</h2><small>LIBRARY</small></div>
+    <p class="sec-lead">新しく足した資料から順に並びます。カードの分類ラベルを押しても絞り込めます。</p>
+    <div class="docgrid" id="docgrid"></div>
+    <p class="nohit" id="nohit">条件に合う資料がありません。キーワードを変えるか、絞り込みを解除してください。</p>
+  </div>
+</section>
+
+<section class="block" id="rules">
+  <div class="wrap">
+    <div class="sec-title"><h2>全資料に共通する約束ごと</h2><small>GROUND RULES</small></div>
+    <p class="sec-lead">どの資料を読むときも、先にここを前提にします。</p>
+    <div class="grid-2">
+      <div class="safety">
+        <h3>⚠ いちばん先に来るのは相手の同意</h3>
+        <ul class="list">
+          <li><b>はっきりした「いいよ」がなければ進めない。</b>迷い・沈黙・話をそらすのはYESではない。</li>
+          <li><b>断られたら引く。</b>言い換えや理屈で断りを崩そうとしない。</li>
+          <li><b>判断できない状態の相手とは進めない。</b>酔いすぎている、断りにくい状況にある（手を引かれている・店の前まで来ている等）ときも同じ。</li>
+          <li><b>路上では進路をふさがない・触れない。</b>強い拒絶には1〜2回で退く。</li>
+        </ul>
+      </div>
+      <div class="panel" style="--c:var(--cx)">
+        <h3>このハブの要約ルール</h3>
+        <ul class="list">
+          <li><b>内容は削らない。</b>元資料の項目はすべて残し、文章だけを要旨に言い換える。</li>
+          <li><b>原文を丸写ししない。</b>原文と16字以上続けて一致しないかを機械でチェックしてから載せる。</li>
+          <li><b>断られた後に押し切るための台本は図解しない。</b>その章は構成と著者の注意事項だけを載せる。</li>
+          <li><b>個人の復習用。</b>元資料は購入者向けのため、全ページを検索エンジンに載せない設定（noindex）にしている。</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="block" id="add" style="padding-top:0">
+  <div class="wrap">
+    <details class="add">
+      <summary>資料の足し方<small>このページの更新メモ</small></summary>
+      <div class="add-body">
+        <ol class="steps">
+          <li>要約ページ（HTML）を、このページと同じ <code>renai/</code> フォルダに置く<span>ページの上部と末尾に <code>&lt;a href="index.html"&gt;← 恋愛まとめへ戻る&lt;/a&gt;</code> を入れ、<code>&lt;meta name="robots" content="noindex, nofollow"&gt;</code> も付ける。</span></li>
+          <li>このファイル（<code>renai/index.html</code>）の <code>DOCS</code> 配列に、下のひな形を1件足す<span>カード・件数・分類タイルの数・横断検索は自動で増える。章へのリンクは <code>a</code> に <code>#見出しのid</code> を書く。</span></li>
+          <li>分類は <code>CATS</code> の id（mind / approach / contact / date / close / extra）から選ぶ<span>どれにも当てはまらない資料が増えたら、<code>CATS</code> に1件足せば分類も増やせる。</span></li>
+          <li><code>main</code> にコミットして push する<span>1〜2分で公開サイトに反映される。</span></li>
+        </ol>
+<pre>{
+  id: 'xxx',                       // 英数字の短いID（重複しないもの）
+  title: '○○ 図解',
+  href: '○○_図解.html',             // renai/ の中のファイル名
+  kind: 'PDF要約',
+  source: '著者『書名』',
+  pages: 0, patterns: 0, cards: 0,  // 不明なら書かなくてよい
+  created: '2026-11-01',
+  color: 'var(--c5)',              // --c1〜--c7 / --cx
+  tags: ['…', '…'],
+  desc: 'ひとこと説明',
+  sections: [                      // 章ごとの入口（横断検索に使う）
+    { t: '第1章 …', a: '#ch1', cat: 'approach', n: 30, kw: '検索用の語',
+      g: [['グループ名', '#グループのid']] },
+  ],
+},</pre>
+      </div>
+    </details>
+  </div>
+</section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <p>個人の復習用にまとめた資料ハブです。各ページは検索エンジンに載せない設定（noindex）にしています。元資料は購入者向けのため、共有しないでください。</p>
+    <p><a href="../index.html">← Claude Tools 工房へ</a></p>
+  </div>
+</footer>
+
+<script>
+(function(){
+  'use strict';
+
+  // ===== 分類（左から関係が進む順。flow:false は「流れ全体に関わるもの」の段に並ぶ）=====
+  var CATS = [
+    { id: 'approach', label: 'STEP 1', icon: '👋', name: '声掛け',       color: 'var(--c1)', flow: true,  desc: '最初の一言・立ち止め・反応がないときの切り返し' },
+    { id: 'contact',  label: 'STEP 2', icon: '💬', name: '連絡先・LINE', color: 'var(--c4)', flow: true,  desc: '番号・LINEの交換から、メッセージ・電話・日程調整まで' },
+    { id: 'date',     label: 'STEP 3', icon: '☕', name: 'アポ・会話',   color: 'var(--c5)', flow: true,  desc: '当日の会話・話の引き出し方・関係づくり' },
+    { id: 'close',    label: 'STEP 4', icon: '🤝', name: '親密・同意',   color: 'var(--c7)', flow: true,  desc: '距離の縮め方と、同意を確かめる目安' },
+    { id: 'mind',     label: '土台',   icon: '🧭', name: 'マインド・原則', color: 'var(--c6)', flow: false, desc: '全体像・共通する原則・資料の使い方' },
+    { id: 'extra',    label: '付録',   icon: '📍', name: '店・付録',     color: 'var(--c2)', flow: false, desc: '店リスト・特典・練習プログラムなど' }
+  ];
+
+  // ===== 資料（1件足すとカード・件数・横断検索に自動で反映。ひな形はページ下部「資料の足し方」）=====
+  var DOCS = [
+    {
+      id: 'talk200',
+      title: '200トークスクリプト 図解',
+      href: '200トークスクリプト_図解.html',
+      kind: 'PDF要約',
+      source: 'チバ『チバの全トーク・全ラインスクリプト集（200パターン）』購入者向けPDF',
+      pages: 277, patterns: 200, cards: 160,
+      created: '2026-10-27',
+      color: 'var(--c1)',
+      tags: ['トーク台本', 'LINE台本', '路上', '7ステップ', '切り返し', '店リスト'],
+      desc: '路上の声掛けからアポ後までの7ステップ・200パターンの台本集を、場面／核の一言／流れ／ポイント／次の分岐のカードに整理。反応別の切り返しや連絡のタイミングも一覧できる。第7章は構成と注意事項のみ。',
+      sections: [
+        { t: 'このPDFの使い方・読む順番', a: '#howto', cat: 'mind', kw: '使い方 読み方 覚え方 実践' },
+        { t: '全体像：7ステップの流れ', a: '#map', cat: 'mind', kw: '全体像 流れ図 ステップ 路上 連絡 アポ' },
+        { t: '全章に共通する7つの原則', a: '#principles', cat: 'mind', kw: '原則 小さなYES 二択 言い換え 不安 偶然 主導権 注意事項' },
+        { t: '第1章 声掛け', a: '#ch1', cat: 'approach', n: 30, kw: '第一声 最初の一言 反応 褒める',
+          g: [['待ち合わせトーク', '#g-1a-0'], ['ファースト・トーク', '#g-1a-1'], ['シチュエーション・トーク', '#g-1a-2'], ['ファッション・トーク', '#g-1b-0'], ['運命トーク', '#g-1b-1'], ['（応用）ケータイトーク', '#g-1b-2']] },
+        { t: '第2章 立ち止め', a: '#ch2', cat: 'approach', n: 50, kw: '立ち止め 話しかけた理由 無視 早足 断られた 切り返し 無理 忙しい チャライ',
+          g: [['立ち止めトーク', '#g-2a-0'], ['理由トーク', '#g-2a-1'], ['開示トーク', '#g-2a-2'], ['後悔トーク', '#g-2a-3'], ['誠実トーク', '#g-2a-4'], ['ガンシカ（無視・早足）崩し', '#g-2b-0'], ['返答への切り返し', '#g-2b-1']] },
+        { t: '第3章 ナンバークローズ', a: '#ch3', cat: 'contact', n: 30, kw: 'LINE 番号 連絡先 交換 約束 日程 彼氏 グダ',
+          g: [['TEL番・LINEゲットトーク', '#g-3-0'], ['ブーメランフック・トーク', '#g-3-1'], ['アポ率向上トーク', '#g-3-2'], ['約束トーク', '#g-3-3'], ['誘導トーク', '#g-3-4'], ['彼氏グダ＆その他グダ崩しトーク', '#g-3-5']] },
+        { t: '第4章 メンテナンス（電話・LINE）', a: '#ch4', cat: 'contact', n: 20, kw: 'LINE 電話 メッセージ 返信 日程調整 ドタキャン 既読 未読 タイミング',
+          g: [['ファーストコール・スクリプト', '#g-4-0'], ['ファーストライン・スクリプト', '#g-4-1'], ['セカンドライン・スクリプト', '#g-4-2'], ['日程調整ライン', '#g-4-3'], ['直前ライン', '#g-4-4'], ['復活ライン', '#g-4-5']] },
+        { t: '第5章 関係構築', a: '#ch5', cat: 'date', n: 20, kw: 'アポ デート 会話 質問 共感 価値 コールドリーディング',
+          g: [['引き出しトーク', '#g-5-0'], ['共感トーク', '#g-5-1'], ['価値伝達トーク', '#g-5-2'], ['コールドリーディング・トーク', '#g-5-3']] },
+        { t: '第6章 性的誘惑', a: '#ch6', cat: 'close', n: 10, kw: '接触 スキンシップ 手 段階 嫌がったら中止',
+          g: [['性的興奮導入トーク', '#g-6-0'], ['手話（接触）トーク', '#g-6-1']] },
+        { t: '第7章 クローズ（構成と注意事項のみ）', a: '#ch7', cat: 'close', n: 40, kw: '同意 同意の目安 注意事項 NO' },
+        { t: '特典：新宿の店リスト・180日プログラム', a: '#bonus', cat: 'extra', kw: '店 バー 居酒屋 新宿 立ち飲み 1軒目 2軒目 プログラム' }
+      ]
+    }
+  ];
+
+  // ===== helpers =====
+  function $(id){ return document.getElementById(id); }
+  function esc(s){ return String(s == null ? '' : s).replace(/[&<>"']/g, function(c){ return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+  // 全角半角・大小文字・カタカナひらがなの違いを無視して比べる
+  function norm(s){ return String(s == null ? '' : s).normalize('NFKC').toLowerCase().replace(/[ァ-ヶ]/g, function(c){ return String.fromCharCode(c.charCodeAt(0) - 0x60); }); }
+  function fmtDate(s){ return String(s || '').replace(/-/g, '.'); }
+  function uniq(a){ return a.filter(function(x, i){ return x && a.indexOf(x) === i; }); }
+  function has(text, t){ return text.indexOf(t) >= 0; }
+
+  var catById = Object.create(null);  // ?cat=constructor などの継承プロパティ名を分類と取り違えないため
+  CATS.forEach(function(c){ catById[c.id] = c; });
+  function catColor(id){ return catById[id] ? catById[id].color : 'var(--cx)'; }
+
+  DOCS.forEach(function(d){
+    d.sections = d.sections || [];
+    d.cats = uniq((d.cats || []).concat(d.sections.map(function(s){ return s.cat; })))
+      .sort(function(a, b){ return CATS.indexOf(catById[a]) - CATS.indexOf(catById[b]); });
+    d._head = norm(d.title + ' ' + (d.source || ''));
+    d._all = norm([d.title, d.source, d.kind, (d.tags || []).join(' '), d.desc].join(' '));
+    d.sections.forEach(function(s){
+      s.g = s.g || [];
+      s._t = norm([s.t, s.kw, s.g.map(function(g){ return g[0]; }).join(' '), catById[s.cat] ? catById[s.cat].name : ''].join(' '));
+    });
+  });
+  DOCS.sort(function(a, b){ return String(b.created).localeCompare(String(a.created)); });
+
+  // ===== stats =====
+  function sum(k){ return DOCS.reduce(function(n, d){ return n + (Number(d[k]) || 0); }, 0); }
+  var last = DOCS.map(function(d){ return d.updated || d.created || ''; }).sort().pop() || '';
+  $('stats').innerHTML =
+    '<div class="stat"><b>' + DOCS.length + '</b><span>資料</span></div>' +
+    '<div class="stat"><b>' + sum('pages') + '</b><span>元資料のページ数</span></div>' +
+    '<div class="stat"><b>' + sum('patterns') + '</b><span>収録パターン数</span></div>' +
+    '<div class="stat"><b class="sm">' + esc(fmtDate(last)) + '</b><span>最終更新</span></div>';
+
+  // ===== category tiles =====
+  function tile(c){
+    var nSec = 0, nDoc = 0;
+    DOCS.forEach(function(d){
+      var n = d.sections.filter(function(s){ return s.cat === c.id; }).length;
+      nSec += n;
+      if (d.cats.indexOf(c.id) >= 0) nDoc++;
+    });
+    return '<li><button class="cat" type="button" data-cat="' + esc(c.id) + '" aria-pressed="false" style="--c:' + c.color + '">' +
+      '<span class="cat-step">' + esc(c.label) + '</span>' +
+      '<span class="cat-name"><span aria-hidden="true">' + c.icon + '</span>' + esc(c.name) + '</span>' +
+      '<span class="cat-desc">' + esc(c.desc) + '</span>' +
+      '<span class="cat-count"><b>' + nSec + '</b>章・項目 ／ <b>' + nDoc + '</b>資料</span>' +
+      '</button></li>';
+  }
+  $('cats-flow').innerHTML = CATS.filter(function(c){ return c.flow; }).map(tile).join('');
+  $('cats-side').innerHTML = CATS.filter(function(c){ return !c.flow; }).map(tile).join('');
+
+  // ===== document cards =====
+  function docCard(d){
+    var meta = [];
+    if (d.pages) meta.push('<span><b>' + d.pages + '</b>ページ</span>');
+    if (d.patterns) meta.push('<span><b>' + d.patterns + '</b>パターン</span>');
+    if (d.cards) meta.push('<span><b>' + d.cards + '</b>枚をカード化</span>');
+    var chips = d.cats.map(function(id){
+      var c = catById[id];
+      return c ? '<button type="button" class="cchip" data-cat="' + esc(id) + '" style="--c:' + c.color + '">' + esc(c.name) + '</button>' : '';
+    }).join('');
+    var tags = (d.tags || []).map(function(t){ return '<span>#' + esc(t) + '</span>'; }).join('');
+    var secs = d.sections.map(function(s){
+      return '<li style="--c:' + catColor(s.cat) + '"><a href="' + esc(d.href + s.a) + '"><span class="dot"></span><span>' + esc(s.t) + '</span>' + (s.n ? '<small>' + esc(s.n) + 'パターン</small>' : '') + '</a></li>';
+    }).join('');
+    var dates = (d.created ? fmtDate(d.created) + ' 作成' : '') + (d.updated ? '・' + fmtDate(d.updated) + ' 更新' : '');
+    return '<article class="doc" data-id="' + esc(d.id) + '" style="--c:' + (d.color || 'var(--cx)') + '">' +
+      '<div class="doc-top"><span class="pill">' + esc(d.kind || '資料') + '</span><span>' + esc(dates) + '</span></div>' +
+      '<h3><a href="' + esc(d.href) + '">' + esc(d.title) + '</a></h3>' +
+      (d.source ? '<p class="doc-src">元資料：' + esc(d.source) + '</p>' : '') +
+      (meta.length ? '<div class="doc-meta">' + meta.join('') + '</div>' : '') +
+      (d.desc ? '<p class="doc-desc">' + esc(d.desc) + '</p>' : '') +
+      (chips ? '<div class="chips">' + chips + '</div>' : '') +
+      (tags ? '<div class="tags">' + tags + '</div>' : '') +
+      (secs ? '<details class="secs"><summary>章から開く<span class="n">' + d.sections.length + '</span></summary><ol>' + secs + '</ol></details>' : '') +
+      '<div class="doc-foot"><a class="open" href="' + esc(d.href) + '">開く <span aria-hidden="true">→</span></a></div>' +
+      '</article>';
+  }
+  var slot = '<div class="slot" id="slot"><b>＋ 次の資料</b><span>新しいPDF要約は、このページの <code>DOCS</code> に1件足すとここに並びます。</span><a href="#add">資料の足し方を見る ↓</a></div>';
+  $('docgrid').innerHTML = DOCS.map(docCard).join('') + slot;
+
+  // カードは DOCS と同じ順に描画しているので、順番で対応づける（id の書き間違いや重複で壊れないように）
+  var cardEls = $('docgrid').querySelectorAll('.doc');
+  DOCS.forEach(function(d, i){ d._el = cardEls[i]; });
+
+  // ===== filter & search =====
+  var state = { cat: '', q: '' };
+  var q = $('q');
+
+  function apply(){
+    var terms = norm(state.q).split(/\s+/).filter(Boolean);
+    var active = !!(state.cat || terms.length);
+    var hits = [], nDocs = 0;
+
+    DOCS.forEach(function(d){
+      var el = d._el;
+      var catOk = !state.cat || d.cats.indexOf(state.cat) >= 0;
+      var textOk = terms.every(function(t){ return has(d._all, t) || d.sections.some(function(s){ return has(s._t, t); }); });
+      var show = catOk && textOk;
+      el.hidden = !show;
+      if (show) nDocs++;
+
+      var lis = el.querySelectorAll('.secs li'), anyOn = false;
+      d.sections.forEach(function(s, i){
+        var on = active && show && (!state.cat || s.cat === state.cat) &&
+          terms.every(function(t){ return has(s._t, t) || has(d._head, t); });
+        if (on) { hits.push({ d: d, s: s }); anyOn = true; }
+        lis[i].classList.toggle('on', on);
+        lis[i].classList.toggle('dim', active && !on);
+      });
+      var det = el.querySelector('details.secs');
+      if (det) {
+        if (active) { if (anyOn && !det.open) { det.open = true; det._auto = true; } }
+        else if (det._auto) { det.open = false; det._auto = false; }
+      }
+    });
+
+    $('results').hidden = !active;
+    if (active) {
+      var label = [];
+      if (state.cat) label.push('分類「' + catById[state.cat].name + '」');
+      if (terms.length) label.push('「' + state.q.trim() + '」');
+      $('res-title').textContent = label.join(' × ') + ' に当てはまる章';
+      $('res-count').textContent = '資料 ' + nDocs + '件・章 ' + hits.length + '件';
+      $('hits').innerHTML = hits.length ? hits.map(function(h){
+        var s = h.s, d = h.d;
+        var groups = s.g.map(function(g){
+          var on = terms.length && terms.some(function(t){ return has(norm(g[0]), t); });
+          return '<a href="' + esc(d.href + g[1]) + '"' + (on ? ' class="on"' : '') + '>' + esc(g[0]) + '</a>';
+        }).join('');
+        return '<li class="hit" style="--c:' + catColor(s.cat) + '">' +
+          '<a class="hit-main" href="' + esc(d.href + s.a) + '"><span class="dot"></span><b>' + esc(s.t) + '</b>' +
+          '<span class="pill">' + esc(catById[s.cat] ? catById[s.cat].name : '') + '</span>' +
+          (s.n ? '<span class="hit-doc">' + esc(s.n) + 'パターン</span>' : '') +
+          '<span class="hit-doc">— ' + esc(d.title) + '</span></a>' +
+          (groups ? '<div class="hit-groups">' + groups + '</div>' : '') +
+          '</li>';
+      }).join('') : '<li class="hit-empty">章単位で当てはまるものはありません。下の資料一覧も確認してください。</li>';
+    }
+
+    $('hit').textContent = active ? '資料' + nDocs + '・章' + hits.length : '';
+    $('nohit').style.display = (active && !nDocs) ? 'block' : 'none';
+    $('slot').hidden = active;
+    Array.prototype.forEach.call(document.querySelectorAll('.cat'), function(b){
+      b.setAttribute('aria-pressed', b.getAttribute('data-cat') === state.cat ? 'true' : 'false');
+    });
+
+    try {
+      var p = new URLSearchParams();
+      if (state.cat) p.set('cat', state.cat);
+      if (state.q.trim()) p.set('q', state.q.trim());
+      var qs = p.toString();
+      history.replaceState(null, '', location.pathname + (qs ? '?' + qs : '') + location.hash);
+    } catch (e) {}
+  }
+
+  document.addEventListener('click', function(e){
+    var b = e.target.closest('[data-cat]');
+    if (!b) return;
+    var id = b.getAttribute('data-cat');
+    state.cat = (state.cat === id) ? '' : id;
+    apply();
+    if (state.cat) $('results').scrollIntoView({ block: 'start' });
+  });
+  q.addEventListener('input', function(){ state.q = q.value; apply(); });
+  q.addEventListener('keydown', function(e){ if (e.key === 'Escape') { q.value = ''; state.q = ''; apply(); } });
+  $('clear').addEventListener('click', function(){ state.cat = ''; state.q = ''; q.value = ''; apply(); });
+  document.addEventListener('keydown', function(e){
+    if (e.key === '/' && !/^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement.tagName)) { e.preventDefault(); q.focus(); }
+  });
+
+  // ===== theme =====
+  var root = document.documentElement;
+  $('theme').addEventListener('click', function(){
+    var cur = root.getAttribute('data-theme') || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    var nx = cur === 'dark' ? 'light' : 'dark';
+    root.setAttribute('data-theme', nx);
+    try { localStorage.setItem('tk-theme', nx); } catch (e) {}
+  });
+
+  // ===== 初期状態（?cat=contact&q=LINE のようなURLで開いたとき）=====
+  try {
+    var params = new URLSearchParams(location.search);
+    if (catById[params.get('cat')]) state.cat = params.get('cat');
+    if (params.get('q')) { state.q = params.get('q'); q.value = state.q; }
+  } catch (e) {}
+  apply();
+})();
+</script>
+</body>
+</html>
